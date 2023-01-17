@@ -46,24 +46,35 @@ class gameboard(object):
         played_button = Button(root, text="Played").place(x=70, y=750)
         return
 
-    def add_piece(self, row, column, floor, id):
-        self.board[floor - 1][row - 1][column - 1] = id
+    def add_piece(self, position_list):
+        row = position_list[0]
+        column = position_list[1]
+        player_id = position_list[2]
+        floor = self.determine_floor(row, column)
+        self.board[floor - 1][row - 1][column - 1] = player_id
         return
 
     def delete_piece(self, row, column, floor):
         self.board[floor - 1][row - 1][column - 1] = 0
         return
 
-    def user_input_board(self):
-        # use for debug instead of add_piece
-        R = int(input("Enter the number of rows: "))
-        C = int(input("Enter the number of columns: "))
-        F = int(input("Enter the number of floors: "))
+    def determine_floor(self, row, column):
+        floor = 0
+        i = 1
+        for i in range(0, 5):
+            if self.board[i - 1][row - 1][column - 1] != 0:
+                floor = floor + 1
+                i += 1    
+            else:
+                break
 
-        print("Enter the entries in a single line (separated by space): ")
+        print('floor value is : ', floor)
+        return floor
+
+    def user_input_board(self):
+        print("Enter the position in a single line (separated by space) and your usernumber at the end: ")
         entries = list(map(int, input().split()))
-        matrix = np.array(entries).reshape(R, C, F)
-        print(matrix)
+        return entries
 
     def graphic_representation(self):
         x, y, z = np.indices((4, 4, 6))
@@ -86,15 +97,36 @@ class gameboard(object):
 
 gm = gameboard()
 
-gm.add_piece(1, 1, 1, 1)
-gm.add_piece(2, 2, 1, 2)
-gm.add_piece(3, 3, 1, 3)
-gm.add_piece(4, 4, 1, 4)
-gm.add_piece(1, 1, 2, 5)
-gm.add_piece(2, 2, 2, 6)
-gm.add_piece(3, 3, 2, 7)
-gm.add_piece(4, 4, 2, 8)
-gm.delete_piece(3, 3, 1)
+#print(gm.user_input_board())
 gm.print_board()
+print('User 1, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 2, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 1, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 1, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 2, play!')
+gm.add_piece(gm.user_input_board())
+print('User 1, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 2, play!')
+gm.add_piece(gm.user_input_board())
+print('User 1, play!')
+gm.add_piece(gm.user_input_board())
+gm.print_board()
+print('User 2, play!')
+gm.add_piece(gm.user_input_board())
 
-gm.graphic_representation()
+
+
+
+#gm.graphic_representation()
+
+
