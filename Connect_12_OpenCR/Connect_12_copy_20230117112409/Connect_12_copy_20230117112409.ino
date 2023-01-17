@@ -55,12 +55,12 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (digitalRead(button1)){
     motorShoulder.setGoalPosition(motorShoulder_ID, 4000);
-    delay(750);
+    delay(500);
     motorShoulder.setGoalPosition(motorShoulder_ID, 0);
   }
   if (digitalRead(button2)){
     motorElbow.setGoalPosition(motorElbow_ID, 4000);
-    delay(750);
+    delay(500);
     motorElbow.setGoalPosition(motorElbow_ID, 0);
   }
 }
