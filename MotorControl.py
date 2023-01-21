@@ -1,11 +1,31 @@
-#Alexandre Baril, 17 janvier 2023, Sherbrooke
+#Alexandre Baril, january 16 2023, Sherbrooke
 
 import struct
 import numpy as np
 import serial
 
+
+### variables
 BicepLen = float(150)
 ForearmLen = float(150)
+
+### parameters
+#ser = serial.Serial('/dev/ttyUSB0', 9600)
+#ser = serial.Serial('COM6', 9600)
+
+def sendMsg(shoulderAngle:int, elbowAngle:int, Zheight:int):
+    #ser.write(shoulderAngle)
+    #ser.write(elbowAngle)
+    #ser.write(moveZ(Zheight))
+        
+    print("msg Sent!")
+    return
+
+def readMsg():
+    #ser.read(eZmotorEncoder)
+        
+    print("msg Read!")
+    return
 
 def rad2Servo(angleRad):
     angleServo = angleRad * 360 / (2*np.pi)
@@ -26,11 +46,12 @@ def cart2cyl(cartX, cartY):
 
 def Interpolation(posXStart: int, posYStart: int, posXEnd: int, posYEnd: int):
     jointAngles = cart2cyl(posXStart, posYStart)
-    increment = 25
+    increment = 100
     posx = posXStart
     posy = posYStart
     diffX = posXEnd - posXStart
     diffY = posYEnd - posYStart
+    #print(str(diffX) + "\t" + str(diffY))
     stepX = diffX / increment
     stepY = diffY / increment
     
@@ -46,44 +67,89 @@ def Interpolation(posXStart: int, posYStart: int, posXEnd: int, posYEnd: int):
     
     return positionsX, positionsY
 
-def moveZ(height, direction):
-    #1 = down
-    #0 = up
-    #while encoderValue != range(height-50, height+50):
-    #    #motor.move(direction, speed, etc)
-    #    print(encoderValue)
-
-    print("height = " + height)
+def moveZ(height):
+    motorEncoder = 0
+    while motorEncoder < height:
+        #motor.movedown
+        #ser.read()
+        print(motorEncoder)
+        motorEncoder += 5
+    while motorEncoder > 0:
+        #motor.moveup
+        #ser.read()
+        print(motorEncoder)
+        motorEncoder -= 10
+    
     return
 
-def sendMsg():
-    print("msg Sent!")
-    return
+def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
+    match letterPos:
+        case 'A':
+            posx = -75
+        case 'B':
+            posx = -25
+        case 'C':
+            posx = 25
+        case 'D':
+            posx = 75
+
+    match numberPos:
+        case '1':
+            posy = 0
+        case '2':
+            posy = 50
+        case '3':
+            posy = 100
+        case '4':
+            posy = 150
+
+    match floorLevel:
+        case 'f0':
+            ztarget = 300
+        case 'f1':
+            ztarget = 250
+        case 'f2':
+            ztarget = 200
+        case 'f3':
+            ztarget = 150
+        case 'f4':
+            ztarget = 100
+        case 'f5':
+            ztarget = 50
+    
+    print(str(posx) + "\t" + str(posy))
+    return posx, posy, ztarget
+
+
 
 ##### SETUP #####
 var = True
-lastCoord = [0, 0]
+lastCoord = pos2cart('A', '1', 'f0')
 
 ##### MAIN #####
 while var == True:
-    #coordonates = import from jacob
-    coord = [100, 150]
+    
+    
 
     #receive from OpenCR card:
         #encodervalue, motorShoulderposition, motorElbowposition
     #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
     #data = struct.unpack('iii', dataPack)
 
-    #sends to OpenCR
+    ###sends to OpenCR
+
+    #position1
+    coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
     cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
-    #print(cartPosX)
-    #print(cartPosY)
     for pos in range(0, len(cartPosY)):
         motorShoulder, motorElbow = cart2cyl(cartPosX[pos], cartPosY[pos])
-        #sendMsg motorShoulder
-        #sendMsg motorElbow
-        print("ShoulderAngle: " + str(motorShoulder) + "\t ElbowAngle: " + str(motorElbow))
-        
+        sendMsg(motorShoulder, motorElbow, 0)
+        print("ShoulderAngle: " + str(motorShoulder) + "   \t ElbowAngle: " + str(motorElbow))
     lastCoord = coord
+    #if other positions (to move out of the way of an object or something): copy-paste the 7 lines above
+    
+
+    moveZ(coord[2])
+    
     var = False
     
