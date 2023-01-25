@@ -83,18 +83,18 @@ class gameboard(object):
         plt.show()
         return
 
-if __name__=="__main__":
-    gm = gameboard()
-    
-    gm.add_piece(1, 1, 1, 1)
-    gm.add_piece(2, 2, 1, 2)
-    gm.add_piece(3, 3, 1, 3)
-    gm.add_piece(4, 4, 1, 4)
-    gm.add_piece(1, 1, 2, 5)
-    gm.add_piece(2, 2, 2, 6)
-    gm.add_piece(3, 3, 2, 7)
-    gm.add_piece(4, 4, 2, 8)
-    gm.delete_piece(3, 3, 1)
-    gm.print_board()
-    
-    gm.graphic_representation()
+
+gm = gameboard()
+
+gm.add_piece(1, 1, 1, 1)
+gm.add_piece(2, 2, 1, 2)
+gm.add_piece(3, 3, 1, 3)
+gm.add_piece(4, 4, 1, 4)
+gm.add_piece(1, 1, 2, 5)
+gm.add_piece(2, 2, 2, 6)
+gm.add_piece(3, 3, 2, 7)
+gm.add_piece(4, 4, 2, 8)
+gm.delete_piece(3, 3, 1)
+gm.print_board()
+
+gm.graphic_representation()
