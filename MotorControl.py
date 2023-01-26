@@ -3,6 +3,7 @@
 import struct
 import numpy as np
 import serial
+import time
 
 
 ### variables
@@ -11,20 +12,26 @@ ForearmLen = float(150)
 
 ### parameters
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
-#ser = serial.Serial('COM6', 9600)
+ser = serial.Serial('COM5', 9600)
 
 def sendMsg(shoulderAngle:int, elbowAngle:int, Zheight:int):
     #ser.write(shoulderAngle)
     #ser.write(elbowAngle)
     #ser.write(moveZ(Zheight))
+
+    #ardu= serial.Serial('COM5',9600, timeout=.1)
+    time.sleep(1)
+    ser.write(shoulderAngle)
+    time.sleep(1)
+    #ardu.close()
         
-    print("msg Sent!")
+    print("msg Sent: " + str(ser.write(shoulderAngle)))
     return
 
 def readMsg():
-    #ser.read(eZmotorEncoder)
+    msgRead = ser.read()
         
-    print("msg Read!")
+    print(msgRead)
     return
 
 def rad2Servo(angleRad):
@@ -72,12 +79,12 @@ def moveZ(height):
     while motorEncoder < height:
         #motor.movedown
         #ser.read()
-        print(motorEncoder)
+        #print(motorEncoder)
         motorEncoder += 5
     while motorEncoder > 0:
         #motor.moveup
         #ser.read()
-        print(motorEncoder)
+        #print(motorEncoder)
         motorEncoder -= 10
     
     return
@@ -117,7 +124,7 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
         case 'f5':
             ztarget = 50
     
-    print(str(posx) + "\t" + str(posy))
+    #print(str(posx) + "\t" + str(posy))
     return posx, posy, ztarget
 
 
@@ -128,8 +135,10 @@ lastCoord = pos2cart('A', '1', 'f0')
 
 ##### MAIN #####
 while var == True:
-    
-    
+    print("next: send msg -")
+    sendMsg(500, 5, 5)
+    sendMsg(1250, 5, 5)
+    readMsg()
 
     #receive from OpenCR card:
         #encodervalue, motorShoulderposition, motorElbowposition
@@ -137,7 +146,7 @@ while var == True:
     #data = struct.unpack('iii', dataPack)
 
     ###sends to OpenCR
-
+'''
     #position1
     coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
     cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
@@ -150,6 +159,6 @@ while var == True:
     
 
     moveZ(coord[2])
-    
-    var = False
+'''    
+    #var = False
     

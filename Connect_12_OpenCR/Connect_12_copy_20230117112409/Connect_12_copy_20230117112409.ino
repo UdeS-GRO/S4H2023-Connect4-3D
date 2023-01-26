@@ -1,10 +1,11 @@
 #include <Dynamixel2Arduino.h>
+#include <HardwareSerial.h>
 
 // For OpenCR, there is a DXL Power Enable pin, so you must initialize and control it.
 // Reference link : https://github.com/ROBOTIS-GIT/OpenCR/blob/master/arduino/opencr_arduino/opencr/libraries/DynamixelSDK/src/dynamixel_sdk/port_handler_arduino.cpp#L78
 #if defined(ARDUINO_OpenCR)
   #define motorShoulder_SERIAL   Serial3
-  #define motorElbow_SERIAL   Serial2
+  #define Serial2   Serial
   #define DEBUG_SERIAL Serial
 #endif
 
@@ -12,13 +13,16 @@
 #define BDPIN_PUSH_SW_2         35
 
 const int motorShoulder_DIR_PIN = 84; // OpenCR Board's DIR PIN.
-const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
-const uint8_t motorShoulder_ID = 23;
-const uint8_t motorElbow_ID = 2;
+//const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
+const uint8_t motorShoulder_ID = 21;
+const uint8_t motorElbow_ID = 23;
 const float DXL_PROTOCOL_VERSION = 2.0;
 
-Dynamixel2Arduino motorShoulder(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
-Dynamixel2Arduino motorElbow(motorElbow_SERIAL, motorElbow_DIR_PIN);
+char PYTHON_SERIAL;
+
+//Dynamixel2Arduino motorShoulder(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
+//Dynamixel2Arduino motorElbow(motorElbow_SERIAL, motorElbow_DIR_PIN);
+Dynamixel2Arduino ServoMotor(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
 
 //This namespace is required to use Control table item names
 using namespace ControlTableItem;
@@ -26,17 +30,20 @@ using namespace ControlTableItem;
 int max = 180;
 int min = 0;
 int ShoulderGoal = 0;
+int ElbowGoal = 0;
 
 void setup() {
   
   DEBUG_SERIAL.begin(115200);
   while(!DEBUG_SERIAL);
 
+  Serial2.begin(9600);
+
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
 
 
-  //motorShoulder Setup
+  /*//motorShoulder Setup
   motorShoulder.begin(57600);
   motorShoulder.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
   motorShoulder.ping(motorShoulder_ID);
@@ -48,7 +55,7 @@ void setup() {
 
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
   motorShoulder.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 100);
-
+*/
  /* //motorElbow Setup
   motorElbow.begin(57600);
   motorElbow.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
@@ -61,22 +68,74 @@ void setup() {
 
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
   motorElbow.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 50);*/
+
+  //motorShoulder Setup
+  ServoMotor.begin(57600);
+  ServoMotor.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
+  //ServoMotor.ping(motorShoulder_ID);
+
+  // Turn off torque when configuring items in EEPROM area
+  ServoMotor.torqueOff(motorShoulder_ID);
+  ServoMotor.setOperatingMode(motorShoulder_ID, OP_POSITION);
+  ServoMotor.torqueOn(motorShoulder_ID);
+  ServoMotor.torqueOff(motorElbow_ID);
+  ServoMotor.setOperatingMode(motorElbow_ID, OP_POSITION);
+  ServoMotor.torqueOn(motorElbow_ID);
+
+  // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 50);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 50);
 }
 
 void loop() {
+
+  if(Serial2.available() > 0)
+  {
+      PYTHON_SERIAL = Serial2.read();
+      Serial.println( PYTHON_SERIAL);
+      if (PYTHON_SERIAL== 500)
+      {
+        Serial.println("S recu");
+      }
+  }
+
+  Serial2.write("MSG Received!");
+
+  ShoulderGoal = PYTHON_SERIAL;
+
+  /*
+  //For Motor1
   if(digitalRead(BDPIN_PUSH_SW_1))
   {
-    ShoulderGoal += 5;
+    ElbowGoal -= 25;
+    if(ElbowGoal <= 0)
+      ElbowGoal = 0;
+    ShoulderGoal += 25;
     if(ShoulderGoal >= 4095)
       ShoulderGoal = 4095;
   }
   else
   {
-    ShoulderGoal -= 2;
+    ShoulderGoal -= 20;
     if(ShoulderGoal <= 0)
       ShoulderGoal = 0;
   }
 
-  motorShoulder.setGoalPosition(motorShoulder_ID, ShoulderGoal);
+  //For Motor 2
+  if(digitalRead(BDPIN_PUSH_SW_2))
+  {
+    ElbowGoal += 25;
+    if(ElbowGoal >= 4095)
+      ElbowGoal = 4095;
+  }
+  else
+  {
+    ElbowGoal -= 20;
+    if(ElbowGoal <= 0)
+      ElbowGoal = 0;
+  }
+  */
+  ServoMotor.setGoalPosition(motorShoulder_ID, ShoulderGoal);
+  ServoMotor.setGoalPosition(motorElbow_ID, ElbowGoal);
   
 }
