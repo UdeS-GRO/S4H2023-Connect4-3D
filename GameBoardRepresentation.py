@@ -1,19 +1,46 @@
 # Sandrine Gagne, January 19th 2023
 
+import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from tkinter import *
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
+from PyQt5.QtCore import Qt
 
 
-class gameboard(object):
+class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
     floor_total = 6
     board = []
-
+        
     def __init__(self):
         self.init_board()
+        super().__init__()
+        self.setWindowTitle("User Interface")
+        self.setGeometry(100, 100, 600, 400)
 
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+
+        self.label = QLabel("Gameboard")
+        self.label.setText(self.print_board())
+        self.label.setAlignment(Qt.AlignCenter)
+
+        self.push_button = QPushButton("Click me when you've played")
+        self.push_button.clicked.connect(self.button_played)
+
+        #self.graphic_representation()
+        #self.canvas = FigureCanvas(self.figure)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.label)
+        self.main_layout.addWidget(self.push_button)
+        #self.main_layout.addWidget(self.canvas)
+        self.central_widget.setLayout(self.main_layout)
+    
     def init_board(self):
         x = self.row_total
         y = self.column_total
@@ -23,28 +50,13 @@ class gameboard(object):
 
     def print_board(self):
         i = 1
-        root = Tk()
-        root.title('Game Board Matrix')
-        root.geometry("200x800")
-        label0 = Label(root, text="Game Board ID's and positions")
-        label0.pack()
+        usermatrix = ('')
         for row in self.board:
-            print("____________________________")
-            label1 = Label(root, text="____________________________")
-            print("      A  B  C  D    floor = " + str(i) + "\n\n" + "1    " + str(row[0]) + "\n" + "2    " + str(
+            stringmatrix = ("\n\n                         A  B  C  D    floor = " + str(i) + "\n\n" + "1    " + str(row[0]) + "\n" + "2    " + str(
                 row[1]) + "\n" + "3    " + str(row[2]) + "\n" + "4    " + str(row[3]))
-            label2 = Label(root, text="      A  B  C  D    floor = " + str(i) + "\n\n" + "1    " + str(
-                row[0]) + "\n" + "2    " + str(
-                row[1]) + "\n" + "3    " + str(row[2]) + "\n" + "4    " + str(row[3]))
+            usermatrix = usermatrix + stringmatrix
             i += 1
-            label1.pack()
-            label2.pack()
-        print("____________________________")
-        label3 = Label(root, text="____________________________")
-        label3.pack()
-        # Put the button in another function and register the input to use it
-        played_button = Button(root, text="Played").place(x=70, y=750)
-        return
+        return usermatrix
 
     def add_piece(self, position_list):
         row = position_list[0]
@@ -84,6 +96,7 @@ class gameboard(object):
     def user_input_board(self):
         print("Enter the position (row and column, separated by space) and your usernumber : ")
         entries = list(map(int, input().split()))
+        # Need to add this entrie to the UI
         return entries
 
     def graphic_representation(self):
@@ -96,50 +109,38 @@ class gameboard(object):
         colors[robot_piece] = 'blue'
         colors[user_piece] = 'red'
 
-        ax = plt.figure().add_subplot(projection='3d')
-        ax.voxels(robot_piece, facecolors=colors, edgecolor='k')
-        ax.voxels(user_piece, facecolors=colors, edgecolor='k')
-        ax.set_title("Connect 4 3D")
-        ax.text2D(0, 0.94, "The robot plays the blue pieces\nYou play the red pieces", transform=ax.transAxes)
-        plt.show()
-        return
+        self.figure = Figure()
+        self.ax = self.figure.add_subplot(111, projection='3d')
+        self.ax.voxels(robot_piece, facecolors=colors, edgecolor='k')
+        self.ax.voxels(user_piece, facecolors=colors, edgecolor='k')
+        self.ax.set_title("Connect 4 3D")
+        self.ax.text2D(0, 0.94, "The robot plays the blue pieces\nYou play the red pieces", transform=self.ax.transAxes)
+        
+        # Add the FigureCanvas to the layout
+        self.canvas = FigureCanvas(self.figure)
+        self.setCentralWidget(self.canvas)
+        return Figure
 
+    def button_played(self):
+        self.label.setAlignment(Qt.AlignCenter)
+        self.push_button = QPushButton("Click me when you've played")
+        self.push_button.clicked.connect(self.button_played)
+        print("Button clicked, the player has played")
+        # Needs to notify the robot that it's is turn
+        return    
+    
+if __name__ == "__main__":
+    #app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
+    window = gameboard()
+    window.show()
+    sys.exit(app.exec_())
 
 gm = gameboard()
-
-#print(gm.user_input_board())
-gm.print_board()
-print('User 1, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 2, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 1, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 1, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 2, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 1, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 2, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 1, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-print('User 2, play!')
-gm.add_piece(gm.user_input_board())
-gm.print_board()
-
-
-
-
-#gm.graphic_representation()
-
-
+#gm.print_board()
+#print('User 1, play!')
+#gm.add_piece(gm.user_input_board())
+#gm.print_board()
+#print('User 2, play!')
+#gm.add_piece(gm.user_input_board())
+#gm.print_board()
