@@ -58,7 +58,7 @@ class gameboard(QtWidgets.QMainWindow):
             i += 1
         return usermatrix
 
-    def add_piece(self, position_list):
+    def add_piece(self, posiiton_list):
         row = position_list[0]
         column = position_list[1]
         player_id = position_list[2]
