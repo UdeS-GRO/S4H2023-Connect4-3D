@@ -1,11 +1,13 @@
 #include <Dynamixel2Arduino.h>
 #include <HardwareSerial.h>
+#include <Arduino.h>
+#include <stdlib.h>
 
 // For OpenCR, there is a DXL Power Enable pin, so you must initialize and control it.
 // Reference link : https://github.com/ROBOTIS-GIT/OpenCR/blob/master/arduino/opencr_arduino/opencr/libraries/DynamixelSDK/src/dynamixel_sdk/port_handler_arduino.cpp#L78
 #if defined(ARDUINO_OpenCR)
   #define motorShoulder_SERIAL   Serial3
-  #define Serial2   Serial
+  #define Serial2   Serial2
   #define DEBUG_SERIAL Serial
 #endif
 
@@ -32,9 +34,12 @@ int min = 0;
 int ShoulderGoal = 0;
 int ElbowGoal = 0;
 
+//int pingMotors(int nbMot);
+
 void setup() {
   
   DEBUG_SERIAL.begin(115200);
+  DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
 
   Serial2.begin(9600);
@@ -42,6 +47,7 @@ void setup() {
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
 
+  pingMotors(1);
 
   /*//motorShoulder Setup
   motorShoulder.begin(57600);
@@ -92,14 +98,14 @@ void loop() {
   if(Serial2.available() > 0)
   {
       PYTHON_SERIAL = Serial2.read();
-      Serial.println( PYTHON_SERIAL);
+      Serial2.println( PYTHON_SERIAL);
       if (PYTHON_SERIAL== 500)
       {
-        Serial.println("S recu");
+        Serial2.println("S recu");
       }
   }
 
-  Serial2.write("MSG Received!");
+  //Serial2.write("MSG Received!");
 
   ShoulderGoal = PYTHON_SERIAL;
 
@@ -138,4 +144,26 @@ void loop() {
   ServoMotor.setGoalPosition(motorShoulder_ID, ShoulderGoal);
   ServoMotor.setGoalPosition(motorElbow_ID, ElbowGoal);
   
+}
+
+int pingMotors(int nbMot)
+{
+  int ID = 1;
+  int nb = 0;
+  int ID_Motors[nbMot];
+  while(nb < nbMot)
+  {
+      if(ServoMotor.ping(ID))
+      {
+        ID_Motors[nb] = ID;
+        nb += 1;
+        //Serial2.print("nbMot: ");
+        //Serial2.println(nb);
+      }
+      //Serial2.print("ID: ");
+      //Serial2.println(ID);
+      ID += 1;
+  }
+  Serial2.println(ID_Motors[1]);
+  return ID_Motors[1];
 }
