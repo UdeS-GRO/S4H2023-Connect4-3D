@@ -15,16 +15,11 @@ import pyzbar.pyzbar as pyzbar
 import time
 import os
 
-
-class gameboard(QtWidgets.QMainWindow):
-    row_total = 4
-    column_total = 4
-    floor_total = 6
-    board = []
-    LastList = [0 for _ in range(16)]
-        
-    def __init__(self):
-        self.init_board()
+#import AI_algoritm as AI
+class gamewindow(QtWidgets.QMainWindow):
+    def __init__(self, bg):
+        self.board = bg.board
+        self.add_piece = bg.add_piece
         super().__init__()
         self.setWindowTitle("User Interface")
         self.setGeometry(100, 100, 600, 400)
@@ -55,12 +50,6 @@ class gameboard(QtWidgets.QMainWindow):
         self.central_widget.setLayout(self.main_layout)
         self.central_widget.setLayout(self.right_layout)
     
-    def init_board(self):
-        x = self.row_total
-        y = self.column_total
-        z = self.floor_total
-        self.board = [[[0 for k in range(x)] for j in range(y)] for i in range(z)]
-        return
 
     def print_board(self):
         i = 1
@@ -72,50 +61,6 @@ class gameboard(QtWidgets.QMainWindow):
             i += 1
         return usermatrix
 
-    def add_piece(self, position_list):
-        row = int(position_list[0])
-        column = int(position_list[1])
-        player_id = int(position_list[2])
-        limit_board = self.row_or_column_limit(row, column)
-        if limit_board == 1:
-            floor = self.determine_floor(row, column)
-            if floor != None and limit_board == 1:
-                self.board[floor - 1][row - 1][column - 1] = player_id
-        return
-
-    def delete_piece(self, row, column, floor):
-        self.board[floor - 1][row - 1][column - 1] = 0
-        return
-
-    def row_or_column_limit(self, row, column):
-        row = int(row)
-        column = int(column)
-        if row > 4 or column > 4:
-            print('This case is not reachable. Try again.')
-            self.add_piece(self.user_input_board())
-            return 0
-        return 1
-
-    def determine_floor(self, row, column):
-        floor = 1
-        row = int(row)
-        column = int(column)
-        for i in range(1, 7):
-            if self.board[i - 1][row - 1][column - 1] != 0:
-                floor = floor + 1   
-        if floor > 6:
-            print('This case is not reachable. Try again.')
-            self.add_piece(self.user_input_board())
-            return None
-        else:
-            print('floor value is : ', floor)               
-        return floor
-
-    #def user_input_board(self):
-    #    print("Enter the position (row and column, separated by space) and your usernumber : ")
-    #    entries = list(map(int, input().split()))
-    #    # Need to add this entrie to the UI
-    #    return entries
 
     def graphic_representation(self):
         # not used for the moment
@@ -234,21 +179,68 @@ class gameboard(QtWidgets.QMainWindow):
 
         return Player, x, y
     
+
+class gameboard():
+    row_total = 4
+    column_total = 4
+    floor_total = 6
+    board = []
+    LastList = [0 for _ in range(16)]
+        
+    def __init__(self):
+        self.init_board()
+    
+    def init_board(self):
+        x = self.row_total
+        y = self.column_total
+        z = self.floor_total
+        self.board = [[[0 for k in range(x)] for j in range(y)] for i in range(z)]
+        return
+
+    def add_piece(self, position_list):
+        row = int(position_list[0])
+        column = int(position_list[1])
+        player_id = int(position_list[2])
+        limit_board = self.row_or_column_limit(row, column)
+        if limit_board == 1:
+            floor = self.determine_floor(row, column)
+            if floor != None and limit_board == 1:
+                self.board[floor - 1][row - 1][column - 1] = player_id
+
+        return
+
+    def delete_piece(self, row, column, floor):
+        self.board[floor - 1][row - 1][column - 1] = 0
+        return
+
+    def row_or_column_limit(self, row, column):
+        row = int(row)
+        column = int(column)
+        if row > 4 or column > 4:
+            print('This case is not reachable. Try again.')
+            self.add_piece(self.user_input_board())
+            return 0
+        return 1
+
+    def determine_floor(self, row, column):
+        floor = 1
+        row = int(row)
+        column = int(column)
+        for i in range(1, 7):
+            if self.board[i - 1][row - 1][column - 1] != 0:
+                floor = floor + 1   
+        if floor > 6:
+            print('This case is not reachable. Try again.')
+            self.add_piece(self.user_input_board())
+            return None
+        else:
+            print('floor value is : ', floor)               
+        return floor
+    
 if __name__ == "__main__":
     #app = QApplication(sys.argv)
+    gb = gameboard()
     app = QtWidgets.QApplication(sys.argv)
-    window = gameboard()
+    window = gamewindow(gb)
     window.show()
     sys.exit(app.exec_())
-
-gm = gameboard()
-
-for _ in range(5):
-    gm.take_picture()
-#gm.print_board()
-#print('User 1, play!')
-#gm.add_piece(gm.user_input_board())
-#gm.print_board()
-#print('User 2, play!')
-#gm.add_piece(gm.user_input_board())
-#gm.print_board()
