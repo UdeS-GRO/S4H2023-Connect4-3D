@@ -12,26 +12,29 @@ ForearmLen = float(150)
 
 ### parameters
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
-ser = serial.Serial('COM5', 9600)
+ser = serial.Serial('COM5', 9600, timeout=1)
 
 def sendMsg(shoulderAngle:int, elbowAngle:int, Zheight:int):
     #ser.write(shoulderAngle)
     #ser.write(elbowAngle)
     #ser.write(moveZ(Zheight))
 
-    #ardu= serial.Serial('COM5',9600, timeout=.1)
-    time.sleep(1)
-    ser.write(shoulderAngle)
-    time.sleep(1)
-    #ardu.close()
+    if ser.isOpen():
+        cmd= vari #input("Enter command : ")
+        ser.write(str(shoulderAngle).encode()) #.encode())
         
     print("msg Sent: " + str(ser.write(shoulderAngle)))
     return
 
 def readMsg():
-    msgRead = ser.read()
+    if ser.isOpen():
+        while ser.inWaiting()==0: pass
+        if  ser.inWaiting()>0: 
+            answer=ser.readline()
+            print("Answer is : " + str(answer))
+            ser.flushInput() #remove data after reading
         
-    print(msgRead)
+    print(answer)
     return
 
 def rad2Servo(angleRad):
@@ -134,7 +137,13 @@ var = True
 lastCoord = pos2cart('A', '1', 'f0')
 
 ##### MAIN #####
+vari = 0
 while var == True:
+    vari += 50
+    sendMsg(vari, 500, 500)
+    readMsg()
+
+    '''
     print("next: send msg -")
     sendMsg(500, 5, 5)
     sendMsg(1250, 5, 5)
@@ -146,7 +155,7 @@ while var == True:
     #data = struct.unpack('iii', dataPack)
 
     ###sends to OpenCR
-'''
+
     #position1
     coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
     cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
@@ -159,6 +168,31 @@ while var == True:
     
 
     moveZ(coord[2])
-'''    
-    #var = False
     
+    #var = False
+    '''
+    
+### Comm that functions below ###
+'''
+    #vari = 0
+
+    #print('Running. Press CTRL-C to exit.')
+    #with serial.Serial("COM5", 9600, timeout=1) as ser:
+    #time.sleep(0.1) #wait for serial to open
+    if ser.isOpen():
+        #print("{} connected!".format(ser.port))
+        #try:
+        #while True:
+        cmd= vari #input("Enter command : ")
+        ser.write(str(vari).encode()) #.encode())
+        #time.sleep(1) #wait for arduino to answer
+        while ser.inWaiting()==0: pass
+        if  ser.inWaiting()>0: 
+            answer=ser.readline()
+            print("Answer is : " + str(answer))
+            ser.flushInput() #remove data after reading
+            #time.sleep(5)
+        
+        #except KeyboardInterrupt:
+        #    print("KeyboardInterrupt has been caught.")
+'''
