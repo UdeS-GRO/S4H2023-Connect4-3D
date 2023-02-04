@@ -31,17 +31,22 @@ int max = 180;
 int min = 0;
 int ShoulderGoal = 0;
 int ElbowGoal = 0;
-
+String ShoulderAngle;
+String ElbowAngle;
 String msg;
+int AngleGoal[2];
+int angles[2];
+const int BUFFER_SIZE = 4;
+char buf[BUFFER_SIZE];
 
 int pingMotors(int nbMot);
 void getMsg();
-String readSerialPort();
+int readSerialPort();
 void sendData(int msg2send);
 
 void setup() {
   
-  DEBUG_SERIAL.begin(9600);
+  DEBUG_SERIAL.begin(115200);
   //DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
 
@@ -79,8 +84,19 @@ void loop() {
       DEBUG_SERIAL.println("ok");
   }*/
 
-  String AngleStr = readSerialPort();
-  int Angle2int = AngleStr.toInt();
+  //String ShoulderAngle = readSerialPort();
+  //int ShoulderAngleint = ShoulderAngle.toInt();
+  int Shoulder = readSerialPort();
+  sendData(AngleGoal[0]);
+  int Elbow = readSerialPort();
+  sendData(AngleGoal[1]);
+  //sendData(ElbowAngle.toInt());
+  //sendData(AngleGoal[0]);
+  //sendData(AngleGoal[1]);
+  //sendData(ShoulderAngleint);
+  //String ElbowAngle = readSerialPort();
+  //int ElbowAngleint = ElbowAngle.toInt();
+  //sendData(ElbowAngleint);
 
   //char msg = DEBUG_SERIAL.Read();
   //Serial.println(msg);
@@ -121,17 +137,16 @@ void loop() {
   }
   */
 
-  ServoMotor.setGoalPosition(motorShoulder_ID, Angle2int);
+  ServoMotor.setGoalPosition(motorShoulder_ID, Shoulder);
   //ServoMotor.setGoalPosition(motorElbow_ID, ElbowGoal);
-  //while(ServoMotor.getPresentPosition(motorShoulder_ID) >= Angle2int);
-  delay(500);
-  sendData(Angle2int);
-  
+  while(ServoMotor.getPresentPosition(motorShoulder_ID) == Shoulder);
+  //delay(10);
+  //sendData(ServoMotor.getPresentPosition(motorShoulder_ID));
 }
 
 void psetIDMotors(int nbMot)
 {
-  DEBUG_SERIAL.println("In process");
+  //DEBUG_SERIAL.println("In process");
   int ID = 0;
   int nb = 0;
   while(nb < nbMot && ID < 50)
@@ -144,35 +159,82 @@ void psetIDMotors(int nbMot)
       ID += 1;
   }
   for(int i = 0; i < nb; i++){
-    DEBUG_SERIAL.print("old id: ");
-    DEBUG_SERIAL.print(MotorsID[i]);
-    DEBUG_SERIAL.print(" - new id: ");
+    //DEBUG_SERIAL.print("old id: ");
+    //DEBUG_SERIAL.print(MotorsID[i]);
+    //DEBUG_SERIAL.print(" - new id: ");
     ServoMotor.setID(MotorsID[i], i);
-    DEBUG_SERIAL.println(i);
+    //DEBUG_SERIAL.println(i);
   }
 
   return;
 }
 
-String readSerialPort() {
- 	msg = "";
+int readSerialPort() {
+  msg = "";
+  String motorAngle = "";
+  //ShoulderAngle = "";
+  //ElbowAngle = "";
+  //char msgChar;
  	if (Serial.available()) {
  			//delay(2);
- 			while (Serial.available() > 0) {
- 					msg += (char)Serial.read();
- 			}
+      
+      while (Serial.available() == 0 );
+ 			while (Serial.available() > 0){
+       /*
+       
+         for(int c = 0; c < 10; c++)
+         {
+           if(c == 0 || c == 5)
+           {
+             Serial.read();
+           }
+           else if (c >= 1 && c <= 4)
+           {
+             ShoulderAngle += Serial.read();
+           }
+           else if (c >= 6 && c <= 9)
+           {
+             ElbowAngle += Serial.read();
+           }
+         }
+       }*/
+        /*
+ 			  msg = Serial.read();
+        if (msg == "S"){
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+        }
+        else if (msg == "E"){
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+          ShoulderAngle += Serial.read();
+        }
+ 			*/
+        Serial.read();
+        motorAngle = Serial.readStringUntil('\n');
+
+      }
  			Serial.flush();
  	}
-  return msg;
+  //AngleGoal[0] = ShoulderAngle.toInt();
+  //AngleGoal[1] = ElbowAngle.toInt();
+  return motorAngle.toInt();
 }
 
 void sendData(int msg2send) {
- 	//write data
- 	//Serial.print(nom);
- 	//Serial.print(" received : ");
- 	//Serial.print(msg);
-  //Serial.print(" + ");
-  Serial.println(String(msg2send));
-  //Serial.println(600);
+  String msg2sendStr = String(msg2send);
+  //String msgWrite = String(msg2send);
+  //buf[0] =msg2send;
+  //Serial.write(buf, BUFFER_SIZE);
+  if(msg2sendStr.length() == 3){
+    msg = '0' + msg2sendStr;
+  }
+  else{
+    msg = msg2sendStr;
+  }
+  Serial.print(msg);
   return;
 }

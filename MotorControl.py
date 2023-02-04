@@ -9,33 +9,37 @@ import time
 ### variables
 BicepLen = float(150)
 ForearmLen = float(150)
+msg:str = ""
 
 ### parameters
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
-ser = serial.Serial('COM5', 9600, timeout=1)
+ser = serial.Serial('COM5', 115200, timeout=1)
 
-def sendMsg(shoulderAngle:int, elbowAngle:int, Zheight:int):
-    #ser.write(shoulderAngle)
-    #ser.write(elbowAngle)
-    #ser.write(moveZ(Zheight))
+def sendMsg(message:int):
+    Shoulderlength = len(str(message))
+    if Shoulderlength == 3:
+        msg:str = '|' + '0' + str(message)
+    elif Shoulderlength == 4:
+        msg:str = '|' + str(message)
 
+    #print(msg)
     if ser.isOpen():
-        cmd= vari #input("Enter command : ")
-        ser.write(str(shoulderAngle).encode()) #.encode())
-        
-    print("msg Sent: " + str(ser.write(shoulderAngle)))
+        ser.write(msg.encode().rstrip())
+        #while(readMsg() != message): pass
+    print("msg Sent: " + msg)
     return
 
 def readMsg():
+    answer:str = ""
     if ser.isOpen():
-        while ser.inWaiting()==0: pass
-        if  ser.inWaiting()>0: 
-            answer=ser.readline()
-            print("Answer is : " + str(answer))
-            ser.flushInput() #remove data after reading
         
-    print(answer)
-    return
+        while ser.inWaiting()==0: pass
+        while  ser.inWaiting() > 0:
+            answer = ser.readline(4).decode()
+            print("Answer is : " + answer)
+        ser.flushInput()
+
+    return int(answer)
 
 def rad2Servo(angleRad):
     angleServo = angleRad * 360 / (2*np.pi)
@@ -131,17 +135,24 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
     return posx, posy, ztarget
 
 
-
+vari:int = 1
 ##### SETUP #####
 var = True
 lastCoord = pos2cart('A', '1', 'f0')
-
+sens:bool = True
 ##### MAIN #####
-vari = 0
+
 while var == True:
-    vari += 50
-    sendMsg(vari, 500, 500)
-    readMsg()
+    
+    vari += 100
+    sendMsg(vari)
+    msgReceived = readMsg()
+    sendMsg(vari)
+    msgReceived = readMsg()
+    
+    #print(msgReceived)
+
+    #time.sleep(0.01)
 
     '''
     print("next: send msg -")
