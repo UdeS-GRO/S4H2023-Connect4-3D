@@ -9,24 +9,33 @@ import time
 ### variables
 BicepLen = float(150)
 ForearmLen = float(150)
+msg1:str = ""
+msg2:str = ""
 msg:str = ""
 
 ### parameters
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
 ser = serial.Serial('COM5', 115200, timeout=1)
 
-def sendMsg(message:int):
-    Shoulderlength = len(str(message))
+def sendMsg(Shouldermessage:int, Elbowmessage:int):
+    Shoulderlength = len(str(Shouldermessage))
     if Shoulderlength == 3:
-        msg:str = '|' + '0' + str(message)
+        msg1 =  '0' + str(Shouldermessage) + '|'
     elif Shoulderlength == 4:
-        msg:str = '|' + str(message)
+        msg1 = str(Shouldermessage) + '|'
 
+    Elbowlength = len(str(Elbowmessage))
+    if Elbowlength == 3:
+        msg2 =  '0' + str(Elbowmessage) + '|'
+    elif Elbowlength == 4:
+        msg2 = str(Elbowmessage) + '|'
+
+    msg = msg1 + msg2
     #print(msg)
     if ser.isOpen():
         ser.write(msg.encode().rstrip())
-        #while(readMsg() != message): pass
-    print("msg Sent: " + msg)
+        print("msg Sent: " + msg)
+    #while(readMsg() != message): pass
     return
 
 def readMsg():
@@ -38,7 +47,6 @@ def readMsg():
             answer = ser.readline(4).decode()
             print("Answer is : " + answer)
         ser.flushInput()
-
     return int(answer)
 
 def rad2Servo(angleRad):
@@ -135,7 +143,7 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
     return posx, posy, ztarget
 
 
-vari:int = 1
+vari:int = 0
 ##### SETUP #####
 var = True
 lastCoord = pos2cart('A', '1', 'f0')
@@ -145,10 +153,10 @@ sens:bool = True
 while var == True:
     
     vari += 100
-    sendMsg(vari)
+    sendMsg(vari, vari+125)
     msgReceived = readMsg()
-    sendMsg(vari)
-    msgReceived = readMsg()
+    #sendMsg(vari+500)
+    #msgReceived = readMsg()
     
     #print(msgReceived)
 
