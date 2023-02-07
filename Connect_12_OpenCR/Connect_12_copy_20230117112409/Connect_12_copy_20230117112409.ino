@@ -7,11 +7,13 @@
 
 // For OpenCR, there is a DXL Power Enable pin, so you must initialize and control it.
 // Reference link : https://github.com/ROBOTIS-GIT/OpenCR/blob/master/arduino/opencr_arduino/opencr/libraries/DynamixelSDK/src/dynamixel_sdk/port_handler_arduino.cpp#L78
-#if defined(ARDUINO_OpenCR)
-  #define motorShoulder_SERIAL   Serial3
-  //#define Serial2   Serial2
+//#if defined(ARDUINO_OpenCR)
+  #define motorShoulder_SERIAL Serial3
+  #define Serial2 Serial2
   #define DEBUG_SERIAL Serial
-#endif
+//#endif
+
+//#define DEBUG_SERIAL  Serial
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
@@ -19,9 +21,9 @@
 const int motorShoulder_DIR_PIN = 84; // OpenCR Board's DIR PIN.
 //const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
 //int myPins[] = {2, 4, 8, 3, 6};
-int MotorsID[] = {0, 0};
-uint8_t motorShoulder_ID;
-uint8_t motorElbow_ID;
+int MotorsID[] = {0, 8};
+uint8_t motorShoulder_ID = MotorsID[0];
+uint8_t motorElbow_ID = MotorsID[1];
 const float DXL_PROTOCOL_VERSION = 2.0;
 
 Dynamixel2Arduino ServoMotor(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
@@ -47,16 +49,14 @@ void sendData(int msg2send);
 
 void setup() {
   
-  DEBUG_SERIAL.begin(115200);
+  DEBUG_SERIAL.begin(9600);
   //DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
 
-  psetIDMotors(1);
-  motorShoulder_ID = MotorsID[0];
-  motorElbow_ID = MotorsID[1];
+  //psetIDMotors(2);
 
   //motorShoulder Setup
   ServoMotor.begin(57600);
@@ -72,8 +72,8 @@ void setup() {
   ServoMotor.torqueOn(motorElbow_ID);
 
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
-  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 100);
-  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 100);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 0);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 0);
 
   
 }
@@ -82,10 +82,10 @@ void loop() {
   readSerialPort();
   sendData();
 
-
   ServoMotor.setGoalPosition(motorShoulder_ID, motorAngleShoulderInt);
-  
-  while(ServoMotor.getPresentPosition(motorShoulder_ID) == motorAngleShoulderInt);
+  //while(ServoMotor.getPresentPosition(motorShoulder_ID) == motorAngleShoulderInt);
+  ServoMotor.setGoalPosition(motorElbow_ID, motorAngleElbowInt);
+  //while(ServoMotor.getPresentPosition(motorElbow_ID) == motorAngleElbowInt);
 }
 
 void psetIDMotors(int nbMot)
@@ -93,21 +93,38 @@ void psetIDMotors(int nbMot)
   //DEBUG_SERIAL.println("In process");
   int ID = 0;
   int nb = 0;
-  while(nb < nbMot && ID < 50)
-  {
-      if(ServoMotor.ping(ID))
+  //while(nb < nbMot && ID < 50)
+  //{
+      /*if(ServoMotor.ping(ID) == TRUE)
       {
         MotorsID[nb] = ID;
+        DEBUG_SERIAL.print("nb: ");
+        DEBUG_SERIAL.println(nb);
         nb += 1;
       }
       ID += 1;
-  }
-  for(int i = 0; i < nb; i++){
-    //DEBUG_SERIAL.print("old id: ");
-    //DEBUG_SERIAL.print(MotorsID[i]);
-    //DEBUG_SERIAL.print(" - new id: ");
+      DEBUG_SERIAL.print("ID: ");
+      DEBUG_SERIAL.println(ID);
+      delay(500);
+      */
+
+      for(int i = 0; i < 255; i++){
+        if(ServoMotor.ping(i) == TRUE){
+          MotorsID[nb] = i;
+          nb += 1;
+          DEBUG_SERIAL.print("nB: ");
+          DEBUG_SERIAL.println(nb);
+        }
+        DEBUG_SERIAL.print("ID: ");
+        DEBUG_SERIAL.println(i);
+      }
+  //}
+  for(int i = 0; i < nbMot; i++){
+    DEBUG_SERIAL.print("old id: ");
+    DEBUG_SERIAL.print(MotorsID[i]);
+    DEBUG_SERIAL.print(" - new id: ");
     ServoMotor.setID(MotorsID[i], i);
-    //DEBUG_SERIAL.println(i);
+    DEBUG_SERIAL.println(i);
   }
 
   return;
@@ -141,12 +158,18 @@ void sendData(){
   msg1 = "";
   msg2 = "";*/
 
-  int SendShoulderPos = abs(ServoMotor.getPresentPosition(motorShoulder_ID));
+  uint8_t SendShoulderPos = ServoMotor.getPresentPosition(motorShoulder_ID);
   String SendShoulderPosStr = String(SendShoulderPos);
 
-  int SendElbowPos = abs(ServoMotor.getPresentPosition(motorElbow_ID));
+  uint8_t SendElbowPos = ServoMotor.getPresentPosition(motorElbow_ID);
   String SendElbowPosStr = String(SendElbowPos);
   
+  if(SendShoulderPosStr.length() == 1){
+    msg1 = '000' + SendShoulderPosStr;
+  }
+  if(SendShoulderPosStr.length() == 2){
+    msg1 = '00' + SendShoulderPosStr;
+  }
   if(SendShoulderPosStr.length() == 3){
     msg1 = '0' + SendShoulderPosStr;
   }
@@ -154,6 +177,12 @@ void sendData(){
     msg1 = SendShoulderPosStr;
   }
 
+  if(SendElbowPosStr.length() == 1){
+    msg2 = '000' + SendElbowPosStr;
+  }
+  if(SendElbowPosStr.length() == 2){
+    msg2 = '00' + SendElbowPosStr;
+  }
   if(SendElbowPosStr.length() == 3){
     msg2 = '0' + SendElbowPosStr;
   }
@@ -162,7 +191,7 @@ void sendData(){
   }
 
   msg = msg1+msg2;
-
+  //msg = "2000";
   Serial.print(msg);
 
   return;

@@ -15,17 +15,25 @@ msg:str = ""
 
 ### parameters
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
-ser = serial.Serial('COM5', 115200, timeout=1)
+ser = serial.Serial('COM5', 9600)
 
 def sendMsg(Shouldermessage:int, Elbowmessage:int):
     Shoulderlength = len(str(Shouldermessage))
-    if Shoulderlength == 3:
+    if Shoulderlength == 1:
+        msg1 =  '000' + str(Shouldermessage) + '|'
+    elif Shoulderlength == 2:
+        msg1 =  '00' + str(Shouldermessage) + '|'
+    elif Shoulderlength == 3:
         msg1 =  '0' + str(Shouldermessage) + '|'
     elif Shoulderlength == 4:
         msg1 = str(Shouldermessage) + '|'
 
     Elbowlength = len(str(Elbowmessage))
-    if Elbowlength == 3:
+    if Elbowlength == 1:
+        msg2 =  '000' + str(Elbowmessage) + '|'
+    elif Elbowlength == 2:
+        msg2 =  '00' + str(Elbowmessage) + '|'
+    elif Elbowlength == 3:
         msg2 =  '0' + str(Elbowmessage) + '|'
     elif Elbowlength == 4:
         msg2 = str(Elbowmessage) + '|'
@@ -143,7 +151,8 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
     return posx, posy, ztarget
 
 
-vari:int = 0
+vari:int = 1
+vari2:int = 1
 ##### SETUP #####
 var = True
 lastCoord = pos2cart('A', '1', 'f0')
@@ -153,7 +162,8 @@ sens:bool = True
 while var == True:
     
     vari += 100
-    sendMsg(vari, vari+125)
+    vari2 += 150
+    sendMsg(vari, vari2)
     msgReceived = readMsg()
     #sendMsg(vari+500)
     #msgReceived = readMsg()
