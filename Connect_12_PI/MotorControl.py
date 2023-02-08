@@ -167,8 +167,8 @@ class MotorMove:
         #print(str(posx) + "\t" + str(posy))
         return posx, posy, ztarget
 
-    def moveJoints(self):
-        gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
+    def moveJoints(self, gameXpos, gameYpos, gameZpos):
+        #gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
 
         servoShoulderAngle, ServoElbowAngle = self.cart2cyl(gameXpos, gameYpos)
 
