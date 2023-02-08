@@ -1,55 +1,88 @@
-#Alexandre Baril, january 16 2023, Sherbrooke
+#Alexandre Baril: Created: january 16 2023, Sherbrooke
+#Alexandre Baril: Modified: february 8 2023, Sherbrooke
 
 import struct
 import numpy as np
 import serial
 import time
+import sys
+from PyQt5 import QtWidgets
+app = QtWidgets.QApplication(sys.argv)
+from Connect_12_PI.GameBoardRepresentation import gameboard
 
+game = gameboard()
 
-### variables
+### Math variables
 BicepLen = float(150)
 ForearmLen = float(150)
 
-### parameters
+## Communication variables
+mssg1:str = "0000"
+mssg2:str = "0000"
+mssg:str = "0000"
+
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
 ser = serial.Serial('COM5', 9600)
 
-def sendMsg(shoulderAngle:int, elbowAngle:int, Zheight:int):
-    #ser.write(shoulderAngle)
-    #ser.write(elbowAngle)
-    #ser.write(moveZ(Zheight))
 
-    #ardu= serial.Serial('COM5',9600, timeout=.1)
-    time.sleep(1)
-    ser.write(shoulderAngle)
-    time.sleep(1)
-    #ardu.close()
-        
-    print("msg Sent: " + str(ser.write(shoulderAngle)))
+## Functions
+
+def sendMsg(Shouldermessage:int, Elbowmessage:int):
+    Shoulderlength = len(str(Shouldermessage))
+    if Shoulderlength == 1:
+        mssg1 =  '000' + str(Shouldermessage) + '|'
+    elif Shoulderlength == 2:
+        mssg1 =  '00' + str(Shouldermessage) + '|'
+    elif Shoulderlength == 3:
+        mssg1 =  '0' + str(Shouldermessage) + '|'
+    elif Shoulderlength == 4:
+        mssg1 = str(Shouldermessage) + '|'
+
+    Elbowlength = len(str(Elbowmessage))
+    if Elbowlength == 1:
+        mssg2 =  '000' + str(Elbowmessage) + '|'
+    elif Elbowlength == 2:
+        mssg2 =  '00' + str(Elbowmessage) + '|'
+    elif Elbowlength == 3:
+        mssg2 =  '0' + str(Elbowmessage) + '|'
+    elif Elbowlength == 4:
+        mssg2 = str(Elbowmessage) + '|'
+
+    mssg = mssg1 + mssg2
+    #print(mssg)
+    if ser.isOpen():
+        ser.write(mssg.encode().rstrip())
+        print("msg Sent: " + mssg)
+    #while(readMsg() != message): pass
     return
 
 def readMsg():
-    msgRead = ser.read()
+    answer:str = ""
+    if ser.isOpen():
         
-    print(msgRead)
-    return
+        while ser.inWaiting()==0: pass
+        while  ser.inWaiting() > 0:
+            answer = ser.readline(8).decode()
+            print("Answer is : " + answer)
+            ser.flushInput()
+    return int(answer)
 
 def rad2Servo(angleRad):
-    angleServo = angleRad * 360 / (2*np.pi)
+    angleServo = angleRad * 4095 / (2*np.pi)
     return angleServo
 
-def cart2cyl(cartX, cartY):
-    C2 = (cartX**2 + cartY**2 - BicepLen**2 - ForearmLen**2) / (2 * BicepLen * ForearmLen)
-    S2 = (1-C2) ** 0.5
+def cart2cyl(cartX:int, cartY:int):
+    C2:float = (cartX**2 + cartY**2 - BicepLen**2 - ForearmLen**2) / (2 * BicepLen * ForearmLen)
+    S2:float = np.sqrt(1-C2)
     theta = np.arccos(C2)     ###cos-1
     phiX = (ForearmLen * S2 * cartX) + ((BicepLen + ForearmLen*C2)*cartY)
     phiY = ((BicepLen + ForearmLen*C2)*cartX)-(ForearmLen * S2 * cartY)
     phi = np.arctan2(((ForearmLen * S2 * cartX) + ((BicepLen + ForearmLen*C2)*cartY)), (((BicepLen + ForearmLen*C2)*cartX)-(ForearmLen * S2 * cartY)))
 
-    theta = rad2Servo(theta)
-    phi = rad2Servo(phi)
+    thetaInt:int = round(rad2Servo(theta))
+    phiInt:int = round(rad2Servo(phi))
 
-    return theta, phi
+    return thetaInt, phiInt
 
 def Interpolation(posXStart: int, posYStart: int, posXEnd: int, posYEnd: int):
     jointAngles = cart2cyl(posXStart, posYStart)
@@ -128,37 +161,84 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
     return posx, posy, ztarget
 
 
-
+vari:int = 1
+vari2:int = 1
 ##### SETUP #####
-var = True
+var2 = True
 lastCoord = pos2cart('A', '1', 'f0')
-
+sens:bool = True
 ##### MAIN #####
-while var == True:
-    print("next: send msg -")
-    sendMsg(500, 5, 5)
-    sendMsg(1250, 5, 5)
-    readMsg()
 
-    #receive from OpenCR card:
-        #encodervalue, motorShoulderposition, motorElbowposition
-    #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
-    #data = struct.unpack('iii', dataPack)
+def main():
+    while var2 == True:
 
-    ###sends to OpenCR
-'''
-    #position1
-    coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
-    cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
-    for pos in range(0, len(cartPosY)):
-        motorShoulder, motorElbow = cart2cyl(cartPosX[pos], cartPosY[pos])
-        sendMsg(motorShoulder, motorElbow, 0)
-        print("ShoulderAngle: " + str(motorShoulder) + "   \t ElbowAngle: " + str(motorElbow))
-    lastCoord = coord
-    #if other positions (to move out of the way of an object or something): copy-paste the 7 lines above
-    
+        gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
 
-    moveZ(coord[2])
-'''    
-    #var = False
-    
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(gameXpos, gameYpos)
+
+        sendMsg(servoShoulderAngle, ServoElbowAngle)
+        msgReceived = readMsg()
+        time.sleep(2)
+
+       ''' vari = 0
+        vari2 = 50
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(vari, vari2)
+        sendMsg(vari, vari2)
+        msgReceived = readMsg()
+        time.sleep(2)
+
+        vari = 100
+        vari2 = 150
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(vari, vari2)
+        sendMsg(vari, vari2)
+        msgReceived = readMsg()
+        time.sleep(2)'''
+        '''
+        #receive from OpenCR card:
+            #encodervalue, motorShoulderposition, motorElbowposition
+        #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
+        #data = struct.unpack('iii', dataPack)
+
+        ###sends to OpenCR
+
+        #position1
+        coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
+        cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
+        for pos in range(0, len(cartPosY)):
+            motorShoulder, motorElbow = cart2cyl(cartPosX[pos], cartPosY[pos])
+            sendMsg(motorShoulder, motorElbow, 0)
+            print("ShoulderAngle: " + str(motorShoulder) + "   \t ElbowAngle: " + str(motorElbow))
+        lastCoord = coord
+        #if other positions (to move out of the way of an object or something): copy-paste the 7 lines above
+
+
+        moveZ(coord[2])
+
+
+        '''
+        #var2 = False
+
+        ### Comm that functions below ###
+        '''
+        #vari = 0
+
+        #print('Running. Press CTRL-C to exit.')
+        #with serial.Serial("COM5", 9600, timeout=1) as ser:
+        #time.sleep(0.1) #wait for serial to open
+        if ser.isOpen():
+            #print("{} connected!".format(ser.port))
+            #try:
+            #while True:
+            cmd= vari #input("Enter command : ")
+            ser.write(str(vari).encode()) #.encode())
+            #time.sleep(1) #wait for arduino to answer
+            while ser.inWaiting()==0: pass
+            if  ser.inWaiting()>0: 
+                answer=ser.readline()
+                print("Answer is : " + str(answer))
+                ser.flushInput() #remove data after reading
+                #time.sleep(5)
+            
+            #except KeyboardInterrupt:
+            #    print("KeyboardInterrupt has been caught.")
+        '''

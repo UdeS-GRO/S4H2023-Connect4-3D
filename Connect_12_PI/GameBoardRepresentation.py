@@ -16,6 +16,7 @@ class gameboard(QtWidgets.QMainWindow):
     floor_total = 6
     board = []
     LastList = [0 for _ in range(16)]
+    var = 0
     
     def __init__(self):
         # Function used to display the user interface (UI) and let the user use inputs to move the robot
@@ -143,7 +144,8 @@ class gameboard(QtWidgets.QMainWindow):
   
         self.central_widget.setLayout(self.main_layout)     
         return
-  
+    
+ 
     def init_board(self):
         # Uses the global variables to generate the gameboard matrix
 
@@ -246,12 +248,10 @@ class gameboard(QtWidgets.QMainWindow):
         zPosition = self.line_edit5.text()
         # Link with Alex's code
         print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
-        print(' x: ', int(xPosition), '\n y: ', yPosition, '\n z: ', zPosition,)
         return int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
         # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
-
         # Link with Alex's code 
         # Link with UI
         xActualPos = 1
