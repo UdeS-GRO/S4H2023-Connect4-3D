@@ -81,12 +81,17 @@ void setup() {
 
 void loop() {
   readSerialPort();
-  sendData();
+  if(Serial.available() < 1)
+    sendData();
 
   ServoMotor.setGoalPosition(motorShoulder_ID, motorAngleShoulderInt);
-  //while(ServoMotor.getPresentPosition(motorShoulder_ID) == motorAngleShoulderInt);
+  while(ServoMotor.getPresentPosition(motorShoulder_ID) == motorAngleShoulderInt){
+    delay(1);
+  }
   ServoMotor.setGoalPosition(motorElbow_ID, motorAngleElbowInt);
-  //while(ServoMotor.getPresentPosition(motorElbow_ID) == motorAngleElbowInt);
+  while(ServoMotor.getPresentPosition(motorElbow_ID) == motorAngleElbowInt){
+    delay(1);
+  }
 }
 
 void psetIDMotors(int nbMot)
@@ -159,41 +164,45 @@ void sendData(){
   msg1 = "";
   msg2 = "";*/
 
-  uint8_t SendShoulderPos = ServoMotor.getPresentPosition(motorShoulder_ID);
-  String SendShoulderPosStr = String(SendShoulderPos);
+  while(Serial.available()<2){
+    float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
+    int SendShoulderPos = round(SendShoulderPosFloat);
+    String SendShoulderPosStr = String(SendShoulderPos);
 
-  uint8_t SendElbowPos = ServoMotor.getPresentPosition(motorElbow_ID);
-  String SendElbowPosStr = String(SendElbowPos);
-  
-  if(SendShoulderPosStr.length() == 1){
-    msg1 = '000' + SendShoulderPosStr;
-  }
-  if(SendShoulderPosStr.length() == 2){
-    msg1 = '00' + SendShoulderPosStr;
-  }
-  if(SendShoulderPosStr.length() == 3){
-    msg1 = '0' + SendShoulderPosStr;
-  }
-  else{
-    msg1 = SendShoulderPosStr;
-  }
+    float SendElbowPosFloat = ServoMotor.getPresentPosition(motorElbow_ID);
+    int SendElbowPos = round(SendElbowPosFloat);
+    String SendElbowPosStr = String(SendElbowPos);
+    
+    if(SendShoulderPosStr.length() == 1){
+      msg1 = "000" + SendShoulderPosStr;
+    }
+    if(SendShoulderPosStr.length() == 2){
+      msg1 = "00" + SendShoulderPosStr;
+    }
+    if(SendShoulderPosStr.length() == 3){
+      msg1 = "0" + SendShoulderPosStr;
+    }
+    else{
+      msg1 = SendShoulderPosStr;
+    }
 
-  if(SendElbowPosStr.length() == 1){
-    msg2 = '000' + SendElbowPosStr;
-  }
-  if(SendElbowPosStr.length() == 2){
-    msg2 = '00' + SendElbowPosStr;
-  }
-  if(SendElbowPosStr.length() == 3){
-    msg2 = '0' + SendElbowPosStr;
-  }
-  else{
-    msg2 = SendElbowPosStr;
-  }
+    if(SendElbowPosStr.length() == 1){
+      msg2 = "000" + SendElbowPosStr;
+    }
+    if(SendElbowPosStr.length() == 2){
+      msg2 = "00" + SendElbowPosStr;
+    }
+    if(SendElbowPosStr.length() == 3){
+      msg2 = "0" + SendElbowPosStr;
+    }
+    else{
+      msg2 = SendElbowPosStr;
+    }
 
-  msg = msg1+msg2;
-  //msg = "2000";
-  Serial.print(msg);
+    msg = msg1+msg2;
+    //msg = "2000";
+    Serial.print(msg);
+  }
 
   return;
 }
