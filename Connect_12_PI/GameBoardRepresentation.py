@@ -15,7 +15,6 @@ import pyzbar.pyzbar as pyzbar
 import time
 import os
 
-
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
@@ -41,7 +40,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.line_edit1 = QLineEdit()
 
         self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
-        self.push_button2.clicked.connect(self.button_played)
+        #self.push_button2.clicked.connect(self.button_played)
         self.line_edit2 = QLineEdit()
 
         self.left_layout = QVBoxLayout()
@@ -86,6 +85,10 @@ class gameboard(QtWidgets.QMainWindow):
             floor = self.determine_floor(row, column)
             if floor != None and limit_board == 1:
                 self.board[floor - 1][row - 1][column - 1] = player_id
+
+        self.label.setText(self.print_board())
+        if self.detect_win(position_list):
+            self.label.setText("Player " + str(player_id) + " won!")
         return
 
     def delete_piece(self, row, column, floor):
@@ -121,7 +124,7 @@ class gameboard(QtWidgets.QMainWindow):
         row_index = int(position_list[0])-1
         column_index = int(position_list[1])-1
         player_id = int(position_list[2])
-        
+        floor_index = 0
         for i in range(self.floor_total):
                     if self.board[i][row_index][column_index] == 0:  
                         floor_index = i-1
@@ -269,31 +272,6 @@ class gameboard(QtWidgets.QMainWindow):
     #    entries = list(map(int, input().split()))
     #    # Need to add this entrie to the UI
     #    return entries
-
-    def graphic_representation(self):
-        # not used for the moment
-
-        x, y, z = np.indices((4, 4, 6))
-        # link these parameters with add_piece definition
-        robot_piece = (x == 3) & (y == 3) & (z == 0)
-        user_piece = (x == 1) & (y == 2) & (z == 0)
-
-        colors = np.empty(robot_piece.shape, dtype=object)
-        colors[robot_piece] = 'blue'
-        colors[user_piece] = 'red'
-
-        self.figure = Figure()
-        self.ax = self.figure.add_subplot(111, projection='3d')
-        self.ax.voxels(robot_piece, facecolors=colors, edgecolor='k')
-        self.ax.voxels(user_piece, facecolors=colors, edgecolor='k')
-        self.ax.set_title("Connect 4 3D")
-        self.ax.text2D(0, 0.94, "The robot plays the blue pieces\nYou play the red pieces", transform=self.ax.transAxes)
-        
-        # Add the FigureCanvas to the layout
-        self.canvas = FigureCanvas(self.figure)
-        self.setCentralWidget(self.canvas)
-        return Figure
-  
 
     def button_played(self):
         print("Button clicked, the player has played")
