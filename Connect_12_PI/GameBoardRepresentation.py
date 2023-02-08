@@ -1,4 +1,4 @@
-# Sandrine Gagne, January 19th 2023
+# Sandrine Gagne, February 1st 2023
 
 import sys
 import numpy as np
@@ -6,7 +6,7 @@ from tkinter import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
 
 import cv2
@@ -15,41 +15,152 @@ import pyzbar.pyzbar as pyzbar
 import time
 import os
 
-#import AI_algoritm as AI
-class gamewindow(QtWidgets.QMainWindow):
-    def __init__(self, bg):
-        self.board = bg.board
-        self.add_piece = bg.add_piece
+class gameboard(QtWidgets.QMainWindow):
+    row_total = 4
+    column_total = 4
+    floor_total = 6
+    board = []
+    LastList = [0 for _ in range(16)]
+    
+    def __init__(self):
+        self.init_board()
         super().__init__()
         self.setWindowTitle("User Interface")
-        self.setGeometry(100, 100, 600, 400)
+        self.setGeometry(200, 200, 900, 500)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-
+        self.grid_layout = QGridLayout()
+        
         self.label = QLabel("Gameboard")
         self.label.setText(self.print_board())
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.push_button = QPushButton("Click me when you've played")
-        self.push_button.clicked.connect(self.button_played)
+        # Define elements of the UI
+        self.push_button1 = QCheckBox("PLAYER 1\nClick me when you've played")
+        self.push_button1.clicked.connect(self.button_played)
+        self.line_edit1 = QLineEdit()
 
-        self.right_layout = QVBoxLayout()
-        self.line_edit = QLineEdit()
-        self.right_layout.addWidget(self.line_edit)
+        self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
+        self.push_button2.clicked.connect(self.button_played)
+        self.line_edit2 = QLineEdit()
 
-        #self.graphic_representation()
-        #self.canvas = FigureCanvas(self.figure)
+        self.line_edit3 = QLineEdit()
+        self.line_edit1_label = QLabel("X position :")
+        self.line_edit1_label.setAlignment(Qt.AlignCenter)
+        self.line_edit4 = QLineEdit()
+        self.line_edit2_label = QLabel("Y position :")
+        self.line_edit2_label.setAlignment(Qt.AlignCenter)
+        self.line_edit5 = QLineEdit()
+        self.line_edit3_label = QLabel("Z position :")
+        self.line_edit3_label.setAlignment(Qt.AlignCenter)
+        self.line_edit6 = QLineEdit()
+        self.line_edit4_label = QLabel("J1 position :")
+        self.line_edit4_label.setAlignment(Qt.AlignCenter)
+        self.line_edit7 = QLineEdit()
+        self.line_edit5_label = QLabel("J2 position :")
+        self.line_edit5_label.setAlignment(Qt.AlignCenter)
+        self.line_edit6_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")               #top right display only
 
-        self.main_layout = QVBoxLayout()
+        self.submit_button1 = QPushButton("Submit x-y-z-coordinates")
+        self.submit_button1.clicked.connect(self.submit_inputs_xyz)
+        self.submit_button2 = QPushButton("Submit joints coordinates")
+        self.submit_button2.clicked.connect(self.submit_inputs_joints)
+
+        self.line_edit6_label = QLabel("Actual X position :")
+        self.line_edit6_label.setAlignment(Qt.AlignCenter)
+        self.line_edit8 = QLineEdit()
+        self.line_edit7_label = QLabel("Actual Y position :")
+        self.line_edit7_label.setAlignment(Qt.AlignCenter)
+        self.line_edit9 = QLineEdit()
+        self.line_edit8_label = QLabel("Actual Z position :")
+        self.line_edit8_label.setAlignment(Qt.AlignCenter)
+        self.line_edit10 = QLineEdit()
+        self.line_edit9_label = QLabel("Actual J1 position :")
+        self.line_edit9_label.setAlignment(Qt.AlignCenter)
+        self.line_edit11 = QLineEdit()
+        self.line_edit10_label = QLabel("Actual J2 position :")
+        self.line_edit10_label.setAlignment(Qt.AlignCenter)
+        self.line_edit12 = QLineEdit()
+        self.line_edit12_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") 
+        self.line_edit13_label = QLabel("\n")      
+
+        # Position keyboard to go to a precise position
+        self.selected_btn = None
+        self.selected_floor = None
+        button_names = ["A1", "B1", "C1", "D1", "A2", "B2", "C2", "D2", 
+                        "A3", "B3", "C3", "D3", "A4", "B4", "C4", "D4"]
+        floor_names =  ["Floor1", "Floor2", "Floor3", "Floor4", "Floor5", "Floor6"]
+
+        self.buttons = []
+        for i in range(16):
+            self.buttons.append(QPushButton(str(button_names[i])))
+            self.buttons[i].clicked.connect(lambda checked, btn=self.buttons[i]: self.update_selected_btn(btn))
+            self.grid_layout.addWidget(self.buttons[i], i//4, i%4)
+        for j in range(6):
+            self.buttons.append(QPushButton(str(floor_names[j])))
+            self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
+            self.grid_layout.addWidget(self.buttons[16+j])
+        
+
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.clicked.connect(self.submit_gameboard_pos)
+        self.grid_layout.addWidget(self.submit_button)
+                
+
+        # Display layouts
+        self.left_layout = QVBoxLayout()
+        self.left_layout.addWidget(self.push_button1)
+        self.left_layout.addWidget(self.line_edit1)
+        self.left_layout.addWidget(self.push_button2)
+        self.left_layout.addWidget(self.line_edit2)
+
+        self.top_right_layout = QVBoxLayout()
+        self.top_right_layout.addWidget(self.line_edit1_label)
+        self.top_right_layout.addWidget(self.line_edit3)
+        self.top_right_layout.addWidget(self.line_edit2_label)
+        self.top_right_layout.addWidget(self.line_edit4)
+        self.top_right_layout.addWidget(self.line_edit3_label)
+        self.top_right_layout.addWidget(self.line_edit5)
+        self.top_right_layout.addWidget(self.submit_button1)
+        self.top_right_layout.addWidget(self.line_edit4_label)
+        self.top_right_layout.addWidget(self.line_edit6)
+        self.top_right_layout.addWidget(self.line_edit5_label)
+        self.top_right_layout.addWidget(self.line_edit7)
+        self.top_right_layout.addWidget(self.submit_button2)
+        self.top_right_layout.addWidget(self.line_edit12_label)
+        
+        self.new_right_layout = QVBoxLayout()
+        self.new_right_layout.addWidget(self.line_edit6_label)
+        self.new_right_layout.addWidget(self.line_edit8)
+        self.new_right_layout.addWidget(self.line_edit7_label)
+        self.new_right_layout.addWidget(self.line_edit9)
+        self.new_right_layout.addWidget(self.line_edit8_label)
+        self.new_right_layout.addWidget(self.line_edit10)
+        self.new_right_layout.addWidget(self.line_edit13_label)
+        self.new_right_layout.addWidget(self.line_edit9_label)
+        self.new_right_layout.addWidget(self.line_edit11)
+        self.new_right_layout.addWidget(self.line_edit10_label)
+        self.new_right_layout.addWidget(self.line_edit12)
+        self.new_right_layout.addWidget(self.line_edit12_label)
+        self.new_right_layout.addWidget(self.line_edit13_label)
+        
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addLayout(self.left_layout)
         self.main_layout.addWidget(self.label)
-        self.main_layout.addWidget(self.push_button)
-        self.main_layout.addWidget(self.line_edit)
-        #user_input = self.line_edit.text()
-        #self.main_layout.addWidget(self.canvas)
-        self.central_widget.setLayout(self.main_layout)
-        self.central_widget.setLayout(self.right_layout)
-    
+        self.main_layout.addLayout(self.top_right_layout)
+        self.main_layout.addLayout(self.new_right_layout)
+        self.main_layout.addLayout(self.grid_layout)
+  
+        self.central_widget.setLayout(self.main_layout)     
+        return
+  
+    def init_board(self):
+        x = self.row_total
+        y = self.column_total
+        z = self.floor_total
+        self.board = [[[0 for k in range(x)] for j in range(y)] for i in range(z)]
+        return
 
     def print_board(self):
         i = 1
@@ -61,59 +172,119 @@ class gamewindow(QtWidgets.QMainWindow):
             i += 1
         return usermatrix
 
+    def add_piece(self, position_list):
+        print('position list : ', position_list)
+        row = int(position_list[0])
+        column = int(position_list[1])
+        player_id = str(position_list[2])
+        limit_board = self.row_or_column_limit(row, column)
+        if limit_board == 1:
+            floor = self.determine_floor(row, column)
+            if floor != None and limit_board == 1:
+                self.board[floor - 1][row - 1][column - 1] = player_id
+        return
 
-    def graphic_representation(self):
-        # not used for the moment
+    def delete_piece(self, row, column, floor):
+        self.board[floor - 1][row - 1][column - 1] = 0
+        return
 
-        x, y, z = np.indices((4, 4, 6))
-        # link these parameters with add_piece definition
-        robot_piece = (x == 3) & (y == 3) & (z == 0)
-        user_piece = (x == 1) & (y == 2) & (z == 0)
+    def row_or_column_limit(self, row, column):
+        row = int(row)
+        column = int(column)
+        if row > 4 or column > 4:
+            print('This case is not reachable. Try again.')
+            self.add_piece(self.button_played())
+            return 0
+        return 1
 
-        colors = np.empty(robot_piece.shape, dtype=object)
-        colors[robot_piece] = 'blue'
-        colors[user_piece] = 'red'
-
-        self.figure = Figure()
-        self.ax = self.figure.add_subplot(111, projection='3d')
-        self.ax.voxels(robot_piece, facecolors=colors, edgecolor='k')
-        self.ax.voxels(user_piece, facecolors=colors, edgecolor='k')
-        self.ax.set_title("Connect 4 3D")
-        self.ax.text2D(0, 0.94, "The robot plays the blue pieces\nYou play the red pieces", transform=self.ax.transAxes)
-        
-        # Add the FigureCanvas to the layout
-        self.canvas = FigureCanvas(self.figure)
-        self.setCentralWidget(self.canvas)
-        return Figure
-  
+    def determine_floor(self, row, column):
+        floor = 1
+        row = int(row)
+        column = int(column)
+        for i in range(1, 7):
+            if self.board[i - 1][row - 1][column - 1] != 0:
+                floor = floor + 1   
+        if floor > 6:
+            print('This case is not reachable. Try again.')
+            self.add_piece(self.button_played())
+            return None
+        else:
+            print('floor value is : ', floor)               
+        return floor
 
     def button_played(self):
-        self.label.setAlignment(Qt.AlignCenter)
-        self.push_button = QPushButton("Click me when you've played")
-        self.push_button.clicked.connect(self.button_played)
         print("Button clicked, the player has played")
 
-        user_input = self.line_edit.text()
-        entries = user_input.split()
-        self.add_piece(entries)
+        player, column, row = self.take_picture()
+        vision_list = [str(row), str(column), str(player)]
+        print('vision list : ', vision_list)
+        self.add_piece(vision_list)
+
+        if self.push_button1.isChecked():
+       #     user_input = self.line_edit1.text()
+       #     entries = user_input.split()
+       #     self.add_piece(entries)
+       #     self.line_edit1.clear()
+            self.push_button1.setChecked(False)
+#
+        elif self.push_button2.isChecked():
+       #     user_input = self.line_edit2.text()
+       #     entries = user_input.split()
+       #     self.add_piece(entries)
+       #     self.line_edit2.clear()
+            self.push_button2.setChecked(False)
+        
         self.label.setText(self.print_board())
-       
+        return vision_list
+
+    def submit_inputs_xyz(self):
+        xPosition = self.line_edit3.text()
+        yPosition = self.line_edit4.text()
+        zPosition = self.line_edit5.text()
+        # Link with Alex's code
+        return xPosition, yPosition, zPosition
+
+    def actual_position_xyz(self):
+        # Link with Alex's code 
+        xActual = 1
+        yActual = 2
+        zActual = 2
+        return xActual, yActual, zActual
+
+    def submit_inputs_joints(self):
+        joint1Position = self.line_edit6.text()
+        joint2Position = self.line_edit7.text()
+        # Link with Alex's code
+        return joint1Position, joint2Position
+
+    def update_selected_btn(self, btn):
+        self.selected_btn = btn
+
+    def update_selected_floor(self, floor):
+        self.selected_floor = floor
+
+    def submit_gameboard_pos(self):
+        if self.selected_btn and self.selected_floor:
+            self.button_played(self.selected_btn, self.selected_floor)
+
+    def button_played(self, btn, floor):
+        gameboardPosition = [btn.text(), floor.text()]
+        print("gameboardposition : ", gameboardPosition)
+        return gameboardPosition
 
     def take_picture(self):
-        global LastList
+        #global LastList
         start_time = time.time()
-        list = LastList[:]
+        list = self.LastList[:]
 
         # Create a VideoCapture object
         cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
         # Set the focus distance (try different values to see the effect)
-        #cap.set(cv2.CAP_PROP_BRIGHTNESS, 0.1)
-        #cap.set(cv2.CAP_PROP_FOCUS, 10)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
-        while list == LastList:
+        while list == self.LastList:
             i=0
 
             # Capture a frame from the webcam
@@ -161,16 +332,16 @@ class gamewindow(QtWidgets.QMainWindow):
             # Wait 0.2 seconds
             time.sleep(0.2)
         
-        for i, (a, b) in enumerate(zip(list, LastList)):
+        for i, (a, b) in enumerate(zip(list, self.LastList)):
             if a != b:
-                x = i%4
-                y = i//4
+                x = i%4+1
+                y = i//4+1
                 if (a < 47):
-                    Player = 0
+                    Player = 'R'
                 else:
-                    Player = 1
+                    Player = 'U'
 
-        LastList = list
+        self.LastList = list
         print("--- %s seconds ---" % (time.time() - start_time))
 
         # Release the VideoCapture object and Close all the windows
@@ -178,68 +349,10 @@ class gamewindow(QtWidgets.QMainWindow):
         cv2.destroyAllWindows()
 
         return Player, x, y
-    
 
-class gameboard():
-    row_total = 4
-    column_total = 4
-    floor_total = 6
-    board = []
-    LastList = [0 for _ in range(16)]
-        
-    def __init__(self):
-        self.init_board()
-    
-    def init_board(self):
-        x = self.row_total
-        y = self.column_total
-        z = self.floor_total
-        self.board = [[[0 for k in range(x)] for j in range(y)] for i in range(z)]
-        return
-
-    def add_piece(self, position_list):
-        row = int(position_list[0])
-        column = int(position_list[1])
-        player_id = int(position_list[2])
-        limit_board = self.row_or_column_limit(row, column)
-        if limit_board == 1:
-            floor = self.determine_floor(row, column)
-            if floor != None and limit_board == 1:
-                self.board[floor - 1][row - 1][column - 1] = player_id
-
-        return
-
-    def delete_piece(self, row, column, floor):
-        self.board[floor - 1][row - 1][column - 1] = 0
-        return
-
-    def row_or_column_limit(self, row, column):
-        row = int(row)
-        column = int(column)
-        if row > 4 or column > 4:
-            print('This case is not reachable. Try again.')
-            self.add_piece(self.user_input_board())
-            return 0
-        return 1
-
-    def determine_floor(self, row, column):
-        floor = 1
-        row = int(row)
-        column = int(column)
-        for i in range(1, 7):
-            if self.board[i - 1][row - 1][column - 1] != 0:
-                floor = floor + 1   
-        if floor > 6:
-            print('This case is not reachable. Try again.')
-            self.add_piece(self.user_input_board())
-            return None
-        else:
-            print('floor value is : ', floor)               
-        return floor
-    
 if __name__ == "__main__":
     #app = QApplication(sys.argv)
-    gb = gameboard()
+    gm = gameboard
     app = QtWidgets.QApplication(sys.argv)
     window = gamewindow(gb)
     window.show()
