@@ -15,7 +15,6 @@ import pyzbar.pyzbar as pyzbar
 import time
 import os
 
-
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
@@ -153,8 +152,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.main_layout.addLayout(self.new_right_layout)
         self.main_layout.addLayout(self.grid_layout)
   
-        self.central_widget.setLayout(self.main_layout)
-        
+        self.central_widget.setLayout(self.main_layout)     
         return
   
     def init_board(self):
@@ -352,23 +350,10 @@ class gameboard(QtWidgets.QMainWindow):
 
         return Player, x, y
 
-
 if __name__ == "__main__":
     #app = QApplication(sys.argv)
     gm = gameboard
     app = QtWidgets.QApplication(sys.argv)
-    window = gameboard()
+    window = gamewindow(gb)
     window.show()
     sys.exit(app.exec_())
-
-gm = gameboard()
-
-for _ in range(5):
-    gm.take_picture()
-#gm.print_board()
-#print('User 1, play!')
-#gm.add_piece(gm.user_input_board())
-#gm.print_board()
-#print('User 2, play!')
-#gm.add_piece(gm.user_input_board())
-#gm.print_board()
