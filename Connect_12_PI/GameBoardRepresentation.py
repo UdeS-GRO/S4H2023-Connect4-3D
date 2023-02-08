@@ -1,19 +1,13 @@
 # Sandrine Gagne, February 1st 2023
 
 import sys
-import numpy as np
-from tkinter import *
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
-from PyQt5.QtCore import Qt
-
 import cv2
-import numpy as np
 import pyzbar.pyzbar as pyzbar
 import time
 import os
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
+from PyQt5.QtCore import Qt
 
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
@@ -23,6 +17,9 @@ class gameboard(QtWidgets.QMainWindow):
     LastList = [0 for _ in range(16)]
     
     def __init__(self):
+        # Function used to display the user interface (UI) and let the user use inputs to move the robot
+        # to a certain position or tell the program he's done playing. 
+
         self.init_board()
         super().__init__()
         self.setWindowTitle("User Interface")
@@ -36,7 +33,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.label.setText(self.print_board())
         self.label.setAlignment(Qt.AlignCenter)
 
-        # Define elements of the UI
+        # Define elements of the UI ------------------------------------------------------------------------------------------
         self.push_button1 = QCheckBox("PLAYER 1\nClick me when you've played")
         self.push_button1.clicked.connect(self.button_played)
         self.line_edit1 = QLineEdit()
@@ -67,25 +64,23 @@ class gameboard(QtWidgets.QMainWindow):
         self.submit_button2 = QPushButton("Submit joints coordinates")
         self.submit_button2.clicked.connect(self.submit_inputs_joints)
 
-        self.line_edit6_label = QLabel("Actual X position :")
+        actXPos, actYPos, actZPos = self.actual_position_xyz()
+        self.line_edit6_label = QLabel("Actual X position :" + str(actXPos))
         self.line_edit6_label.setAlignment(Qt.AlignCenter)
-        self.line_edit8 = QLineEdit()
-        self.line_edit7_label = QLabel("Actual Y position :")
+        self.line_edit7_label = QLabel("Actual Y position :" + str(actYPos))
         self.line_edit7_label.setAlignment(Qt.AlignCenter)
-        self.line_edit9 = QLineEdit()
-        self.line_edit8_label = QLabel("Actual Z position :")
+        self.line_edit8_label = QLabel("Actual Z position :" + str(actZPos))
         self.line_edit8_label.setAlignment(Qt.AlignCenter)
-        self.line_edit10 = QLineEdit()
-        self.line_edit9_label = QLabel("Actual J1 position :")
+        
+        actJ1Pos, actJ2Pos = self.actual_position_joints()
+        self.line_edit9_label = QLabel("Actual J1 position :" + str(actJ1Pos))
         self.line_edit9_label.setAlignment(Qt.AlignCenter)
-        self.line_edit11 = QLineEdit()
-        self.line_edit10_label = QLabel("Actual J2 position :")
+        self.line_edit10_label = QLabel("Actual J2 position :" + str(actJ2Pos))
         self.line_edit10_label.setAlignment(Qt.AlignCenter)
-        self.line_edit12 = QLineEdit()
-        self.line_edit12_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") 
+        self.line_edit12_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") 
         self.line_edit13_label = QLabel("\n")      
 
-        # Position keyboard to go to a precise position
+        # Position keyboard to go to a precise gameboard position -------------------------------------------------------------
         self.selected_btn = None
         self.selected_floor = None
         button_names = ["A1", "B1", "C1", "D1", "A2", "B2", "C2", "D2", 
@@ -102,13 +97,11 @@ class gameboard(QtWidgets.QMainWindow):
             self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
             self.grid_layout.addWidget(self.buttons[16+j])
         
-
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_gameboard_pos)
         self.grid_layout.addWidget(self.submit_button)
                 
-
-        # Display layouts
+        # Display layouts ----------------------------------------------------------------------------------------------------
         self.left_layout = QVBoxLayout()
         self.left_layout.addWidget(self.push_button1)
         self.left_layout.addWidget(self.line_edit1)
@@ -132,16 +125,11 @@ class gameboard(QtWidgets.QMainWindow):
         
         self.new_right_layout = QVBoxLayout()
         self.new_right_layout.addWidget(self.line_edit6_label)
-        self.new_right_layout.addWidget(self.line_edit8)
         self.new_right_layout.addWidget(self.line_edit7_label)
-        self.new_right_layout.addWidget(self.line_edit9)
         self.new_right_layout.addWidget(self.line_edit8_label)
-        self.new_right_layout.addWidget(self.line_edit10)
         self.new_right_layout.addWidget(self.line_edit13_label)
         self.new_right_layout.addWidget(self.line_edit9_label)
-        self.new_right_layout.addWidget(self.line_edit11)
         self.new_right_layout.addWidget(self.line_edit10_label)
-        self.new_right_layout.addWidget(self.line_edit12)
         self.new_right_layout.addWidget(self.line_edit12_label)
         self.new_right_layout.addWidget(self.line_edit13_label)
         
@@ -156,6 +144,8 @@ class gameboard(QtWidgets.QMainWindow):
         return
   
     def init_board(self):
+        # Uses the global variables to generate the gameboard matrix
+
         x = self.row_total
         y = self.column_total
         z = self.floor_total
@@ -163,6 +153,8 @@ class gameboard(QtWidgets.QMainWindow):
         return
 
     def print_board(self):
+        # Generate a visual representation of the gameboard to see what the robot / program knows of the game status.
+
         i = 1
         usermatrix = ('')
         for row in self.board:
@@ -173,7 +165,8 @@ class gameboard(QtWidgets.QMainWindow):
         return usermatrix
 
     def add_piece(self, position_list):
-        print('position list : ', position_list)
+        # Display the piece played on the UI to refresh the gameboard.
+
         row = int(position_list[0])
         column = int(position_list[1])
         player_id = str(position_list[2])
@@ -185,10 +178,15 @@ class gameboard(QtWidgets.QMainWindow):
         return
 
     def delete_piece(self, row, column, floor):
+        # Delete the piece played on the UI to refresh the gameboard.
+
         self.board[floor - 1][row - 1][column - 1] = 0
         return
 
     def row_or_column_limit(self, row, column):
+        # Returns an error if the player is trying to play out of the gameboard range limit. 
+        # Asks the player to play at another position. 
+
         row = int(row)
         column = int(column)
         if row > 4 or column > 4:
@@ -198,6 +196,8 @@ class gameboard(QtWidgets.QMainWindow):
         return 1
 
     def determine_floor(self, row, column):
+        # Calculate the actual floor of the piece, knowing the previous pieces played at this exact position. 
+
         floor = 1
         row = int(row)
         column = int(column)
@@ -213,7 +213,7 @@ class gameboard(QtWidgets.QMainWindow):
         return floor
 
     def button_played(self):
-        print("Button clicked, the player has played")
+        # Actualize the gameboard status with the new inputs
 
         player, column, row = self.take_picture()
         vision_list = [str(row), str(column), str(player)]
@@ -221,116 +221,181 @@ class gameboard(QtWidgets.QMainWindow):
         self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-       #     user_input = self.line_edit1.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit1.clear()
+        #    user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
+        #    self.add_piece(entries)                # Comment thoses lines to use the vision input
+        #    entries = user_input.split()           # " "
+        #    self.line_edit1.clear()                # " "
             self.push_button1.setChecked(False)
-#
+
         elif self.push_button2.isChecked():
-       #     user_input = self.line_edit2.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit2.clear()
+        #    user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
+        #    entries = user_input.split()           # Comment thoses lines to use the vision input
+        #    self.add_piece(entries)                # " "
+        #    self.line_edit2.clear()                # " "
             self.push_button2.setChecked(False)
         
         self.label.setText(self.print_board())
         return vision_list
 
     def submit_inputs_xyz(self):
+        # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
+
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
         # Link with Alex's code
-        return xPosition, yPosition, zPosition
+        return int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
+        # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
+
         # Link with Alex's code 
-        xActual = 1
-        yActual = 2
-        zActual = 2
-        return xActual, yActual, zActual
+        # Link with UI
+        xActualPos = 1
+        yActualPos = 2
+        zActualPos = 2
+        return xActualPos, yActualPos, zActualPos
 
     def submit_inputs_joints(self):
+        # Send the joints coordinates entered from the UI to the motor control program, to move the robot to desired position.
+
         joint1Position = self.line_edit6.text()
         joint2Position = self.line_edit7.text()
         # Link with Alex's code
-        return joint1Position, joint2Position
+        return int(joint1Position), int(joint2Position)
+
+    def actual_position_joints(self):
+        # Receives the joints coordinates from the motor control program and uses it to display it on the UI.
+
+        # Link with Alex's code 
+        # Link with UI
+        joint1ActualPos = 1
+        joint2ActualPos = 2
+        return joint1ActualPos, joint2ActualPos
 
     def update_selected_btn(self, btn):
+        # When a position button is selected on the UI, selected_btn is updated here. 
+
         self.selected_btn = btn
 
     def update_selected_floor(self, floor):
+        # When a floor button is selected on the UI, selected_floor is updated here. 
+
         self.selected_floor = floor
 
     def submit_gameboard_pos(self):
+        # Once a position and a floor is selected, the gameboard position is updated and the robot can move to this position. 
+
         if self.selected_btn and self.selected_floor:
             self.button_played(self.selected_btn, self.selected_floor)
 
     def button_played(self, btn, floor):
+        # Returns the xyz coordinates of the position where the robot has to move to. 
+        # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
+
+        height_constant = 200
+        height_init = 70
         gameboardPosition = [btn.text(), floor.text()]
+
+        match btn.text():
+            case 'A1':
+                xPosition = 1
+                yPosition = 1
+            case 'A2':
+                xPosition = 1
+                yPosition = 1
+            case 'A3':
+                xPosition = 1
+                yPosition = 1
+            case 'A4':
+                xPosition = 1
+                yPosition = 1
+
+            case 'B1':
+                xPosition = 1
+                yPosition = 1
+            case 'B2':
+                xPosition = 1
+                yPosition = 1
+            case 'B3':
+                xPosition = 1
+                yPosition = 1
+            case 'B4':
+                xPosition = 1
+                yPosition = 1
+
+            case 'C1':
+                xPosition = 1
+                yPosition = 1
+            case 'C2':
+                xPosition = 1
+                yPosition = 1
+            case 'C3':
+                xPosition = 1
+                yPosition = 1
+            case 'C4':
+                xPosition = 1
+                yPosition = 1
+            
+            case 'D1':
+                xPosition = 1
+                yPosition = 1
+            case 'D2':
+                xPosition = 1
+                yPosition = 1
+            case 'D3':
+                xPosition = 1
+                yPosition = 1
+            case 'D4':
+                xPosition = 1
+                yPosition = 1
+
+        zPosition = int((floor.text())[5]) * height_constant + height_init
         print("gameboardposition : ", gameboardPosition)
-        return gameboardPosition
+        return xPosition, yPosition, zPosition
 
     def take_picture(self):
-        #global LastList
+        # Take picture of the gameboard when the played button is press. Actualize the UI by comparing the actual status gameboard
+        # and the previous status gameboard. 
+
         start_time = time.time()
         list = self.LastList[:]
 
-        # Create a VideoCapture object
-        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-
-        # Set the focus distance (try different values to see the effect)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object 
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
 
         while list == self.LastList:
             i=0
+            ret, img = cap.read()                       # Capture a frame from the webcam
+            cv2.imshow("Webcam", img)                   # Show the frame
 
-            # Capture a frame from the webcam
-            ret, img = cap.read()
-
-            # Show the frame
-            cv2.imshow("Webcam", img)
-
-            # Exit the loop if the 'q' key is pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord('q'):       # Exit the loop if the 'q' key is pressed
                 break
 
-            # Crop the image and divise it into 16 squares
-            center = (img.shape[1]//2, img.shape[0]//2)
+            center = (img.shape[1]//2, img.shape[0]//2) # Crop the image and divise it into 16 squares
             size = (1080, 1080)
             img = cv2.getRectSubPix(img, size, center)
 
             height, width, _ = img.shape
             square_size = (height//4, width//4)
 
-            # Iterate through the rows and columns of the image
-            for row in range(4):
+            for row in range(4):                        # Iterate through the rows and columns of the image
                 for col in range(4):
-                    
-                    # Extract each square of the image
-                    square = img[row*square_size[0]:(row+1)*square_size[0], col*square_size[1]:(col+1)*square_size[1]]
+                    square = img[row*square_size[0]:(row+1)*square_size[0], col*square_size[1]:(col+1)*square_size[1]]  # Extract each square of the image
                     gray_img = cv2.cvtColor(square, cv2.COLOR_BGR2GRAY)
-
-                    # Detect QR codes
-                    qr_codes = pyzbar.decode(gray_img)
-
-                    # Add QR code to the list
-                    for qr_code in qr_codes:
-                        # Get QR code data
-                        data = qr_code.data.decode()
+                    
+                    qr_codes = pyzbar.decode(gray_img)  # Detect QR codes
+                    for qr_code in qr_codes:            # Add QR code to the list
+                        data = qr_code.data.decode()    # Get QR code data
                         list[i]=(int(data))                
-                        #print(data)
                     i+=1
                     
-            # Print the game board
-            os.system('cls' if os.name == 'nt' else 'clear')
+            os.system('cls' if os.name == 'nt' else 'clear')    # Print the game board
             for i in range(0, 16, 4):
                 print(list[i:i+4])
             
-            # Wait 0.2 seconds
-            time.sleep(0.2)
+            time.sleep(0.2)                             # Wait 0.2 seconds
         
         for i, (a, b) in enumerate(zip(list, self.LastList)):
             if a != b:
@@ -342,18 +407,14 @@ class gameboard(QtWidgets.QMainWindow):
                     Player = 'U'
 
         self.LastList = list
-        print("--- %s seconds ---" % (time.time() - start_time))
-
-        # Release the VideoCapture object and Close all the windows
-        cap.release()
+        #print("--- %s seconds ---" % (time.time() - start_time))
+        cap.release()                                   # Release the VideoCapture object and Close all the windows
         cv2.destroyAllWindows()
-
         return Player, x, y
 
 if __name__ == "__main__":
-    #app = QApplication(sys.argv)
     gm = gameboard
     app = QtWidgets.QApplication(sys.argv)
-    window = gamewindow(gb)
+    window = gameboard()
     window.show()
     sys.exit(app.exec_())
