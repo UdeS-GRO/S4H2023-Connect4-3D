@@ -112,9 +112,158 @@ class gameboard(QtWidgets.QMainWindow):
             print('This case is not reachable. Try again.')
             self.add_piece(self.user_input_board())
             return None
-        else:
-            print('floor value is : ', floor)               
+        #else:
+            #print('floor value is : ', floor)               
         return floor
+
+    def detect_win(self,position_list):
+        
+        row_index = int(position_list[0])-1
+        column_index = int(position_list[1])-1
+        player_id = int(position_list[2])
+        
+        for i in range(self.floor_total):
+                    if self.board[i][row_index][column_index] == 0:  
+                        floor_index = i-1
+                        break
+
+        #Row verification
+        streak = 0
+        for i in range(0,self.row_total):
+            if int(self.board[floor_index][i][column_index])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Column verification
+        streak = 0
+        for i in range(0,self.column_total):
+            if int(self.board[floor_index][row_index][i])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Floor verification
+        streak = 0
+        for i in range(0,self.floor_total):
+            if int(self.board[i][row_index][column_index])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Positive diagonal column and row verification
+        streak = 0
+        if row_index == column_index:
+            for i in range(0,self.column_total):
+                if int(self.board[floor_index][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative diagonal column and row verification
+        streak = 0
+        if row_index == self.column_total-1-column_index:
+            for i in range(0,self.column_total):
+                if int(self.board[floor_index][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive diagonal column and floor verification
+        streak = 0
+        gap = floor_index - row_index
+        #if row_index <= floor_index and gap <= self.floor_total-self.row_total:
+        for i in range(0,self.column_total):
+            print(i+gap)
+            if int(self.board[i+gap][i][column_index])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Negative diagonal column and floor verification
+        streak = 0
+        if row_index <= self.floor_total-1-floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[self.floor_total-i-1-gap][i][column_index])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive diagonal row and floor verification
+        streak = 0
+        gap = floor_index - row_index
+        #if row_index <= floor_index and gap <= self.floor_total-self.row_total:
+        for i in range(0,self.column_total):
+            if int(self.board[i+gap][row_index][i])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Negative diagonal row and floor verification
+        streak = 0
+        if column_index <= self.floor_total-1-floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[self.floor_total-i-1-gap][row_index][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        """#Positive positive diagonal column, row and floor verification
+        streak = 0
+        if row_index == column_index and row_index <= floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[i+gap][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive negative diagonal column, row and floor verification
+        streak = 0
+        if row_index == column_index and row_index <= self.floor_total-1-floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[self.floor_total-i-1+gap][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative positive diagonal column, row and floor verification
+        streak = 0
+        if row_index == self.column_total-1-column_index and row_index <= floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[i+gap][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative negative diagonal column, row and floor verification
+        streak = 0
+        if row_index == self.column_total-1-column_index and row_index <= self.floor_total-1-floor_index:
+            gap = floor_index - row_index
+            for i in range(0,self.column_total):
+                if int(self.board[self.floor_total-i-1-gap][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0"""
+        return False
 
     #def user_input_board(self):
     #    print("Enter the position (row and column, separated by space) and your usernumber : ")
@@ -150,27 +299,35 @@ class gameboard(QtWidgets.QMainWindow):
     def button_played(self):
         print("Button clicked, the player has played")
 
-        player, column, row = self.take_picture()
-        vision_list = [str(row), str(column), str(player)]
-        print('vision list : ', vision_list)
-        self.add_piece(vision_list)
+        #player, column, row = self.take_picture()
+        #vision_list = [str(row), str(column), str(player)]
+        #print('vision list : ', vision_list)
+        #self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-       #     user_input = self.line_edit1.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit1.clear()
+            user_input = self.line_edit1.text()
+            entries = user_input.split()
+            self.add_piece(entries)
+            self.line_edit1.clear()
             self.push_button1.setChecked(False)
+            
+            win = self.detect_win(entries)
+            if(win):
+                print("VICTORY!")
 #
         elif self.push_button2.isChecked():
-       #     user_input = self.line_edit2.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit2.clear()
+            user_input = self.line_edit2.text()
+            entries = user_input.split()
+            self.add_piece(entries)
+            self.line_edit2.clear()
             self.push_button2.setChecked(False)
+            
+            win = self.detect_win(entries)
+            if(win):
+                print("VICTORY!")
         
         self.label.setText(self.print_board())
-        return vision_list
+        return #vision_list
         
 
     def take_picture(self):
@@ -254,6 +411,6 @@ class gameboard(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     #app = QApplication(sys.argv)
     app = QtWidgets.QApplication(sys.argv)
-    window = gamewindow(gb)
+    window = gameboard()
     window.show()
     sys.exit(app.exec_())
