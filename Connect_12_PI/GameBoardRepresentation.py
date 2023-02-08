@@ -5,6 +5,7 @@ import cv2
 import pyzbar.pyzbar as pyzbar
 import time
 import os
+import MotorControl
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
@@ -42,19 +43,19 @@ class gameboard(QtWidgets.QMainWindow):
         self.push_button2.clicked.connect(self.button_played)
         self.line_edit2 = QLineEdit()
 
-        self.line_edit3 = QLineEdit()
+        self.line_edit3 = QLineEdit("10")
         self.line_edit1_label = QLabel("X position :")
         self.line_edit1_label.setAlignment(Qt.AlignCenter)
-        self.line_edit4 = QLineEdit()
+        self.line_edit4 = QLineEdit("10")
         self.line_edit2_label = QLabel("Y position :")
         self.line_edit2_label.setAlignment(Qt.AlignCenter)
-        self.line_edit5 = QLineEdit()
+        self.line_edit5 = QLineEdit("10")
         self.line_edit3_label = QLabel("Z position :")
         self.line_edit3_label.setAlignment(Qt.AlignCenter)
-        self.line_edit6 = QLineEdit()
+        self.line_edit6 = QLineEdit("10")
         self.line_edit4_label = QLabel("J1 position :")
         self.line_edit4_label.setAlignment(Qt.AlignCenter)
-        self.line_edit7 = QLineEdit()
+        self.line_edit7 = QLineEdit("10")
         self.line_edit5_label = QLabel("J2 position :")
         self.line_edit5_label.setAlignment(Qt.AlignCenter)
         self.line_edit6_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")               #top right display only
@@ -239,11 +240,13 @@ class gameboard(QtWidgets.QMainWindow):
 
     def submit_inputs_xyz(self):
         # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
-
+        MotorControl.main
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
         # Link with Alex's code
+        print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
+        print(' x: ', int(xPosition), '\n y: ', yPosition, '\n z: ', zPosition,)
         return int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
@@ -302,14 +305,14 @@ class gameboard(QtWidgets.QMainWindow):
                 xPosition = 1
                 yPosition = 1
             case 'A2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = 2
+                yPosition = 2
             case 'A3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = 3
+                yPosition = 3
             case 'A4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = 4
+                yPosition = 4
 
             case 'B1':
                 xPosition = 1
