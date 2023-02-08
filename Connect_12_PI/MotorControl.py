@@ -13,8 +13,8 @@ from GameBoardRepresentation import gameboard
 game = gameboard()
 
 
-class MotorControl:
-    ### Math variables
+class MotorMove:
+    ### Math variable
     BicepLen = float(200)
     ForearmLen = float(200)
 
@@ -65,13 +65,13 @@ class MotorControl:
 
     def readMsg(self):
         answer:str = ""
-        if ser.isOpen():
+        if self.ser.isOpen():
             
-            while ser.inWaiting()==0: pass
-            while  ser.inWaiting() > 0:
-                answer = ser.readline(8).decode()
+            while self.ser.inWaiting()==0: pass
+            while  self.ser.inWaiting() > 0:
+                answer = self.ser.readline(8).decode()
                 print("Answer is : " + answer)
-                ser.flushInput()
+                self.ser.flushInput()
         return int(answer)
 
     def rad2Servo(self, angleRad):
