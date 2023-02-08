@@ -14,7 +14,7 @@ game = gameboard()
 
 
 class MotorMove:
-    ### Math variables
+    ### Math variable
     BicepLen = float(200)
     ForearmLen = float(200)
 
