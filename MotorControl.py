@@ -1,48 +1,57 @@
-#Alexandre Baril, january 16 2023, Sherbrooke
+#Alexandre Baril: Created: january 16 2023, Sherbrooke
+#Alexandre Baril: Modified: february 8 2023, Sherbrooke
 
 import struct
 import numpy as np
 import serial
 import time
+import sys
+from PyQt5 import QtWidgets
+app = QtWidgets.QApplication(sys.argv)
+from Connect_12_PI.GameBoardRepresentation import gameboard
+game = gameboard()
 
-
-### variables
+### Math variables
 BicepLen = float(150)
 ForearmLen = float(150)
-msg1:str = ""
-msg2:str = ""
-msg:str = ""
 
-### parameters
+## Communication variables
+mssg1:str = "0000"
+mssg2:str = "0000"
+mssg:str = "0000"
+
 #ser = serial.Serial('/dev/ttyUSB0', 9600)
 ser = serial.Serial('COM5', 9600)
+
+
+## Functions
 
 def sendMsg(Shouldermessage:int, Elbowmessage:int):
     Shoulderlength = len(str(Shouldermessage))
     if Shoulderlength == 1:
-        msg1 =  '000' + str(Shouldermessage) + '|'
+        mssg1 =  '000' + str(Shouldermessage) + '|'
     elif Shoulderlength == 2:
-        msg1 =  '00' + str(Shouldermessage) + '|'
+        mssg1 =  '00' + str(Shouldermessage) + '|'
     elif Shoulderlength == 3:
-        msg1 =  '0' + str(Shouldermessage) + '|'
+        mssg1 =  '0' + str(Shouldermessage) + '|'
     elif Shoulderlength == 4:
-        msg1 = str(Shouldermessage) + '|'
+        mssg1 = str(Shouldermessage) + '|'
 
     Elbowlength = len(str(Elbowmessage))
     if Elbowlength == 1:
-        msg2 =  '000' + str(Elbowmessage) + '|'
+        mssg2 =  '000' + str(Elbowmessage) + '|'
     elif Elbowlength == 2:
-        msg2 =  '00' + str(Elbowmessage) + '|'
+        mssg2 =  '00' + str(Elbowmessage) + '|'
     elif Elbowlength == 3:
-        msg2 =  '0' + str(Elbowmessage) + '|'
+        mssg2 =  '0' + str(Elbowmessage) + '|'
     elif Elbowlength == 4:
-        msg2 = str(Elbowmessage) + '|'
+        mssg2 = str(Elbowmessage) + '|'
 
-    msg = msg1 + msg2
-    #print(msg)
+    mssg = mssg1 + mssg2
+    #print(mssg)
     if ser.isOpen():
-        ser.write(msg.encode().rstrip())
-        print("msg Sent: " + msg)
+        ser.write(mssg.encode().rstrip())
+        print("msg Sent: " + mssg)
     #while(readMsg() != message): pass
     return
 
@@ -52,27 +61,27 @@ def readMsg():
         
         while ser.inWaiting()==0: pass
         while  ser.inWaiting() > 0:
-            answer = ser.readline(4).decode()
+            answer = ser.readline(8).decode()
             print("Answer is : " + answer)
-        ser.flushInput()
+            ser.flushInput()
     return int(answer)
 
 def rad2Servo(angleRad):
-    angleServo = angleRad * 360 / (2*np.pi)
+    angleServo = angleRad * 4095 / (2*np.pi)
     return angleServo
 
-def cart2cyl(cartX, cartY):
-    C2 = (cartX**2 + cartY**2 - BicepLen**2 - ForearmLen**2) / (2 * BicepLen * ForearmLen)
-    S2 = (1-C2) ** 0.5
+def cart2cyl(cartX:int, cartY:int):
+    C2:float = (cartx**2 + np.power(cartY, 2) - np.power(BicepLen, 2) - np.power(ForearmLen, 2)*1.0) / (2 * BicepLen * ForearmLen)
+    S2:float = np.sqrt(1-C2)
     theta = np.arccos(C2)     ###cos-1
     phiX = (ForearmLen * S2 * cartX) + ((BicepLen + ForearmLen*C2)*cartY)
     phiY = ((BicepLen + ForearmLen*C2)*cartX)-(ForearmLen * S2 * cartY)
     phi = np.arctan2(((ForearmLen * S2 * cartX) + ((BicepLen + ForearmLen*C2)*cartY)), (((BicepLen + ForearmLen*C2)*cartX)-(ForearmLen * S2 * cartY)))
 
-    theta = rad2Servo(theta)
-    phi = rad2Servo(phi)
+    thetaInt:int = round(rad2Servo(theta))
+    phiInt:int = round(rad2Servo(phi))
 
-    return theta, phi
+    return thetaInt, phiInt
 
 def Interpolation(posXStart: int, posYStart: int, posXEnd: int, posYEnd: int):
     jointAngles = cart2cyl(posXStart, posYStart)
@@ -161,28 +170,27 @@ sens:bool = True
 
 while var == True:
     
-    vari = 2000
+    gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
+
+    servoShoulderAngle, ServoElbowAngle = cart2cyl(gameXpos, gameYpos)
+    
+    sendMsg(gameXpos, gameYpos)
+    msgReceived = readMsg()
+    
+
+    '''vari = 2000
     vari2 = 2500
     sendMsg(vari, vari2)
     msgReceived = readMsg()
+    time.sleep(2)
 
     vari = 4000
     vari2 = 1000
     sendMsg(vari, vari2)
     msgReceived = readMsg()
-    #sendMsg(vari+500)
-    #msgReceived = readMsg()
-    
-    #print(msgReceived)
-
-    #time.sleep(0.01)
-
+    time.sleep(2)
+'''
     '''
-    print("next: send msg -")
-    sendMsg(500, 5, 5)
-    sendMsg(1250, 5, 5)
-    readMsg()
-
     #receive from OpenCR card:
         #encodervalue, motorShoulderposition, motorElbowposition
     #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
