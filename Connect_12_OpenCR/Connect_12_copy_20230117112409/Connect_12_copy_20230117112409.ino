@@ -1,4 +1,5 @@
 #include <Dynamixel2Arduino.h>
+#include <DynamixelSDK.h>
 #include <HardwareSerial.h>
 #include <Arduino.h>
 #include <stdlib.h>
@@ -72,8 +73,8 @@ void setup() {
   ServoMotor.torqueOn(motorElbow_ID);
 
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
-  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 0);
-  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 0);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 100);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 100);
 
   
 }

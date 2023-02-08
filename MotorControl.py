@@ -161,8 +161,13 @@ sens:bool = True
 
 while var == True:
     
-    vari += 100
-    vari2 += 150
+    vari = 2000
+    vari2 = 2500
+    sendMsg(vari, vari2)
+    msgReceived = readMsg()
+
+    vari = 4000
+    vari2 = 1000
     sendMsg(vari, vari2)
     msgReceived = readMsg()
     #sendMsg(vari+500)
