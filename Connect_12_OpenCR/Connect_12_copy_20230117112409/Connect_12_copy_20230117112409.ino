@@ -164,7 +164,7 @@ void sendData(){
   msg1 = "";
   msg2 = "";*/
 
-  while(Serial.available()<2){
+  while(Serial.available()<1){
     float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
     int SendShoulderPos = round(SendShoulderPosFloat);
     String SendShoulderPosStr = String(SendShoulderPos);
