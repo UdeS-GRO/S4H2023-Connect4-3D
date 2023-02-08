@@ -9,6 +9,7 @@ import sys
 from PyQt5 import QtWidgets
 app = QtWidgets.QApplication(sys.argv)
 from Connect_12_PI.GameBoardRepresentation import gameboard
+
 game = gameboard()
 
 ### Math variables
@@ -71,7 +72,7 @@ def rad2Servo(angleRad):
     return angleServo
 
 def cart2cyl(cartX:int, cartY:int):
-    C2:float = (cartx**2 + np.power(cartY, 2) - np.power(BicepLen, 2) - np.power(ForearmLen, 2)*1.0) / (2 * BicepLen * ForearmLen)
+    C2:float = (cartX**2 + cartY**2 - BicepLen**2 - ForearmLen**2) / (2 * BicepLen * ForearmLen)
     S2:float = np.sqrt(1-C2)
     theta = np.arccos(C2)     ###cos-1
     phiX = (ForearmLen * S2 * cartX) + ((BicepLen + ForearmLen*C2)*cartY)
@@ -163,78 +164,81 @@ def pos2cart(letterPos: str, numberPos: str, floorLevel: str):
 vari:int = 1
 vari2:int = 1
 ##### SETUP #####
-var = True
+var2 = True
 lastCoord = pos2cart('A', '1', 'f0')
 sens:bool = True
 ##### MAIN #####
 
-while var == True:
-    
-    gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
+def main():
+    while var2 == True:
 
-    servoShoulderAngle, ServoElbowAngle = cart2cyl(gameXpos, gameYpos)
-    
-    sendMsg(gameXpos, gameYpos)
-    msgReceived = readMsg()
-    
+        gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
 
-    '''vari = 2000
-    vari2 = 2500
-    sendMsg(vari, vari2)
-    msgReceived = readMsg()
-    time.sleep(2)
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(gameXpos, gameYpos)
 
-    vari = 4000
-    vari2 = 1000
-    sendMsg(vari, vari2)
-    msgReceived = readMsg()
-    time.sleep(2)
-'''
-    '''
-    #receive from OpenCR card:
-        #encodervalue, motorShoulderposition, motorElbowposition
-    #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
-    #data = struct.unpack('iii', dataPack)
+        sendMsg(servoShoulderAngle, ServoElbowAngle)
+        msgReceived = readMsg()
+        time.sleep(2)
 
-    ###sends to OpenCR
+       ''' vari = 0
+        vari2 = 50
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(vari, vari2)
+        sendMsg(vari, vari2)
+        msgReceived = readMsg()
+        time.sleep(2)
 
-    #position1
-    coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
-    cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
-    for pos in range(0, len(cartPosY)):
-        motorShoulder, motorElbow = cart2cyl(cartPosX[pos], cartPosY[pos])
-        sendMsg(motorShoulder, motorElbow, 0)
-        print("ShoulderAngle: " + str(motorShoulder) + "   \t ElbowAngle: " + str(motorElbow))
-    lastCoord = coord
-    #if other positions (to move out of the way of an object or something): copy-paste the 7 lines above
-    
+        vari = 100
+        vari2 = 150
+        servoShoulderAngle, ServoElbowAngle = cart2cyl(vari, vari2)
+        sendMsg(vari, vari2)
+        msgReceived = readMsg()
+        time.sleep(2)'''
+        '''
+        #receive from OpenCR card:
+            #encodervalue, motorShoulderposition, motorElbowposition
+        #dataPack = struct.pack('iii', encodervalue, motorShoulderPosition, motorElbowPosition)
+        #data = struct.unpack('iii', dataPack)
 
-    moveZ(coord[2])
-    
-    #var = False
-    '''
-    
-### Comm that functions below ###
-'''
-    #vari = 0
+        ###sends to OpenCR
 
-    #print('Running. Press CTRL-C to exit.')
-    #with serial.Serial("COM5", 9600, timeout=1) as ser:
-    #time.sleep(0.1) #wait for serial to open
-    if ser.isOpen():
-        #print("{} connected!".format(ser.port))
-        #try:
-        #while True:
-        cmd= vari #input("Enter command : ")
-        ser.write(str(vari).encode()) #.encode())
-        #time.sleep(1) #wait for arduino to answer
-        while ser.inWaiting()==0: pass
-        if  ser.inWaiting()>0: 
-            answer=ser.readline()
-            print("Answer is : " + str(answer))
-            ser.flushInput() #remove data after reading
-            #time.sleep(5)
-        
-        #except KeyboardInterrupt:
-        #    print("KeyboardInterrupt has been caught.")
-'''
+        #position1
+        coord = pos2cart('C', '3', 'f5') #coordonates = import from jacob
+        cartPosX, cartPosY = Interpolation(lastCoord[0], lastCoord[1], coord[0], coord[1])
+        for pos in range(0, len(cartPosY)):
+            motorShoulder, motorElbow = cart2cyl(cartPosX[pos], cartPosY[pos])
+            sendMsg(motorShoulder, motorElbow, 0)
+            print("ShoulderAngle: " + str(motorShoulder) + "   \t ElbowAngle: " + str(motorElbow))
+        lastCoord = coord
+        #if other positions (to move out of the way of an object or something): copy-paste the 7 lines above
+
+
+        moveZ(coord[2])
+
+
+        '''
+        #var2 = False
+
+        ### Comm that functions below ###
+        '''
+        #vari = 0
+
+        #print('Running. Press CTRL-C to exit.')
+        #with serial.Serial("COM5", 9600, timeout=1) as ser:
+        #time.sleep(0.1) #wait for serial to open
+        if ser.isOpen():
+            #print("{} connected!".format(ser.port))
+            #try:
+            #while True:
+            cmd= vari #input("Enter command : ")
+            ser.write(str(vari).encode()) #.encode())
+            #time.sleep(1) #wait for arduino to answer
+            while ser.inWaiting()==0: pass
+            if  ser.inWaiting()>0: 
+                answer=ser.readline()
+                print("Answer is : " + str(answer))
+                ser.flushInput() #remove data after reading
+                #time.sleep(5)
+            
+            #except KeyboardInterrupt:
+            #    print("KeyboardInterrupt has been caught.")
+        '''
