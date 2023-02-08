@@ -15,6 +15,7 @@ class gameboard(QtWidgets.QMainWindow):
     floor_total = 6
     board = []
     LastList = [0 for _ in range(16)]
+    var = 0
     
     def __init__(self):
         # Function used to display the user interface (UI) and let the user use inputs to move the robot
@@ -42,13 +43,13 @@ class gameboard(QtWidgets.QMainWindow):
         self.push_button2.clicked.connect(self.button_played)
         self.line_edit2 = QLineEdit()
 
-        self.line_edit3 = QLineEdit()
+        self.line_edit3 = QLineEdit("10")
         self.line_edit1_label = QLabel("X position :")
         self.line_edit1_label.setAlignment(Qt.AlignCenter)
-        self.line_edit4 = QLineEdit()
+        self.line_edit4 = QLineEdit("10")
         self.line_edit2_label = QLabel("Y position :")
         self.line_edit2_label.setAlignment(Qt.AlignCenter)
-        self.line_edit5 = QLineEdit()
+        self.line_edit5 = QLineEdit("10")
         self.line_edit3_label = QLabel("Z position :")
         self.line_edit3_label.setAlignment(Qt.AlignCenter)
         self.line_edit6 = QLineEdit()
@@ -142,7 +143,8 @@ class gameboard(QtWidgets.QMainWindow):
   
         self.central_widget.setLayout(self.main_layout)     
         return
-  
+    
+ 
     def init_board(self):
         # Uses the global variables to generate the gameboard matrix
 
@@ -244,11 +246,11 @@ class gameboard(QtWidgets.QMainWindow):
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
         # Link with Alex's code
+        print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
         return int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
         # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
-
         # Link with Alex's code 
         # Link with UI
         xActualPos = 1
