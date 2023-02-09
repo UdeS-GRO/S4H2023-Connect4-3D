@@ -16,8 +16,8 @@ phi = 0.001
 
 class MotorMove:
     ### Math variable
-    BicepLen = float(200)
-    ForearmLen = float(200)
+    BicepLen:float = 200
+    ForearmLen:float = 200
 
     ## Communication variables
     mssg1:str = "0000"
@@ -190,6 +190,10 @@ class MotorMove:
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
         msgReceived = self.readMsg(self)
         time.sleep(0.5)'''
+
+        MotorMove.sendMsg(MotorMove, gameXpos, gameYpos)
+        msgReceived = MotorMove.readMsg(MotorMove)
+
     
     def moveJoint(self, J1, J2):
         MotorMove.sendMsg(MotorMove, J1, J2)
