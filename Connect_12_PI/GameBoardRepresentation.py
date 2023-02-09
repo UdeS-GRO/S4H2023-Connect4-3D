@@ -5,7 +5,7 @@ import cv2
 import pyzbar.pyzbar as pyzbar
 import time
 import os
-from MotorControl import MotorControl
+from MotorControl import MotorMove
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
@@ -242,13 +242,13 @@ class gameboard(QtWidgets.QMainWindow):
 
     def submit_inputs_xyz(self):
         # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
-        MotorControl.main()
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
         # Link with Alex's code
+        MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
         print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
-        return int(xPosition), int(yPosition), int(zPosition)
+        return # int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
         # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
@@ -265,6 +265,7 @@ class gameboard(QtWidgets.QMainWindow):
         joint1Position = self.line_edit6.text()
         joint2Position = self.line_edit7.text()
         # Link with Alex's code
+        MotorMove.moveJoint(MotorMove, joint1Position, joint2Position)
         return int(joint1Position), int(joint2Position)
 
     def actual_position_joints(self):
