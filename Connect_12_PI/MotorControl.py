@@ -193,7 +193,7 @@ class MotorMove:
 
         MotorMove.sendMsg(MotorMove, gameXpos, gameYpos)
         msgReceived = MotorMove.readMsg(MotorMove)
-
+        time.sleep(0.1)
     
     def moveJoint(self, J1, J2):
         MotorMove.sendMsg(MotorMove, J1, J2)
