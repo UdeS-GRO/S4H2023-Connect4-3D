@@ -23,7 +23,7 @@
 const int motorShoulder_DIR_PIN = 84; // OpenCR Board's DIR PIN.
 //const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
 //int myPins[] = {2, 4, 8, 3, 6};
-int MotorsID[] = {8, 3};
+int MotorsID[] = {1, 3};
 uint8_t motorShoulder_ID = MotorsID[0];
 uint8_t motorElbow_ID = MotorsID[1];
 const float DXL_PROTOCOL_VERSION = 2.0;
