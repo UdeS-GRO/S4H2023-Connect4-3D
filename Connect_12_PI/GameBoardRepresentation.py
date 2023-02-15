@@ -5,7 +5,10 @@ import cv2
 import pyzbar.pyzbar as pyzbar
 import time
 import os
-from MotorControl import MotorMove
+try:
+    from MotorControl import MotorMove
+except:
+    pass
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
@@ -37,11 +40,11 @@ class gameboard(QtWidgets.QMainWindow):
 
         # Define elements of the UI ------------------------------------------------------------------------------------------
         self.push_button1 = QCheckBox("PLAYER 1\nClick me when you've played")
-        self.push_button1.clicked.connect(self.button_played)
+        self.push_button1.clicked.connect(self.player_played)
         self.line_edit1 = QLineEdit()
 
         self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
-        self.push_button2.clicked.connect(self.button_played)
+        self.push_button2.clicked.connect(self.player_played)
         self.line_edit2 = QLineEdit()
 
         self.line_edit3 = QLineEdit("10")
@@ -194,7 +197,7 @@ class gameboard(QtWidgets.QMainWindow):
         column = int(column)
         if row > 4 or column > 4:
             print('This case is not reachable. Try again.')
-            self.add_piece(self.button_played())
+            self.add_piece(self.player_played())
             return 0
         return 1
 
@@ -209,36 +212,36 @@ class gameboard(QtWidgets.QMainWindow):
                 floor = floor + 1   
         if floor > 6:
             print('This case is not reachable. Try again.')
-            self.add_piece(self.button_played())
+            self.add_piece(self.player_played())
             return None
         else:
             print('floor value is : ', floor)               
         return floor
 
-    def button_played(self):
+    def player_played(self):
         # Actualize the gameboard status with the new inputs
-
-        player, column, row = self.take_picture()
-        vision_list = [str(row), str(column), str(player)]
-        print('vision list : ', vision_list)
-        self.add_piece(vision_list)
+        print('HI')
+        #player, column, row = self.take_picture()
+        #vision_list = [str(row), str(column), str(player)]
+        #print('vision list : ', vision_list)
+        #self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-        #    user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
-        #    self.add_piece(entries)                # Comment thoses lines to use the vision input
-        #    entries = user_input.split()           # " "
-        #    self.line_edit1.clear()                # " "
+            user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
+            entries = user_input.split()           # Comment thoses lines to use the vision input
+            self.add_piece(entries)                # " "  
+            self.line_edit1.clear()                # " "
             self.push_button1.setChecked(False)
 
         elif self.push_button2.isChecked():
-        #    user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
-        #    entries = user_input.split()           # Comment thoses lines to use the vision input
-        #    self.add_piece(entries)                # " "
-        #    self.line_edit2.clear()                # " "
+            user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
+            entries = user_input.split()           # Comment thoses lines to use the vision input
+            self.add_piece(entries)                # " "
+            self.line_edit2.clear()                # " "
             self.push_button2.setChecked(False)
         
         self.label.setText(self.print_board())
-        return vision_list
+        return #vision_list
 
     def submit_inputs_xyz(self):
         # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
@@ -296,66 +299,72 @@ class gameboard(QtWidgets.QMainWindow):
     def button_played(self, btn, floor):
         # Returns the xyz coordinates of the position where the robot has to move to. 
         # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
+        # The reference position is A1 and then the other positinos are automatically generated. 
 
         height_constant = 200
         height_init = 70
         gameboardPosition = [btn.text(), floor.text()]
+        xA1Position = 1
+        yA1Position = 1
+        xgap = 5
+        ygap = -5            # Use a negative value since the A1 position is at the top left
 
         match btn.text():
             case 'A1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position
+                yPosition = yA1Position
             case 'A2':
-                xPosition = 2
-                yPosition = 2
+                xPosition = xA1Position
+                yPosition = yA1Position + ygap
             case 'A3':
-                xPosition = 3
-                yPosition = 3
+                xPosition = xA1Position
+                yPosition = yA1Position + 2*ygap
             case 'A4':
-                xPosition = 4
-                yPosition = 4
+                xPosition = xA1Position
+                yPosition = yA1Position + 3*ygap
 
             case 'B1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position
             case 'B2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + ygap
             case 'B3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 2*ygap
             case 'B4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 3*ygap
 
             case 'C1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position 
             case 'C2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + ygap
             case 'C3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 2*ygap
             case 'C4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 3*ygap
             
             case 'D1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap 
+                yPosition = yA1Position 
             case 'D2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + ygap
             case 'D3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 2*ygap
             case 'D4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 3*ygap
 
         zPosition = int((floor.text())[5]) * height_constant + height_init
-        print("gameboardposition : ", gameboardPosition)
+        #print("gameboardposition : ", gameboardPosition)
+        #print("x  ", xPosition, "    y  ", yPosition)
         return xPosition, yPosition, zPosition
 
     def take_picture(self):
