@@ -129,6 +129,9 @@ class gameboard(QtWidgets.QMainWindow):
                     if self.board[i][row_index][column_index] == 0:  
                         floor_index = i-1
                         break
+        if i == self.floor_total-1:
+            floor_index = i
+            print("max floor reached")
 
         #Row verification
         streak = 0

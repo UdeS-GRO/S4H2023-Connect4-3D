@@ -4,6 +4,10 @@ from AI_algoritm import AI
 import sys
 from PyQt5 import QtWidgets
 
+import os
+os.system('cls||clear') # this line clears the screen 'cls' = windows 'clear' = unix
+# below is my main script
+
 class main():
     def __init__(self,gb,AI):
         self.gb = gb
