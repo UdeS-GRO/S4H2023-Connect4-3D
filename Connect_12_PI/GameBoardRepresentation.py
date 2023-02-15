@@ -13,6 +13,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
 
+import os
+
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
@@ -32,6 +34,7 @@ class gameboard(QtWidgets.QMainWindow):
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
+        self.gridlayout = QGridLayout()
 
         self.label = QLabel("Gameboard")
         self.label.setText(self.print_board())
@@ -43,8 +46,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.line_edit1 = QLineEdit()
 
         self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
-        #self.push_button2.clicked.connect(self.button_played)
-        self.push_button2.clicked.connect(self.player_played)
+        #self.push_button2.clicked.connect(self.player_played)
         self.line_edit2 = QLineEdit()
 
         self.line_edit3 = QLineEdit("10")
@@ -96,12 +98,15 @@ class gameboard(QtWidgets.QMainWindow):
         for i in range(16):
             self.buttons.append(QPushButton(str(button_names[i])))
             self.buttons[i].clicked.connect(lambda checked, btn=self.buttons[i]: self.update_selected_btn(btn))
+            self.gridlayout.addWidget(self.buttons[i], i//4, i%4)
         for j in range(6):
             self.buttons.append(QPushButton(str(floor_names[j])))
             self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
+            self.gridlayout.addWidget(self.buttons[16+j])
         
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_gameboard_pos)
+        self.gridlayout.addWidget(self.submit_button)
                 
         # Display layouts ----------------------------------------------------------------------------------------------------
         self.left_layout = QVBoxLayout()
@@ -140,6 +145,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.main_layout.addWidget(self.label)
         self.main_layout.addLayout(self.top_right_layout)
         self.main_layout.addLayout(self.new_right_layout)
+        self.main_layout.addLayout(self.gridlayout)
   
         self.central_widget.setLayout(self.main_layout)     
         return
@@ -168,7 +174,6 @@ class gameboard(QtWidgets.QMainWindow):
 
     def add_piece(self, position_list):
         # Display the piece played on the UI to refresh the gameboard.
-
         row = int(position_list[0])
         column = int(position_list[1])
         player_id = int(position_list[2])
@@ -177,10 +182,6 @@ class gameboard(QtWidgets.QMainWindow):
             floor = self.determine_floor(row, column)
             if floor != None and limit_board == 1:
                 self.board[floor - 1][row - 1][column - 1] = player_id
-
-        self.label.setText(self.print_board())
-        if self.detect_win(position_list):
-            self.label.setText("Player " + str(player_id) + " won!")
         return
 
     def delete_piece(self, row, column, floor):
@@ -228,10 +229,6 @@ class gameboard(QtWidgets.QMainWindow):
                     if self.board[i][row_index][column_index] == 0:  
                         floor_index = i-1
                         break
-        if i == self.floor_total-1:
-            floor_index = i
-            print("max floor reached")
-
         #Row verification
         streak = 0
         for i in range(0,self.row_total):
@@ -369,38 +366,28 @@ class gameboard(QtWidgets.QMainWindow):
                     streak = 0
         return False
 
-    #def user_input_board(self):
-    #    print("Enter the position (row and column, separated by space) and your usernumber : ")
-    #    entries = list(map(int, input().split()))
-    #    # Need to add this entrie to the UI
-    #    return entries
-
     def player_played(self):
         # Actualize the gameboard status with the new inputs
-        print('HI')
         ##player, column, row = self.take_picture()
         ##vision_list = [str(row), str(column), str(player)]
         ##print('vision list : ', vision_list)
         ##self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-       #     user_input = self.line_edit1.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit1.clear()
+            user_input = self.line_edit1.text()
+            entries = user_input.split()
+            self.add_piece(entries)
+            self.line_edit1.clear()
             self.push_button1.setChecked(False)
-#
+
         elif self.push_button2.isChecked():
-       #     user_input = self.line_edit2.text()
-       #     entries = user_input.split()
-       #     self.add_piece(entries)
-       #     self.line_edit2.clear()
+            user_input = self.line_edit2.text()
+            entries = user_input.split()
+            self.add_piece(entries)
+            self.line_edit2.clear()
             self.push_button2.setChecked(False)
-            
-            win = self.detect_win(entries)
-            if(win):
+        if(self.detect_win(entries)):
                 print("VICTORY!")
-        
         self.label.setText(self.print_board())
         return #vision_list
 
@@ -510,5 +497,6 @@ if __name__ == "__main__":
     gm = gameboard
     app = QtWidgets.QApplication(sys.argv)
     window = gameboard()
+    window.push_button2.clicked.connect(window.player_played)
     window.show()
     sys.exit(app.exec_())
