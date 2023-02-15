@@ -19,14 +19,18 @@
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
+#define ENCA                    2
+#define ENCB                    4
 
 const int motorShoulder_DIR_PIN = 84; // OpenCR Board's DIR PIN.
 //const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
 //int myPins[] = {2, 4, 8, 3, 6};
-int MotorsID[] = {8, 3};
+int MotorsID[] = {1, 3};
 uint8_t motorShoulder_ID = MotorsID[0];
 uint8_t motorElbow_ID = MotorsID[1];
 const float DXL_PROTOCOL_VERSION = 2.0;
+
+
 
 Dynamixel2Arduino ServoMotor(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
 
@@ -44,6 +48,8 @@ String motorAngleElbow = "";
 int motorAngleElbowInt = 0;
 String motorAngle = "";
 
+int Count_pulses = 0;
+
 int pingMotors(int nbMot);
 void getMsg();
 void readSerialPort();
@@ -54,6 +60,9 @@ void setup() {
   DEBUG_SERIAL.begin(9600);
   //DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
+
+  attachInterrupt(digitalPinToInterrupt(ENCA), void EncoderA(), RISING);
+  attachInterrupt(digitalPinToInterrupt(ENCB), void EncoderB(), RISING);
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
@@ -207,3 +216,28 @@ void sendData(){
 
   return;
 }
+
+void EncoderA()
+{
+  int aRead = digitalRead(ENCA);
+  if(aRead > 0){
+    Count_pulses++;
+  }
+  else{
+    Count_pulses--;
+  }
+  return;
+}
+
+void EncoderB()
+{
+  int bRead = digitalRead(ENCB);
+  if(bRead > 0){
+    Count_pulses--;
+  }
+  else{
+    Count_pulses++;
+  }
+  return;
+}
+
