@@ -1,29 +1,37 @@
 #include <Dynamixel2Arduino.h>
+#include <DynamixelSDK.h>
+//#include <DynamixelWizard.h>
 #include <HardwareSerial.h>
 #include <Arduino.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 // For OpenCR, there is a DXL Power Enable pin, so you must initialize and control it.
 // Reference link : https://github.com/ROBOTIS-GIT/OpenCR/blob/master/arduino/opencr_arduino/opencr/libraries/DynamixelSDK/src/dynamixel_sdk/port_handler_arduino.cpp#L78
-#if defined(ARDUINO_OpenCR)
-  #define motorShoulder_SERIAL   Serial3
-  #define Serial2   Serial2
+//#if defined(ARDUINO_OpenCR)
+  #define motorShoulder_SERIAL Serial3
+  #define Serial2 Serial2
   #define DEBUG_SERIAL Serial
-#endif
+//#endif
+
+//#define DEBUG_SERIAL  Serial
 
 #define BDPIN_PUSH_SW_1         34
 #define BDPIN_PUSH_SW_2         35
+#define ENCA                    2
+#define ENCB                    4
 
 const int motorShoulder_DIR_PIN = 84; // OpenCR Board's DIR PIN.
 //const int motorElbow_DIR_PIN = 85; // OpenCR Board's DIR PIN.
-const uint8_t motorShoulder_ID = 21;
-const uint8_t motorElbow_ID = 23;
+//int myPins[] = {2, 4, 8, 3, 6};
+int MotorsID[] = {1, 3};
+uint8_t motorShoulder_ID = MotorsID[0];
+uint8_t motorElbow_ID = MotorsID[1];
 const float DXL_PROTOCOL_VERSION = 2.0;
 
-char PYTHON_SERIAL;
 
-//Dynamixel2Arduino motorShoulder(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
-//Dynamixel2Arduino motorElbow(motorElbow_SERIAL, motorElbow_DIR_PIN);
+
 Dynamixel2Arduino ServoMotor(motorShoulder_SERIAL, motorShoulder_DIR_PIN);
 
 //This namespace is required to use Control table item names
@@ -31,49 +39,35 @@ using namespace ControlTableItem;
 
 int max = 180;
 int min = 0;
-int ShoulderGoal = 0;
-int ElbowGoal = 0;
+String msg = "";
+String msg1 = "";
+String msg2 = "";
+String motorAngleShoulder = "";
+int motorAngleShoulderInt = 0;
+String motorAngleElbow = "";
+int motorAngleElbowInt = 0;
+String motorAngle = "";
 
-//int pingMotors(int nbMot);
+int Count_pulses = 0;
+
+int pingMotors(int nbMot);
+void getMsg();
+void readSerialPort();
+void sendData(int msg2send);
 
 void setup() {
   
-  DEBUG_SERIAL.begin(115200);
-  DEBUG_SERIAL.println("Started");
+  DEBUG_SERIAL.begin(9600);
+  //DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
 
-  Serial2.begin(9600);
+  attachInterrupt(digitalPinToInterrupt(ENCA), void EncoderA(), RISING);
+  attachInterrupt(digitalPinToInterrupt(ENCB), void EncoderB(), RISING);
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
 
-  pingMotors(1);
-
-  /*//motorShoulder Setup
-  motorShoulder.begin(57600);
-  motorShoulder.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
-  motorShoulder.ping(motorShoulder_ID);
-
-  // Turn off torque when configuring items in EEPROM area
-  motorShoulder.torqueOff(motorShoulder_ID);
-  motorShoulder.setOperatingMode(motorShoulder_ID, OP_POSITION);
-  motorShoulder.torqueOn(motorShoulder_ID);
-
-  // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
-  motorShoulder.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 100);
-*/
- /* //motorElbow Setup
-  motorElbow.begin(57600);
-  motorElbow.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
-  motorElbow.ping(motorElbow_ID);
-
-  // Turn off torque when configuring items in EEPROM area
-  motorElbow.torqueOff(motorElbow_ID);
-  motorElbow.setOperatingMode(motorElbow_ID, OP_POSITION);
-  motorElbow.torqueOn(motorElbow_ID);
-
-  // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
-  motorElbow.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 50);*/
+  //psetIDMotors(2);
 
   //motorShoulder Setup
   ServoMotor.begin(57600);
@@ -91,79 +85,159 @@ void setup() {
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
   ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 50);
   ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 50);
-}
-
-void loop() {
-
-  if(Serial2.available() > 0)
-  {
-      PYTHON_SERIAL = Serial2.read();
-      Serial2.println( PYTHON_SERIAL);
-      if (PYTHON_SERIAL== 500)
-      {
-        Serial2.println("S recu");
-      }
-  }
-
-  //Serial2.write("MSG Received!");
-
-  ShoulderGoal = PYTHON_SERIAL;
-
-  /*
-  //For Motor1
-  if(digitalRead(BDPIN_PUSH_SW_1))
-  {
-    ElbowGoal -= 25;
-    if(ElbowGoal <= 0)
-      ElbowGoal = 0;
-    ShoulderGoal += 25;
-    if(ShoulderGoal >= 4095)
-      ShoulderGoal = 4095;
-  }
-  else
-  {
-    ShoulderGoal -= 20;
-    if(ShoulderGoal <= 0)
-      ShoulderGoal = 0;
-  }
-
-  //For Motor 2
-  if(digitalRead(BDPIN_PUSH_SW_2))
-  {
-    ElbowGoal += 25;
-    if(ElbowGoal >= 4095)
-      ElbowGoal = 4095;
-  }
-  else
-  {
-    ElbowGoal -= 20;
-    if(ElbowGoal <= 0)
-      ElbowGoal = 0;
-  }
-  */
-  ServoMotor.setGoalPosition(motorShoulder_ID, ShoulderGoal);
-  ServoMotor.setGoalPosition(motorElbow_ID, ElbowGoal);
+  //ServoMotor.
   
 }
 
-int pingMotors(int nbMot)
-{
-  int ID = 1;
-  int nb = 0;
-  int ID_Motors[nbMot];
-  while(nb < nbMot)
-  {
-      if(ServoMotor.ping(ID))
-      {
-        ID_Motors[nb] = ID;
-        nb += 1;
-        //Serial2.print("nbMot: ");
-        //Serial2.println(nb);
-      }
-      //Serial2.print("ID: ");
-      //Serial2.println(ID);
-      ID += 1;
+void loop() {
+  readSerialPort();
+  if(Serial.available() < 1)
+    sendData();
+
+  ServoMotor.setGoalPosition(motorShoulder_ID, motorAngleShoulderInt);
+  while(ServoMotor.getPresentPosition(motorShoulder_ID) == motorAngleShoulderInt){
+    delay(1);
   }
-  Serial2.println(ID_Motors[1]);
-  return ID_Motors[1];
+  ServoMotor.setGoalPosition(motorElbow_ID, motorAngleElbowInt);
+  while(ServoMotor.getPresentPosition(motorElbow_ID) == motorAngleElbowInt){
+    delay(1);
+  }
 }
+
+void psetIDMotors(int nbMot)
+{
+  //DEBUG_SERIAL.println("In process");
+  int ID = 0;
+  int nb = 0;
+  //while(nb < nbMot && ID < 50)
+  //{
+      /*if(ServoMotor.ping(ID) == TRUE)
+      {
+        MotorsID[nb] = ID;
+        DEBUG_SERIAL.print("nb: ");
+        DEBUG_SERIAL.println(nb);
+        nb += 1;
+      }
+      ID += 1;
+      DEBUG_SERIAL.print("ID: ");
+      DEBUG_SERIAL.println(ID);
+      delay(500);
+      */
+
+      for(int i = 0; i < 255; i++){
+        if(ServoMotor.ping(i) == TRUE){
+          MotorsID[nb] = i;
+          nb += 1;
+          DEBUG_SERIAL.print("nB: ");
+          DEBUG_SERIAL.println(nb);
+        }
+        DEBUG_SERIAL.print("ID: ");
+        DEBUG_SERIAL.println(i);
+      }
+  //}
+  for(int i = 0; i < nbMot; i++){
+    DEBUG_SERIAL.print("old id: ");
+    DEBUG_SERIAL.print(MotorsID[i]);
+    DEBUG_SERIAL.print(" - new id: ");
+    ServoMotor.setID(MotorsID[i], i);
+    DEBUG_SERIAL.println(i);
+  }
+
+  return;
+}
+
+void readSerialPort() {
+  
+ 	if (Serial.available()) {
+ 			//delay(2);
+      
+      while (Serial.available() == 0 );
+ 			while (Serial.available() > 0){
+        motorAngle = Serial.readString();
+      }
+ 			Serial.flush();
+ 	}
+
+  int firstIndexDelimiter = motorAngle.indexOf('|');
+  motorAngleShoulder = motorAngle.substring(0, firstIndexDelimiter);
+  motorAngleShoulderInt = motorAngleShoulder.toInt();
+
+  int lastIndexDelimiter = motorAngle.lastIndexOf('|');
+  motorAngleElbow = motorAngle.substring(firstIndexDelimiter+1, lastIndexDelimiter);
+  motorAngleElbowInt = motorAngleElbow.toInt();
+
+  return;
+}
+
+void sendData(){
+  /*msg = "";
+  msg1 = "";
+  msg2 = "";*/
+
+  while(Serial.available()<1){
+    float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
+    int SendShoulderPos = round(SendShoulderPosFloat);
+    String SendShoulderPosStr = String(SendShoulderPos);
+
+    float SendElbowPosFloat = ServoMotor.getPresentPosition(motorElbow_ID);
+    int SendElbowPos = round(SendElbowPosFloat);
+    String SendElbowPosStr = String(SendElbowPos);
+    
+    if(SendShoulderPosStr.length() == 1){
+      msg1 = "000" + SendShoulderPosStr;
+    }
+    if(SendShoulderPosStr.length() == 2){
+      msg1 = "00" + SendShoulderPosStr;
+    }
+    if(SendShoulderPosStr.length() == 3){
+      msg1 = "0" + SendShoulderPosStr;
+    }
+    else{
+      msg1 = SendShoulderPosStr;
+    }
+
+    if(SendElbowPosStr.length() == 1){
+      msg2 = "000" + SendElbowPosStr;
+    }
+    if(SendElbowPosStr.length() == 2){
+      msg2 = "00" + SendElbowPosStr;
+    }
+    if(SendElbowPosStr.length() == 3){
+      msg2 = "0" + SendElbowPosStr;
+    }
+    else{
+      msg2 = SendElbowPosStr;
+    }
+
+    msg = msg1+msg2;
+    //msg = "2000";
+    Serial.print(msg);
+  }
+
+  return;
+}
+
+void EncoderA()
+{
+  int aRead = digitalRead(ENCA);
+  if(aRead > 0){
+    Count_pulses++;
+  }
+  else{
+    Count_pulses--;
+  }
+  return;
+}
+
+void EncoderB()
+{
+  int bRead = digitalRead(ENCB);
+  if(bRead > 0){
+    Count_pulses--;
+  }
+  else{
+    Count_pulses++;
+  }
+  return;
+}
+
