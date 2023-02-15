@@ -96,15 +96,12 @@ class gameboard(QtWidgets.QMainWindow):
         for i in range(16):
             self.buttons.append(QPushButton(str(button_names[i])))
             self.buttons[i].clicked.connect(lambda checked, btn=self.buttons[i]: self.update_selected_btn(btn))
-            self.grid_layout.addWidget(self.buttons[i], i//4, i%4)
         for j in range(6):
             self.buttons.append(QPushButton(str(floor_names[j])))
             self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
-            self.grid_layout.addWidget(self.buttons[16+j])
         
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_gameboard_pos)
-        self.grid_layout.addWidget(self.submit_button)
                 
         # Display layouts ----------------------------------------------------------------------------------------------------
         self.left_layout = QVBoxLayout()
@@ -143,7 +140,6 @@ class gameboard(QtWidgets.QMainWindow):
         self.main_layout.addWidget(self.label)
         self.main_layout.addLayout(self.top_right_layout)
         self.main_layout.addLayout(self.new_right_layout)
-        self.main_layout.addLayout(self.grid_layout)
   
         self.central_widget.setLayout(self.main_layout)     
         return
@@ -388,10 +384,10 @@ class gameboard(QtWidgets.QMainWindow):
         ##self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-            user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
-            entries = user_input.split()           # Comment thoses lines to use the vision input
-            self.add_piece(entries)                # " "  
-            self.line_edit1.clear()                # " "
+       #     user_input = self.line_edit1.text()
+       #     entries = user_input.split()
+       #     self.add_piece(entries)
+       #     self.line_edit1.clear()
             self.push_button1.setChecked(False)
 #
         elif self.push_button2.isChecked():
@@ -406,7 +402,7 @@ class gameboard(QtWidgets.QMainWindow):
                 print("VICTORY!")
         
         self.label.setText(self.print_board())
-        return vision_list
+        return #vision_list
 
     def submit_inputs_xyz(self):
         xPosition = self.line_edit3.text()
@@ -421,6 +417,14 @@ class gameboard(QtWidgets.QMainWindow):
         yActual = 2
         zActual = 2
         return xActual, yActual, zActual
+
+    def actual_position_joints(self): # Receives the joints coordinates from the motor control program and uses it to display it on the UI.        
+        # Link with Alex's code        
+        # # Link with UI        
+        joint1ActualPos = 1 
+        joint2ActualPos = 2
+
+        return joint1ActualPos, joint2ActualPos
 
     def submit_inputs_joints(self):
         joint1Position = self.line_edit6.text()
