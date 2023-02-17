@@ -6,6 +6,7 @@ import numpy as np
 import serial
 import time
 import sys
+import serial.tools.list_ports
 from PyQt5 import QtWidgets
 app = QtWidgets.QApplication(sys.argv)
 #from GameBoardRepresentation import gameboard
@@ -22,6 +23,9 @@ class MotorMove:
     ## Communication variables
     mssg1:str = "0000"
     mssg2:str = "0000"
+    mssg2:str = "0000"
+    mssg2:str = "0"
+    mssg2:str = "0"
     mssg:str = "0000"
 
     ## Motor control
@@ -29,38 +33,75 @@ class MotorMove:
     vari2:int = 1
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)
-    serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
+
+    serOpenCR = serial.tools.list_ports.comports(include_links=False)
+    #serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
+    print(serOpenCR)
 
     ## Methods
     def __init__(self):
         self.init_motor(self)
 
     def sendMsg(self, Shouldermessage:int, Elbowmessage:int):
+        '''
+        communication order:    [j1 j1 j1 j1  --> int 0-9 times 4
+                                j2 j2 j2 j2   --> int 0-9 times 4
+                                z z z z       --> int 0-9 times 4
+                                mode          --> int 0 = manual, 1 = automatic
+                                etat          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
+                                ]
+        ex: 01230123012300
+        '''
+        
+        ### First Joint Position
         Shoulderlength = len(str(Shouldermessage))
         if Shoulderlength == 1:
-            mssg1 =  "000" + str(Shouldermessage) + '|'
+            mssg1 =  "000" + str(Shouldermessage)# + '|'
         elif Shoulderlength == 2:
-            mssg1 =  "00" + str(Shouldermessage) + '|'
+            mssg1 =  "00" + str(Shouldermessage)# + '|'
         elif Shoulderlength == 3:
-            mssg1 =  '0' + str(Shouldermessage) + '|'
+            mssg1 =  '0' + str(Shouldermessage)# + '|'
         elif Shoulderlength == 4:
-            mssg1 = str(Shouldermessage) + '|'
+            mssg1 = str(Shouldermessage)# + '|'
         if mssg1 == "":
             mssg1 = "0000"
 
+        ### Second Joint Position
         Elbowlength = len(str(Elbowmessage))
         if Elbowlength == 1:
-            mssg2 =  "000" + str(Elbowmessage) + '|'
+            mssg2 =  "000" + str(Elbowmessage)# + '|'
         elif Elbowlength == 2:
-            mssg2 =  "00" + str(Elbowmessage) + '|'
+            mssg2 =  "00" + str(Elbowmessage)# + '|'
         elif Elbowlength == 3:
-            mssg2 =  '0' + str(Elbowmessage) + '|'
+            mssg2 =  '0' + str(Elbowmessage)# + '|'
         elif Elbowlength == 4:
-            mssg2 = str(Elbowmessage) + '|'
+            mssg2 = str(Elbowmessage)# + '|'
         if mssg2 == "":
             mssg2 = "0000"
+        
+        ### Z Position
+        mssg3 = "0000"
 
-        mssg = mssg1 + mssg2
+        ### Mode, Automatic (1) or Manual (0)
+        mssg4 = "2"
+
+        ### Step to do:
+        '''
+        fromPi_auto_startSequence   = 0
+        fromPi_auto_resetSequence   = 1
+
+        fromPi_man_goToHome         = 0
+        fromPi_man_goToPick         = 1
+        fromPi_man_goToPlace        = 2
+        fromPi_man_goDown           = 3
+        fromPi_man_goToLS           = 4
+        fromPi_man_grip             = 5
+        fromPi_man_drop             = 6
+        '''
+        
+        mssg5 = "0"
+
+        mssg = mssg1 + mssg2 + mssg3 + mssg4 + mssg5
         print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip())
