@@ -34,9 +34,9 @@ class MotorMove:
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)
 
-    serOpenCR = serial.tools.list_ports.comports(include_links=False)
-    #serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
-    print(serOpenCR)
+    #serOpenCR = serial.tools.list_ports.comports(include_links=False)
+    serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
+    #print(serOpenCR)
 
     ## Methods
     def __init__(self):
@@ -48,7 +48,7 @@ class MotorMove:
                                 j2 j2 j2 j2   --> int 0-9 times 4
                                 z z z z       --> int 0-9 times 4
                                 mode          --> int 0 = manual, 1 = automatic
-                                etat          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
+                                state          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
                                 ]
         ex: 01230123012300
         '''
@@ -83,7 +83,7 @@ class MotorMove:
         mssg3 = "0000"
 
         ### Mode, Automatic (1) or Manual (0)
-        mssg4 = "2"
+        mssg4 = "1"
 
         ### Step to do:
         '''
@@ -115,16 +115,18 @@ class MotorMove:
             StartTime = time.time()
             while self.serOpenCR.inWaiting()==0:
                 #TimeElapsed = time.time() - StartTime
-                if (time.time() - StartTime) >= 2:     ##timeout after 2sec
+                '''if (time.time() - StartTime) >= 2:     ##timeout after 2sec
                     print("timeout achieved")
                     break
                 else:
                     #print(round(2.0 - (time.time() - StartTime), 1))
-                    pass
+                    pass'''
+                pass
             while  self.serOpenCR.inWaiting() > 0:
-                answer = self.serOpenCR.readline(8).decode()
+                answer = self.serOpenCR.readline(14).decode()
                 print("Answer is : " + answer)
                 self.serOpenCR.flushInput()
+        #answer = "2000"
         return int(answer)
 
     def rad2Servo(self, angleRad:float):
@@ -154,8 +156,8 @@ class MotorMove:
         
         thetaInt:int = round(self.rad2Servo(self, theta))
         phiInt:int = round(self.rad2Servo(self, phi))
-        print(phiInt)
-        print(thetaInt)
+        print("phi: " + str(phiInt))
+        print("theta: " + str(thetaInt))
 
         return thetaInt, phiInt
 
@@ -239,9 +241,9 @@ class MotorMove:
         #gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
 
         servoShoulderAngle, servoElbowAngle = self.cart2cyl(self, gameXpos, gameYpos)
-        print(str(servoShoulderAngle) + '|' + str(servoElbowAngle))
+        #print(str(servoShoulderAngle) + '|' + str(servoElbowAngle))
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
-        msgReceived = self.readMsg(self)
+        #msgReceived = self.readMsg(self)
         time.sleep(0.1)
 
         '''MotorMove.sendMsg(MotorMove, gameXpos, gameYpos)
@@ -250,7 +252,7 @@ class MotorMove:
     
     def moveJoint(self, J1, J2):
         self.sendMsg(self, J1, J2)
-        msgReceived = self.readMsg(self)
+        #msgReceived = self.readMsg(self)
 
 '''while(True):
     vari = 1000

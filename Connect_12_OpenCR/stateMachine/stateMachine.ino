@@ -14,7 +14,7 @@
 
 //Servos
 #define motorShoulder_DIR_PIN   84
-#define motorShoulder_ID        1
+#define motorShoulder_ID        8
 #define motorElbow_ID           3
 
 //DcMotor
@@ -36,13 +36,18 @@
 #define LED4_PIN                25      //LED USER 4
 #define LED5_PIN                13      //Arduino, LED built in
 
+//Delays
+#define delayBetweenStates      1000
+#define delayPick               1000
+#define delayPlace              1000
+
 //Positions
-#define HOME_POS_J1             0       // TODO: hardcoder la valeur
-#define HOME_POS_J2             0       // TODO: hardcoder la valeur
+#define HOME_POS_J1             4050       // TODO: hardcoder la valeur
+#define HOME_POS_J2             3000       // TODO: hardcoder la valeur
 #define HOME_POS_Z              0       // TODO: hardcoder la valeur
-#define PICK_POS_J1             1000    // TODO: hardcoder la valeur
-#define PICK_POS_J2             1000    // TODO: hardcoder la valeur
-#define PICK_POS_Z              0       // TODO: hardcoder la valeur
+#define PICK_POS_J1             4050    // TODO: hardcoder la valeur
+#define PICK_POS_J2             1500    // TODO: hardcoder la valeur
+#define PICK_POS_Z              2000       // TODO: hardcoder la valeur
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -115,11 +120,16 @@ int     motorAngleShoulderInt = 0;
 int     motorAngleElbowInt = 0;
 String  motorAngleShoulder = "";
 String  motorAngleElbow = "";
-String  motorAngle = "";
+String  StringFromPi = "";
 
 //DcMotor
-unsigned long Count_pulses = 0;
-int DcDirection = 0;
+long Count_pulses = 0;
+int DcDirection = 0;  
+
+//Timers
+unsigned long timerPickPieceStart;
+unsigned long timerPlacePieceStart;
+unsigned long timerBetweenStates;
 
 //States
 int  fromPi_posJ1 = 0;
@@ -129,7 +139,7 @@ int  fromPi_posZ = 0;
 //bool fromPi_manual = true;
 //bool fromPi_automatic = false;
 int fromPi_Mode = 0;
-int fromPi_Step = 0;
+int fromPi_State = 0;
 
 bool fromPi_auto_startSequence = false;
 bool fromPi_auto_resetSequence = false;
@@ -155,31 +165,68 @@ void setup()
   pinMode(ENCA,INPUT);
   pinMode(ENCB,INPUT);
   pinMode(PIN_LIMITSWITCH, INPUT_PULLUP);
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
+  pinMode(LED3_PIN, OUTPUT);
+  pinMode(LED4_PIN, OUTPUT);
+  pinMode(LED5_PIN, OUTPUT);
 
   digitalWrite(PIN_EMAGNET, LOW);
 
   attachInterrupt(digitalPinToInterrupt(ENCA), ReadEncoder, RISING);
 
-  STATE = S_MANUAL;
+  //motorShoulder Setup
+  ServoMotor.begin(57600);
+  ServoMotor.setPortProtocolVersion(DXL_PROTOCOL_VERSION);
+  //ServoMotor.ping(motorShoulder_ID);
+
+  // Turn off torque when configuring items in EEPROM area
+  ServoMotor.torqueOff(motorShoulder_ID);
+  ServoMotor.setOperatingMode(motorShoulder_ID, OP_POSITION);
+  ServoMotor.torqueOn(motorShoulder_ID);
+  ServoMotor.torqueOff(motorElbow_ID);
+  ServoMotor.setOperatingMode(motorElbow_ID, OP_POSITION);
+  ServoMotor.torqueOn(motorElbow_ID);
+
+  // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorShoulder_ID, 50);
+  ServoMotor.writeControlTableItem(PROFILE_VELOCITY, motorElbow_ID, 50);
+
+  //Positions
+  pr_home.j1 = HOME_POS_J1;
+  pr_home.j2 = HOME_POS_J2;
+  pr_home.z = HOME_POS_Z;
+
+  pr_pick.j1 = PICK_POS_J1;
+  pr_pick.j2 = PICK_POS_J2;
+  pr_pick.z = PICK_POS_Z;
+
+  pr_place.j1 = 3000;
+  pr_place.j2 = 1000;
+  pr_place.z = 1000;
+
+  //STATE = S_MANUAL;
+  STATE = S_AUTOMATIC;
   STATE_MAN = SM_IDLE;  
   STATE_AUTO = SA_GO_TO_HOME;
+
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() 
 {
-  readSerialPort();
+  //readSerialPort();
 
   switch (STATE)
   {
     ////////// MANUAL SEQUENCE BELOW //////////
     case S_MANUAL:
-
+      /*
       switch (STATE_MAN)
       {
         case SM_IDLE:
-          
+          LED_DEBUG(0);
           if (fromPi_man_goToHome)
             STATE_MAN = SM_GO_TO_HOME;
           else if (fromPi_man_goToPick)
@@ -200,9 +247,10 @@ void loop()
 
         case SM_GO_TO_HOME:
           LED_DEBUG(1);
+          
           GoToPosition(pr_home);
-
-          if (true)
+          LED_DEBUG(2);
+          if (true) //ServoMotor.getPresentPosition(motorShoulder_ID) <= 5)
           {
             STATE_MAN = SM_IDLE;
           }
@@ -276,27 +324,44 @@ void loop()
         default:
           STATE_MAN = SM_IDLE;
           break;
-      }
+      }*/
 
       break;
     
     ////////// AUTOMATIC SEQUENCE BELOW //////////
     case S_AUTOMATIC:
-
+     
       if (fromPi_auto_resetSequence)
       {
         STATE_AUTO = SA_IDLE;
         fromPi_auto_resetSequence = false;
       }
+      /*Serial.print("State: ");
+      Serial.println(STATE_AUTO);
+      Serial.print("LimitSwitch: ");
+      Serial.println(digitalRead(PIN_LIMITSWITCH));
+      Serial.print("Boutton: ");
+      Serial.println(digitalRead(BDPIN_PUSH_SW_1));
+      Serial.print("Pulses Count: ");
+      Serial.println(Count_pulses);
+      Serial.print("Timer: ---------------------- ");
+      Serial.println(timerBetweenStates);
+      */
 
       switch (STATE_AUTO)
       {
         case SA_GO_TO_HOME:
           LED_DEBUG(9);
-          GoToPosition(pr_home);
+          RaiseEOAT();
+          if(IsLimitSwitchActivated()){
+            Count_pulses = 0;
+            GoToPosition(pr_home);
+            RestingEOAT();
+          }
 
-          if (true)
+          if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
           {
+            
             STATE_AUTO = SA_IDLE;
           }
           break;
@@ -304,12 +369,13 @@ void loop()
         case SA_IDLE:
           LED_DEBUG(10);
           DeactivateMagnet();
+          //digitalWrite(DcPWM, 0);
           toPi_sequenceDone = true;
 
-          if (fromPi_auto_startSequence)
+          if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true)
           {
-            fromPi_auto_startSequence = false;
-            toPi_sequenceDone = false;
+            //fromPi_auto_startSequence = false;
+            //toPi_sequenceDone = false;
             STATE_AUTO = SA_GO_TO_PICK1;
           }
           break;
@@ -318,9 +384,14 @@ void loop()
           LED_DEBUG(11);
           GoToPosition(pr_pick);
 
-          if (true)
+          if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
           {
-            STATE_AUTO = SA_GO_TO_PIECE;
+            //timerBetweenStates = millis();
+            //if(timerBetweenStates - millis() >= delayBetweenStates)
+            //{
+              //timerBetweenStates = millis();
+              STATE_AUTO = SA_GO_TO_PIECE;
+            //}
           }
           break;
 
@@ -328,8 +399,10 @@ void loop()
           LED_DEBUG(12);
           LowerEOAT(pr_pick);
 
-          if (true)
+          if (Count_pulses >= pr_pick.z)
           {
+            RestingEOAT();
+            timerPickPieceStart = millis();
             STATE_AUTO = SA_PICK_PIECE;
           }
           break;
@@ -337,7 +410,8 @@ void loop()
         case SA_PICK_PIECE:
           LED_DEBUG(13);
           ActivateMagnet();
-          if (true)
+
+          if ((millis() - timerPickPieceStart) >= delayPick)
           {
             STATE_AUTO = SA_GO_TO_LS1;
           }
@@ -346,9 +420,10 @@ void loop()
         case SA_GO_TO_LS1:
           LED_DEBUG(14);
           RaiseEOAT();
-          if (true)
-          {
+
+          if(IsLimitSwitchActivated()){
             RestingEOAT();
+            Count_pulses = 0;
             STATE_AUTO = SA_GO_TO_POS;
           }
           break;
@@ -357,8 +432,10 @@ void loop()
           LED_DEBUG(15);
           GoToPosition(pr_place);
 
-          if (true)
+          if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6))
           {
+            //timerBetweenStates = millis();
+            //if(timerBetweenStates >= delayBetweenStates)
             STATE_AUTO = SA_GO_TO_FLOOR;
           }
           break;
@@ -372,8 +449,10 @@ void loop()
             encoder = 0;
             STATE_AUTO = SA_DROP_PIECE;
           }*/
-          if (true)
+          if (Count_pulses >= pr_place.z)
           {
+            RestingEOAT();
+            timerPlacePieceStart = millis();
             STATE_AUTO = SA_DROP_PIECE;
           }
           break;
@@ -381,7 +460,7 @@ void loop()
         case SA_DROP_PIECE:
           LED_DEBUG(17);
           DeactivateMagnet();
-          if (true)                             // TODO: ajouter délai avec compteur
+          if (millis() - timerPlacePieceStart >= delayPlace)                             // TODO: ajouter délai avec compteur
           {
             STATE_AUTO = SA_GO_TO_LS2;
           }
@@ -393,10 +472,11 @@ void loop()
           if (IsLimitSwitchActivated())
           {
             RestingEOAT();
+            Count_pulses = 0;
             STATE_AUTO = SA_GO_TO_HOME;
           }
           break;
-        
+
         default:
           STATE_AUTO = SA_GO_TO_HOME;
           break;
@@ -405,7 +485,8 @@ void loop()
       break;
     
     default:
-      STATE = S_MANUAL;
+      //STATE = S_MANUAL;
+      STATE = S_AUTOMATIC;
       break;
   }
 }
@@ -415,16 +496,22 @@ void loop()
 void GoToPosition(PositionRegister pr)
 {
   //RaiseEOAT();
+  //LED_DEBUG(3);
   ServoMotor.setGoalPosition(motorShoulder_ID, pr.j1);
+  //Serial.print("SHoulder Present position: ");
+  //Serial.println(ServoMotor.getPresentPosition(motorShoulder_ID));
+  //LED_DEBUG(4);
+  //sendData();
   ServoMotor.setGoalPosition(motorElbow_ID,   pr.j2);
-  while(ServoMotor.getPresentPosition(motorShoulder_ID) != pr.j1 && ServoMotor.getPresentPosition(motorElbow_ID) != pr.j2);
+  //while(ServoMotor.getPresentPosition(motorShoulder_ID) != pr.j1 && ServoMotor.getPresentPosition(motorElbow_ID) != pr.j2);
   
 }
 
 void LowerEOAT(PositionRegister pr)
 {
   digitalWrite(DcDir, HIGH);
-  analogWrite(DcPWM, 255);
+  analogWrite(DcPWM, 200);
+  
   /*
   do{
     //Read DC encoder
@@ -437,23 +524,18 @@ void LowerEOAT(PositionRegister pr)
 
 void RaiseEOAT()
 {
-  digitalWrite(DcDir, HIGH);
+  digitalWrite(DcDir, LOW);
   analogWrite(DcPWM, 127);
 
-  while(!IsLimitSwitchActivated()){
-    /*if(encoder value < -50){
-      analogwrite(DcPWM, 0);
-      //message erreur
-    }*/
-  }
-
-  analogWrite(DcPWM, 0);
-
+  /*if(IsLimitSwitchActivated() || Count_pulses < 0){
+    analogWrite(DcPWM, 0);
+    Count_pulses = 0;
+  }*/
 }
 
 void RestingEOAT()
 {
-  //Motor.setSpeed(0); TODO: Mettre le moteur à OFF
+  analogWrite(DcPWM, 0);
 }
 
 void ReadEncoder()
@@ -470,7 +552,7 @@ void ReadEncoder()
 
 bool IsLimitSwitchActivated()
 {
-  return digitalRead(PIN_LIMITSWITCH);
+  return !digitalRead(PIN_LIMITSWITCH);
 }
 
 void ActivateMagnet()
@@ -486,7 +568,7 @@ void DeactivateMagnet()
 void sendData(){
   //besoin d<Envoyer quoi?:
   //mode; sequence finished; erreur; ???
-  //while(Serial.available()<1){
+  while(Serial.available()<1){
     float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
     int SendShoulderPos = round(SendShoulderPosFloat);
     String SendShoulderPosStr = String(SendShoulderPos);
@@ -495,44 +577,66 @@ void sendData(){
     int SendElbowPos = round(SendElbowPosFloat);
     String SendElbowPosStr = String(SendElbowPos);
     
-    if(SendShoulderPosStr.length() == 1){
+    if(SendShoulderPosStr.length() == 0){
+      msg1 = "0000";
+    }
+    else if(SendShoulderPosStr.length() == 1){
       msg1 = "000" + SendShoulderPosStr;
     }
-    if(SendShoulderPosStr.length() == 2){
+    else if(SendShoulderPosStr.length() == 2){
       msg1 = "00" + SendShoulderPosStr;
     }
-    if(SendShoulderPosStr.length() == 3){
+    else if(SendShoulderPosStr.length() == 3){
       msg1 = "0" + SendShoulderPosStr;
     }
     else{
       msg1 = SendShoulderPosStr;
     }
 
-    if(SendElbowPosStr.length() == 1){
+    if(SendElbowPosStr.length() == 0){
+      msg2 = "0000";
+    }
+    else if(SendElbowPosStr.length() == 1){
       msg2 = "000" + SendElbowPosStr;
     }
-    if(SendElbowPosStr.length() == 2){
+    else if(SendElbowPosStr.length() == 2){
       msg2 = "00" + SendElbowPosStr;
     }
-    if(SendElbowPosStr.length() == 3){
+    else if(SendElbowPosStr.length() == 3){
       msg2 = "0" + SendElbowPosStr;
     }
     else{
       msg2 = SendElbowPosStr;
     }
 
-    msg3 = "2000";
+    if(String(Count_pulses).length() == 0){
+      msg3 = "0000";
+    }
+    else if(String(Count_pulses).length() == 1){
+      msg3 = "000" + SendElbowPosStr;
+    }
+    else if(String(Count_pulses).length() == 2){
+      msg3 = "00" + SendElbowPosStr;
+    }
+    else if(String(Count_pulses).length() == 3){
+      msg3 = "0" + SendElbowPosStr;
+    }
+    else{
+      msg3 = String(Count_pulses);
+    }
+
+    msg3 = "1234";
 
     msg4 = String(fromPi_Mode);
 
-    msg5 = String(fromPi_Step);
+    msg5 = String(fromPi_State);
 
     msg = msg1 + msg2 + msg3 + msg4 + msg5;
     //msg = "2000";
     Serial.print(msg);
-  //}
+  }
 
-  return;
+  //return;
 }
 
 void readSerialPort() {
@@ -544,24 +648,35 @@ void readSerialPort() {
                           etat          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
                           ]*/
 
- 	if (Serial.available()) {
+  if (Serial.available() == 0){
+  }
+ 	else if (Serial.available() >= 0) {
  			//delay(2);
       
-      while (Serial.available() == 0 );
+      //while (Serial.available() == 0 );
  			//while (Serial.available() > 0){
-        motorAngle = Serial.readString();
-      //}
- 			Serial.flush();
- 	}
+        StringFromPi = Serial.readString();
+        //LED_DEBUG(StringFromPi.length());
 
-  String stringJ1 = motorAngle.substring(0, 3);
-  String stringJ2 = motorAngle.substring(4, 7);
-  String stringZ = motorAngle.substring(8, 11);
-  String stringMode = motorAngle.substring(12, 12);
-  String stringStep = motorAngle.substring(13, 13);
+        //delay(1000);
+      //}
+ 			
+ 	}
+  Serial.flush();
+
+  //String stringJ1 = StringFromPi.substring(0, 3);
+  String stringJ1 = String(StringFromPi.charAt(0)) + String(StringFromPi.charAt(1)) + String(StringFromPi.charAt(2)) + String(StringFromPi.charAt(3));
+  //String stringJ2 = StringFromPi.substring(4, 7);
+  String stringJ2 = String(StringFromPi.charAt(4)) + String(StringFromPi.charAt(5)) + String(StringFromPi.charAt(6)) + String(StringFromPi.charAt(7));
+  //String stringZ = StringFromPi.substring(8, 11);
+  String stringZ = String(StringFromPi.charAt(8)) + String(StringFromPi.charAt(9)) + String(StringFromPi.charAt(10)) + String(StringFromPi.charAt(11));
+  //String stringMode = StringFromPi.substring(12, 12);
+  String stringMode = String(StringFromPi.charAt(12));
+  //String stringState = StringFromPi.substring(13, 13);
+  String stringState = String(StringFromPi.charAt(13));
 
   fromPi_Mode = stringMode.toInt();
-  fromPi_Step = stringStep.toInt();
+  fromPi_State = stringState.toInt();
 
   fromPi_posJ1 = stringJ1.toInt();
   fromPi_posJ2 = stringJ2.toInt();
@@ -575,12 +690,15 @@ void readSerialPort() {
     STATE = S_AUTOMATIC;
   else
     STATE = S_MANUAL;
+
+  STATE = S_AUTOMATIC;
   
-  switch (fromPi_Step) {
+  switch (fromPi_State) {
     case 0:
       if(STATE == S_AUTOMATIC){
         fromPi_auto_startSequence = true;
         fromPi_auto_resetSequence = false;
+        digitalWrite(LED1_PIN, HIGH);
       }
       else {
         fromPi_man_goToHome = true;
@@ -596,6 +714,7 @@ void readSerialPort() {
       if(STATE == S_AUTOMATIC){
         fromPi_auto_startSequence = false;
         fromPi_auto_resetSequence = true;
+        digitalWrite(LED2_PIN, HIGH);
       }
       else {
         fromPi_man_goToHome = false;
@@ -663,12 +782,12 @@ void readSerialPort() {
       break;
   }
 
-  /*int firstIndexDelimiter = motorAngle.indexOf('|');
-  motorAngleShoulder = motorAngle.substring(0, firstIndexDelimiter);
+  /*int firstIndexDelimiter = StringFromPi.indexOf('|');
+  motorAngleShoulder = StringFromPi.substring(0, firstIndexDelimiter);
   pr_place.j1 = motorAngleShoulder.toInt();
 
-  int lastIndexDelimiter = motorAngle.lastIndexOf('|');
-  motorAngleElbow = motorAngle.substring(firstIndexDelimiter+1, lastIndexDelimiter);
+  int lastIndexDelimiter = StringFromPi.lastIndexOf('|');
+  motorAngleElbow = StringFromPi.substring(firstIndexDelimiter+1, lastIndexDelimiter);
   pr_place.j1 = motorAngleElbow.toInt();*/
 
   //pr_place.j1 = fromPi_posJ1;
@@ -679,14 +798,41 @@ void readSerialPort() {
 }
 
 void LED_DEBUG(int caseNumber){
-  bool LED1 = caseNumber % 2;
-  bool LED2 = caseNumber % 4;
-  bool LED3 = caseNumber % 8;
-  bool LED4 = caseNumber % 16;
-  bool LED5 = caseNumber % 32;
+  /*bool LED1 = caseNumber % 1;
+  bool LED2 = caseNumber % 2;
+  bool LED3 = caseNumber % 4;
+  bool LED4 = caseNumber % 8;
+  bool LED5 = caseNumber % 16;
   digitalWrite(LED1_PIN, LED1);
   digitalWrite(LED2_PIN, LED2);
   digitalWrite(LED3_PIN, LED3);
   digitalWrite(LED4_PIN, LED4);
-  digitalWrite(LED5_PIN, LED5);
+  digitalWrite(LED5_PIN, LED5);*/
+
+  if(caseNumber % 1 >= 0)
+    digitalWrite(LED1_PIN, HIGH);
+  else
+    digitalWrite(LED1_PIN, LOW);
+  if(caseNumber % 2 >= 0)
+    digitalWrite(LED2_PIN, HIGH);
+  else
+    digitalWrite(LED2_PIN, LOW);
+  if(caseNumber % 4 >= 0)
+    digitalWrite(LED3_PIN, HIGH);
+  else
+    digitalWrite(LED3_PIN, LOW);
+  if(caseNumber % 8 >= 0)
+    digitalWrite(LED4_PIN, HIGH);
+  else
+    digitalWrite(LED4_PIN, LOW);
+  if(caseNumber % 16 >= 0)
+    digitalWrite(LED5_PIN, HIGH);
+  else
+    digitalWrite(LED5_PIN, LOW);
+
+}
+
+bool IsAtPosition(int MotorID, int EndPos, int Treshold)
+{
+  return (ServoMotor.getPresentPosition(MotorID) >= (EndPos-Treshold)) && (ServoMotor.getPresentPosition(MotorID) <= (EndPos+Treshold));
 }

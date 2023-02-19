@@ -61,8 +61,8 @@ void setup() {
   //DEBUG_SERIAL.println("Started");
   while(!DEBUG_SERIAL);
 
-  attachInterrupt(digitalPinToInterrupt(ENCA), void EncoderA(), RISING);
-  attachInterrupt(digitalPinToInterrupt(ENCB), void EncoderB(), RISING);
+  //attachInterrupt(digitalPinToInterrupt(ENCA), void EncoderA(), RISING);
+  //attachInterrupt(digitalPinToInterrupt(ENCB), void EncoderB(), RISING);
 
   pinMode(BDPIN_PUSH_SW_1, INPUT);
   pinMode(BDPIN_PUSH_SW_2, INPUT);
