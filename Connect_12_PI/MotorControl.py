@@ -85,7 +85,7 @@ class MotorMove:
         ### Mode, Automatic (1) or Manual (0)
         mssg4 = "1"
 
-        ### Step to do:
+        ### States:
         '''
         fromPi_auto_startSequence   = 0
         fromPi_auto_resetSequence   = 1

@@ -139,7 +139,7 @@ int  fromPi_posZ = 0;
 
 //bool fromPi_manual = true;
 //bool fromPi_automatic = false;
-int fromPi_Mode = 0;
+bool fromPi_Mode = false;   //Manual by default
 int fromPi_State = 0;
 
 bool fromPi_auto_startSequence = false;
@@ -154,6 +154,8 @@ bool fromPi_man_grip = false;
 bool fromPi_man_drop = false;
 
 bool toPi_sequenceDone = false;
+
+bool error;
 
 void setup() 
 {
@@ -688,8 +690,6 @@ void readSerialPort() {
   String stringMode = String(StringFromPi.charAt(12));
   //String stringState = StringFromPi.substring(13, 13);
   String stringState = String(StringFromPi.charAt(13));
-
-  fromPi_Mode = stringMode.toInt();
   fromPi_State = stringState.toInt();
 
   fromPi_posJ1 = stringJ1.toInt();
@@ -707,12 +707,20 @@ void readSerialPort() {
   if(pr_place.z == 0)
     pr_place.z = pr_home.z;
 
-  if (fromPi_Mode == 1) 
-    STATE = S_AUTOMATIC;
-  else
+  if (stringMode == "0"){
+    fromPi_Mode = false;
     STATE = S_MANUAL;
+  }
+  else if (stringMode == "1"){
+    fromPi_Mode = true;
+    STATE = S_AUTOMATIC;
+  }
+  else{
+    LED_DEBUG(2);
+    error = true;
+  }
 
-  STATE = S_AUTOMATIC;
+  //STATE = S_AUTOMATIC;
   
   switch (fromPi_State) {
     case 0:
