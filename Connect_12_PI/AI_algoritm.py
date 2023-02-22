@@ -7,16 +7,17 @@ import sys
 from PyQt5 import QtWidgets
 
 import os
+from streak_counter import streak_counter
 
 class AI():
-
     def __init__(self, gb):
         self.gb = gb
         self.board = gb.board
         self.row_total = gb.row_total
         self.column_total = gb.column_total
         self.floor_total = gb.floor_total
-        self.AI_id = '2'
+        self.AI_id = 1
+        self.opponent_id = 2
         return
         
     def get_positions(self):
@@ -28,214 +29,30 @@ class AI():
                         possible_positions.append([i+1,j+1,k+1])
                         break
         return possible_positions
-        
-    def streak_counter(self,play):
-        
-        streak_list = []
-        row_index = int(play[0])-1
-        column_index = int(play[1])-1
-        for i in range(self.floor_total):
-                    if self.board[i][row_index][column_index] == 0:  
-                        floor_index = i
-                        break
-        
-        player_id = play[2]
-
-        #Row counter
-        streak = 0
-        for i in range(0,self.row_total):
-            if i == row_index:
-                streak = streak + 1
-            elif int(self.board[floor_index][i][column_index])==int(player_id):
-                streak = streak + 1
-            elif int(self.board[floor_index][i][column_index])!=0:
-                   streak = 0
-                   break
-        streak_list.append(streak)
-        #Column counter
-        streak = 0
-        for i in range(0,self.column_total):
-            if i == column_index:
-                streak = streak + 1
-            elif int(self.board[floor_index][row_index][i])==int(player_id):
-                streak = streak + 1
-            elif int(self.board[floor_index][row_index][i])!=0:
-                   streak = 0
-                   break
-        streak_list.append(streak)                     
-        #Floor counter
-        streak = 0
-        for i in range(0,self.floor_total):
-            if i == floor_index:
-                streak = streak + 1
-            elif int(self.board[i][row_index][column_index])==int(player_id):
-                streak = streak + 1
-            elif int(self.board[i][row_index][column_index])!=0:
-                   streak = 0
-                   break
-        streak_list.append(streak)              
-        #Positive diagonal column and row counter
-        streak = 0
-        if row_index == column_index:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[floor_index][i][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[floor_index][i][i])!=0:
-                    streak = 0
-                    break
-            streak_list.append(streak)
-        #else:
-            #print("Not a positive diagonal column and row play")
-        #Negative diagonal column and row counter
-        streak = 0
-        if (self.row_total-1)-row_index == column_index:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[floor_index][(self.row_total-1-i)][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[floor_index][(self.row_total-1-i)][i])!=0:
-                    streak = 0
-                    break
-            streak_list.append(streak)
-        #else:
-            #print("Not a negative diagonal column and row play")
-        #Positive diagonal column and floor counter
-        streak = 0
-        gap = floor_index - row_index
-        if row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if i == row_index:
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][column_index])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][column_index])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a positive diagonal column and floor play")
-        #Negative diagonal column and floor counter
-        streak = 0
-        gap = floor_index - ((self.row_total-1)-row_index)
-        if (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if i == row_index:
-                    streak = streak + 1
-                elif int(self.board[(self.row_total-1-i)+gap][i][column_index])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[(self.row_total-1-i)+gap][i][column_index])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a negative diagonal column and floor play")
-        #Positive diagonal row and floor counter
-        streak = 0
-        gap = floor_index - column_index
-        if column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[i+gap][row_index][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[i+gap][row_index][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a positive diagonal row and floor play")
-        #Negative diagonal row and floor counter
-        streak = 0
-        gap = floor_index - ((self.column_total-1)-column_index)
-        if (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[(self.column_total-1-i)+gap][row_index][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[(self.column_total-1-i)+gap][row_index][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a negative diagonal row and floor play")
-        #Positive positive diagonal column, row and floor counter
-        streak = 0
-        gap = floor_index - row_index
-        if row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if i == row_index:
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a positive positive diagonal column, row and floor play")
-        #Positive negative diagonal column, row and floor counter
-        streak = 0
-        gap = floor_index - ((self.row_total-1)-row_index)
-        if (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if i == row_index:
-                    streak = streak + 1
-                elif int(self.board[(self.row_total-1-i)+gap][i][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[(self.row_total-1-i)+gap][i][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a positive negative diagonal column, row and floor play")
-        #Negative positive diagonal column, row and floor counter
-        streak = 0
-        gap = floor_index - column_index
-        if column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[i+gap][i][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a negative positive diagonal column, row and floor play")
-        #Negative negative diagonal column, row and floor counter
-        streak = 0
-        gap = floor_index - ((self.column_total-1)-column_index)
-        if (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if i == column_index:
-                    streak = streak + 1
-                elif int(self.board[(self.column_total-1-i)+gap][i][i])==int(player_id):
-                    streak = streak + 1
-                elif int(self.board[(self.column_total-1-i)+gap][i][i])!=0:
-                        streak = 0
-                        break
-            streak_list.append(streak)
-        #else:
-            #print("Not a negative negative diagonal column, row and floor play")
-        
-        return streak_list
 
     def rate_play(self,play):
         strength=0
-        for streak in self.streak_counter(play):
+        streak_list = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
+        for streak in streak_list:
             if streak == 1:
-                strength=strength+1
+                strength=strength+11
             elif streak == 2:
-                strength=strength+20
+                strength=strength+101
             elif streak == 3:
-                strength=strength+100
+                strength=strength+1001
             elif streak == 4:
+                strength=strength+10001
+        opponent_play = [play[0],play[1],self.opponent_id]
+        for streak in streak_counter(opponent_play,self.board,self.row_total,self.column_total,self.floor_total):
+            if streak == 1:
+                strength=strength+10
+            elif streak == 2:
+                strength=strength+100
+            elif streak == 3:
                 strength=strength+1000
+            elif streak == 4:
+                strength=strength+10000
+    
         return strength
 
     def choose_play(self):
@@ -254,12 +71,6 @@ class AI():
                 best_plays.append(play)
         best_play = random.choice(best_plays)
 
-        for i in range (len(rated_plays)):
-                #print("play : ",rated_plays[i][0]," strength : ",rated_plays[i][1])
-                print("play : ",rated_plays[i][0]," streaks : "," strength : ",rated_plays[i][1],self.streak_counter(rated_plays[i][0]))
-        print("best plays : ",len(best_plays))
-        print(best_play)
-
         return best_play
 
 if __name__=="__main__":
@@ -275,5 +86,5 @@ if __name__=="__main__":
     
     gb.show()
     sys.exit(app.exec_())
- 
+
 

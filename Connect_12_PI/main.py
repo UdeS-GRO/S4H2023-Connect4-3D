@@ -13,8 +13,7 @@ class main():
         
     def AI_played(self):
         play = AI.choose_play()
-        position_list = [str(play[0]),str(play[1]),'2']
-        gb.add_piece(position_list)
+        gb.add_piece(play)
         gb.line_edit2.clear()
         gb.push_button2.setChecked(False)
         if(gb.detect_win(play)):

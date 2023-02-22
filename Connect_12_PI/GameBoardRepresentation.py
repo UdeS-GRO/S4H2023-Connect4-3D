@@ -13,6 +13,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
 
+import os
+from streak_counter import streak_counter
+
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
@@ -200,6 +203,7 @@ class gameboard(QtWidgets.QMainWindow):
         row = int(position_list[0])
         column = int(position_list[1])
         player_id = str(position_list[2])
+        player_id = str(position_list[2])
         limit_board = self.row_or_column_limit(row, column)
         if limit_board == 1:
             floor = self.determine_floor(row, column)
@@ -241,6 +245,13 @@ class gameboard(QtWidgets.QMainWindow):
         else:
             print('floor value is : ', floor)               
         return floor
+
+    def detect_win(self,play):
+        streak_list = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
+        for streak in streak_list:
+            if streak == 4:
+                return True
+        return False
 
     def player_played(self):
         # Actualize the gameboard status with the new inputs
