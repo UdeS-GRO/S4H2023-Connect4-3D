@@ -5,7 +5,10 @@ import cv2
 import pyzbar.pyzbar as pyzbar
 import time
 import os
-from MotorControl import MotorMove
+try:
+    from MotorControl import MotorMove
+except:
+    pass
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
 from PyQt5.QtCore import Qt
@@ -37,11 +40,11 @@ class gameboard(QtWidgets.QMainWindow):
 
         # Define elements of the UI ------------------------------------------------------------------------------------------
         self.push_button1 = QCheckBox("PLAYER 1\nClick me when you've played")
-        self.push_button1.clicked.connect(self.button_played)
+        self.push_button1.clicked.connect(self.player_played)
         self.line_edit1 = QLineEdit()
 
         self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
-        self.push_button2.clicked.connect(self.button_played)
+        self.push_button2.clicked.connect(self.player_played)
         self.line_edit2 = QLineEdit()
 
         self.line_edit3 = QLineEdit("10")
@@ -59,12 +62,27 @@ class gameboard(QtWidgets.QMainWindow):
         self.line_edit7 = QLineEdit("10")
         self.line_edit5_label = QLabel("J2 position :")
         self.line_edit5_label.setAlignment(Qt.AlignCenter)
-        self.line_edit6_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")               #top right display only
 
         self.submit_button1 = QPushButton("Submit x-y-z-coordinates")
         self.submit_button1.clicked.connect(self.submit_inputs_xyz)
         self.submit_button2 = QPushButton("Submit joints coordinates")
         self.submit_button2.clicked.connect(self.submit_inputs_joints)
+        self.submit_button3 = QPushButton("Start automatic sequence")
+        self.submit_button3.clicked.connect(self.submit_auto_startSequence)
+        self.submit_button4 = QPushButton("Reset automatic sequence")
+        self.submit_button4.clicked.connect(self.submit_auto_resetSequence)
+        self.submit_button5 = QPushButton("Go to home")
+        self.submit_button5.clicked.connect(self.submit_man_goToHome)
+        self.submit_button6 = QPushButton("Go to pick")
+        self.submit_button6.clicked.connect(self.submit_man_goToPick)
+        self.submit_button8 = QPushButton("Go down")
+        self.submit_button8.clicked.connect(self.submit_man_goDown)
+        self.submit_button9 = QPushButton("Go to limit switch")
+        self.submit_button9.clicked.connect(self.submit_man_goToLS)
+        self.submit_button10 = QPushButton("Active electromagnet")
+        self.submit_button10.clicked.connect(self.submit_man_grip)
+        self.submit_button11 = QPushButton("Disable electromagnet")
+        self.submit_button11.clicked.connect(self.submit_man_drop)
 
         actXPos, actYPos, actZPos = self.actual_position_xyz()
         self.line_edit6_label = QLabel("Actual X position :" + str(actXPos))
@@ -79,8 +97,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.line_edit9_label.setAlignment(Qt.AlignCenter)
         self.line_edit10_label = QLabel("Actual J2 position :" + str(actJ2Pos))
         self.line_edit10_label.setAlignment(Qt.AlignCenter)
-        self.line_edit12_label = QLabel("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") 
-        self.line_edit13_label = QLabel("\n")      
+        self.line_edit12_label = QLabel("\n")      
 
         # Position keyboard to go to a precise gameboard position -------------------------------------------------------------
         self.selected_btn = None
@@ -99,10 +116,12 @@ class gameboard(QtWidgets.QMainWindow):
             self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
             self.grid_layout.addWidget(self.buttons[16+j])
         
-        self.submit_button = QPushButton("Submit")
+        self.submit_button = QPushButton("Go to place")
         self.submit_button.clicked.connect(self.submit_gameboard_pos)
-        self.grid_layout.addWidget(self.submit_button)
-                
+        
+        self.line_edit11_label = QLabel("Select a position,\na floor and  \n'Go to place'")
+        self.grid_layout.addWidget(self.line_edit11_label)
+        
         # Display layouts ----------------------------------------------------------------------------------------------------
         self.left_layout = QVBoxLayout()
         self.left_layout.addWidget(self.push_button1)
@@ -111,29 +130,37 @@ class gameboard(QtWidgets.QMainWindow):
         self.left_layout.addWidget(self.line_edit2)
 
         self.top_right_layout = QVBoxLayout()
-        self.top_right_layout.addWidget(self.line_edit1_label)
-        self.top_right_layout.addWidget(self.line_edit3)
-        self.top_right_layout.addWidget(self.line_edit2_label)
-        self.top_right_layout.addWidget(self.line_edit4)
-        self.top_right_layout.addWidget(self.line_edit3_label)
-        self.top_right_layout.addWidget(self.line_edit5)
-        self.top_right_layout.addWidget(self.submit_button1)
-        self.top_right_layout.addWidget(self.line_edit4_label)
-        self.top_right_layout.addWidget(self.line_edit6)
-        self.top_right_layout.addWidget(self.line_edit5_label)
-        self.top_right_layout.addWidget(self.line_edit7)
-        self.top_right_layout.addWidget(self.submit_button2)
-        self.top_right_layout.addWidget(self.line_edit12_label)
+
+        self.top_right_layout.addWidget(self.submit_button3)
+        self.top_right_layout.addWidget(self.submit_button4)
+        self.top_right_layout.addWidget(self.submit_button5)
+        self.top_right_layout.addWidget(self.submit_button6)
+        self.top_right_layout.addWidget(self.submit_button)
+        self.top_right_layout.addWidget(self.submit_button8)
+        self.top_right_layout.addWidget(self.submit_button9)
+        self.top_right_layout.addWidget(self.submit_button10)
+        self.top_right_layout.addWidget(self.submit_button11)
+
         
         self.new_right_layout = QVBoxLayout()
+        self.new_right_layout.addWidget(self.line_edit1_label)
+        self.new_right_layout.addWidget(self.line_edit3)
+        self.new_right_layout.addWidget(self.line_edit2_label)
+        self.new_right_layout.addWidget(self.line_edit4)
+        self.new_right_layout.addWidget(self.line_edit3_label)
+        self.new_right_layout.addWidget(self.line_edit5)
+        self.new_right_layout.addWidget(self.submit_button1)
+        self.new_right_layout.addWidget(self.line_edit4_label)
+        self.new_right_layout.addWidget(self.line_edit6)
+        self.new_right_layout.addWidget(self.line_edit5_label)
+        self.new_right_layout.addWidget(self.line_edit7)
+        self.new_right_layout.addWidget(self.submit_button2)
         self.new_right_layout.addWidget(self.line_edit6_label)
         self.new_right_layout.addWidget(self.line_edit7_label)
         self.new_right_layout.addWidget(self.line_edit8_label)
-        self.new_right_layout.addWidget(self.line_edit13_label)
         self.new_right_layout.addWidget(self.line_edit9_label)
         self.new_right_layout.addWidget(self.line_edit10_label)
         self.new_right_layout.addWidget(self.line_edit12_label)
-        self.new_right_layout.addWidget(self.line_edit13_label)
         
         self.main_layout = QHBoxLayout()
         self.main_layout.addLayout(self.left_layout)
@@ -194,7 +221,7 @@ class gameboard(QtWidgets.QMainWindow):
         column = int(column)
         if row > 4 or column > 4:
             print('This case is not reachable. Try again.')
-            self.add_piece(self.button_played())
+            self.add_piece(self.player_played())
             return 0
         return 1
 
@@ -209,50 +236,50 @@ class gameboard(QtWidgets.QMainWindow):
                 floor = floor + 1   
         if floor > 6:
             print('This case is not reachable. Try again.')
-            self.add_piece(self.button_played())
+            self.add_piece(self.player_played())
             return None
         else:
             print('floor value is : ', floor)               
         return floor
 
-    def button_played(self):
+    def player_played(self):
         # Actualize the gameboard status with the new inputs
 
-        player, column, row = self.take_picture()
-        vision_list = [str(row), str(column), str(player)]
-        print('vision list : ', vision_list)
-        self.add_piece(vision_list)
+        #player, column, row = self.take_picture()
+        #vision_list = [str(row), str(column), str(player)]
+        #print('vision list : ', vision_list)
+        #self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-        #    user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
-        #    self.add_piece(entries)                # Comment thoses lines to use the vision input
-        #    entries = user_input.split()           # " "
-        #    self.line_edit1.clear()                # " "
+            user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
+            entries = user_input.split()           # Comment thoses lines to use the vision input
+            self.add_piece(entries)                # " "  
+            self.line_edit1.clear()                # " "
             self.push_button1.setChecked(False)
 
         elif self.push_button2.isChecked():
-        #    user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
-        #    entries = user_input.split()           # Comment thoses lines to use the vision input
-        #    self.add_piece(entries)                # " "
-        #    self.line_edit2.clear()                # " "
+            user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
+            entries = user_input.split()           # Comment thoses lines to use the vision input
+            self.add_piece(entries)                # " "
+            self.line_edit2.clear()                # " "
             self.push_button2.setChecked(False)
         
         self.label.setText(self.print_board())
-        return vision_list
+        return #vision_list
 
     def submit_inputs_xyz(self):
         # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
+
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
-        # Link with Alex's code
         MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
         print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
         return # int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
         # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
-        # Link with Alex's code 
+
         # Link with UI
         xActualPos = 1
         yActualPos = 2
@@ -264,18 +291,56 @@ class gameboard(QtWidgets.QMainWindow):
 
         joint1Position = self.line_edit6.text()
         joint2Position = self.line_edit7.text()
-        # Link with Alex's code
         MotorMove.moveJoint(MotorMove, joint1Position, joint2Position)
         return int(joint1Position), int(joint2Position)
 
     def actual_position_joints(self):
         # Receives the joints coordinates from the motor control program and uses it to display it on the UI.
 
-        # Link with Alex's code 
         # Link with UI
         joint1ActualPos = 1
         joint2ActualPos = 2
         return joint1ActualPos, joint2ActualPos
+
+
+    def submit_auto_startSequence(self):
+        # Starts the state machine to make the robot play
+
+        return
+
+    def submit_auto_resetSequence(self):
+        # The robot stops its sequence and goes back home
+
+        return
+
+    def submit_man_goToHome(self):
+        # Move the robot to his home position registered
+
+        return
+
+    def submit_man_goToPick(self):
+        # Move the robot to his pick position registered, where the pieces dispenser is placed
+
+        return 
+    
+    def submit_man_goDown(self):
+        # Move the z coordinate of the robot to its lower position
+
+        return
+
+    def submit_man_goToLS(self):
+        # Move the z coordinate of the robot to its limit switch
+        return 
+
+    def submit_man_grip(self):
+        # Activate the electromagnet
+
+        return
+
+    def submit_man_drop(self):
+        # Disable the electromagnet
+
+        return
 
     def update_selected_btn(self, btn):
         # When a position button is selected on the UI, selected_btn is updated here. 
@@ -296,66 +361,72 @@ class gameboard(QtWidgets.QMainWindow):
     def button_played(self, btn, floor):
         # Returns the xyz coordinates of the position where the robot has to move to. 
         # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
+        # The reference position is A1 and then the other positinos are automatically generated. 
 
         height_constant = 200
         height_init = 70
         gameboardPosition = [btn.text(), floor.text()]
+        xA1Position = 1
+        yA1Position = 1
+        xgap = 5
+        ygap = -5            # Use a negative value since the A1 position is at the top left
 
         match btn.text():
             case 'A1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position
+                yPosition = yA1Position
             case 'A2':
-                xPosition = 2
-                yPosition = 2
+                xPosition = xA1Position
+                yPosition = yA1Position + ygap
             case 'A3':
-                xPosition = 3
-                yPosition = 3
+                xPosition = xA1Position
+                yPosition = yA1Position + 2*ygap
             case 'A4':
-                xPosition = 4
-                yPosition = 4
+                xPosition = xA1Position
+                yPosition = yA1Position + 3*ygap
 
             case 'B1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position
             case 'B2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + ygap
             case 'B3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 2*ygap
             case 'B4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 3*ygap
 
             case 'C1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position 
             case 'C2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + ygap
             case 'C3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 2*ygap
             case 'C4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 3*ygap
             
             case 'D1':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap 
+                yPosition = yA1Position 
             case 'D2':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + ygap
             case 'D3':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 2*ygap
             case 'D4':
-                xPosition = 1
-                yPosition = 1
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 3*ygap
 
         zPosition = int((floor.text())[5]) * height_constant + height_init
-        print("gameboardposition : ", gameboardPosition)
+        #print("gameboardposition : ", gameboardPosition)
+        #print("x  ", xPosition, "    y  ", yPosition)
         return xPosition, yPosition, zPosition
 
     def take_picture(self):
