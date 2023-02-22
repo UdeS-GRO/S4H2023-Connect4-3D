@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBox
 from PyQt5.QtCore import Qt
 
 import os
+from streak_counter import streak_counter
 
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
@@ -176,7 +177,7 @@ class gameboard(QtWidgets.QMainWindow):
         # Display the piece played on the UI to refresh the gameboard.
         row = int(position_list[0])
         column = int(position_list[1])
-        player_id = int(position_list[2])
+        player_id = str(position_list[2])
         limit_board = self.row_or_column_limit(row, column)
         if limit_board == 1:
             floor = self.determine_floor(row, column)
@@ -219,151 +220,11 @@ class gameboard(QtWidgets.QMainWindow):
             #print('floor value is : ', floor)               
         return floor
 
-    def detect_win(self,position_list):
-        
-        row_index = int(position_list[0])-1
-        column_index = int(position_list[1])-1
-        player_id = int(position_list[2])
-        floor_index = 0
-        for i in range(self.floor_total):
-                    if self.board[i][row_index][column_index] == 0:  
-                        floor_index = i-1
-                        break
-        #Row verification
-        streak = 0
-        for i in range(0,self.row_total):
-            if int(self.board[floor_index][i][column_index])==player_id:
-                streak = streak + 1
-                if streak == 4:
-                    return True
-            else:
-                streak = 0
-        #Column verification
-        streak = 0
-        for i in range(0,self.column_total):
-            if int(self.board[floor_index][row_index][i])==player_id:
-                streak = streak + 1
-                if streak == 4:
-                    return True
-            else:
-                streak = 0
-        #Floor verification
-        streak = 0
-        for i in range(0,self.floor_total):
-            if int(self.board[i][row_index][column_index])==player_id:
-                streak = streak + 1
-                if streak == 4:
-                    return True
-            else:
-                streak = 0
-        #Positive diagonal column and row verification
-        streak = 0
-        if row_index == column_index:
-            for i in range(0,self.column_total):
-                if int(self.board[floor_index][i][i])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Negative diagonal column and row verification
-        streak = 0
-        if row_index == self.column_total-1-column_index:
-            for i in range(0,self.column_total):
-                if int(self.board[floor_index][i][self.column_total-i-1])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Positive diagonal column and floor verification
-        streak = 0
-        gap = floor_index - row_index
-        if row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if int(self.board[i+gap][i][column_index])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Negative diagonal column and floor verification
-        streak = 0
-        gap = floor_index - ((self.row_total-1)-row_index)
-        if (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if int(self.board[(self.row_total-1-i)+gap][i][column_index])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Positive diagonal row and floor verification
-        streak = 0
-        gap = floor_index - column_index
-        if column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if int(self.board[i+gap][row_index][i])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Negative diagonal row and floor verification
-        streak = 0
-        gap = floor_index - ((self.column_total-1)-column_index)
-        if (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if int(self.board[(self.column_total-1-i)+gap][row_index][i])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Positive positive diagonal column, row and floor verification
-        streak = 0
-        gap = floor_index - row_index
-        if row_index == column_index and row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if int(self.board[i+gap][i][i])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Positive negative diagonal column, row and floor verification
-        streak = 0
-        gap = floor_index - ((self.row_total-1)-row_index)
-        if row_index == self.column_total-1-column_index and (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
-            for i in range(0,self.row_total):
-                if int(self.board[(self.row_total-1-i)+gap][i][self.column_total-i-1])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Negative positive diagonal column, row and floor verification
-        streak = 0
-        gap = floor_index - column_index
-        if row_index == self.column_total-1-column_index and column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if int(self.board[i+gap][i][self.column_total-i-1])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
-        #Negative negative diagonal column, row and floor verification
-        streak = 0
-        gap = floor_index - ((self.column_total-1)-column_index)
-        if row_index == column_index and (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
-            for i in range(0,self.column_total):
-                if int(self.board[(self.column_total-1-i)+gap][i][i])==player_id:
-                    streak = streak + 1
-                    if streak == 4:
-                        return True
-                else:
-                    streak = 0
+    def detect_win(self,play):
+        streak_list = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
+        for streak in streak_list:
+            if streak == 4:
+                return True
         return False
 
     def player_played(self):
