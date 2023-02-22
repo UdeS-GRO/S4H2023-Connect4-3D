@@ -10,9 +10,10 @@ try:
 except:
     pass
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
-#from QtWidgets import Toggle
-from PyQt5.QtCore import Qt
+
+import os
+from streak_counter import streak_counter
+from UserInterface import userInterface
 
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
@@ -28,153 +29,9 @@ class gameboard(QtWidgets.QMainWindow):
 
         self.init_board()
         super().__init__()
-        self.setWindowTitle("User Interface")
-        self.setGeometry(200, 200, 900, 500)
-
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.grid_layout = QGridLayout()
-        
-        self.label = QLabel("Gameboard")
-        self.label.setText(self.print_board())
-        self.label.setAlignment(Qt.AlignCenter)
-
-        # Define elements of the UI ------------------------------------------------------------------------------------------
-        self.push_button1 = QCheckBox("PLAYER 1\nClick me when you've played")
-        self.push_button1.clicked.connect(self.player_played)
-        self.line_edit1 = QLineEdit()
-
-        self.push_button2 = QCheckBox("PLAYER 2\nClick me when you've played")
-        self.push_button2.clicked.connect(self.player_played)
-        self.line_edit2 = QLineEdit()
-
-        self.line_edit3 = QLineEdit("10")
-        self.line_edit1_label = QLabel("X position :")
-        self.line_edit1_label.setAlignment(Qt.AlignCenter)
-        self.line_edit4 = QLineEdit("10")
-        self.line_edit2_label = QLabel("Y position :")
-        self.line_edit2_label.setAlignment(Qt.AlignCenter)
-        self.line_edit5 = QLineEdit("10")
-        self.line_edit3_label = QLabel("Z position :")
-        self.line_edit3_label.setAlignment(Qt.AlignCenter)
-        self.line_edit6 = QLineEdit("10")
-        self.line_edit4_label = QLabel("J1 position :")
-        self.line_edit4_label.setAlignment(Qt.AlignCenter)
-        self.line_edit7 = QLineEdit("10")
-        self.line_edit5_label = QLabel("J2 position :")
-        self.line_edit5_label.setAlignment(Qt.AlignCenter)
-
-        self.submit_button1 = QPushButton("Submit x-y-z-coordinates")
-        self.submit_button1.clicked.connect(self.submit_inputs_xyz)
-        self.submit_button2 = QPushButton("Submit joints coordinates")
-        self.submit_button2.clicked.connect(self.submit_inputs_joints)
-        self.submit_button3 = QPushButton("Start automatic sequence")
-        self.submit_button3.clicked.connect(self.submit_auto_startSequence)
-        self.submit_button4 = QPushButton("Reset automatic sequence")
-        self.submit_button4.clicked.connect(self.submit_auto_resetSequence)
-        self.submit_button5 = QPushButton("Go to home")
-        self.submit_button5.clicked.connect(self.submit_man_goToHome)
-        self.submit_button6 = QPushButton("Go to pick")
-        self.submit_button6.clicked.connect(self.submit_man_goToPick)
-        self.submit_button8 = QPushButton("Go down")
-        self.submit_button8.clicked.connect(self.submit_man_goDown)
-        self.submit_button9 = QPushButton("Go to limit switch")
-        self.submit_button9.clicked.connect(self.submit_man_goToLS)
-        self.submit_button10 = QPushButton("Active electromagnet")
-        self.submit_button10.clicked.connect(self.submit_man_grip)
-        self.submit_button11 = QPushButton("Disable electromagnet")
-        self.submit_button11.clicked.connect(self.submit_man_drop)
-
-        actXPos, actYPos, actZPos = self.actual_position_xyz()
-        self.line_edit6_label = QLabel("Actual X position :" + str(actXPos))
-        self.line_edit6_label.setAlignment(Qt.AlignCenter)
-        self.line_edit7_label = QLabel("Actual Y position :" + str(actYPos))
-        self.line_edit7_label.setAlignment(Qt.AlignCenter)
-        self.line_edit8_label = QLabel("Actual Z position :" + str(actZPos))
-        self.line_edit8_label.setAlignment(Qt.AlignCenter)
-        
-        actJ1Pos, actJ2Pos = self.actual_position_joints()
-        self.line_edit9_label = QLabel("Actual J1 position :" + str(actJ1Pos))
-        self.line_edit9_label.setAlignment(Qt.AlignCenter)
-        self.line_edit10_label = QLabel("Actual J2 position :" + str(actJ2Pos))
-        self.line_edit10_label.setAlignment(Qt.AlignCenter)
-        self.line_edit12_label = QLabel("\n")      
-
-        # Position keyboard to go to a precise gameboard position -------------------------------------------------------------
-        self.selected_btn = None
-        self.selected_floor = None
-        button_names = ["A1", "B1", "C1", "D1", "A2", "B2", "C2", "D2", 
-                        "A3", "B3", "C3", "D3", "A4", "B4", "C4", "D4"]
-        floor_names =  ["Floor1", "Floor2", "Floor3", "Floor4", "Floor5", "Floor6"]
-
-        self.buttons = []
-        for i in range(16):
-            self.buttons.append(QPushButton(str(button_names[i])))
-            self.buttons[i].clicked.connect(lambda checked, btn=self.buttons[i]: self.update_selected_btn(btn))
-            self.grid_layout.addWidget(self.buttons[i], i//4, i%4)
-        for j in range(6):
-            self.buttons.append(QPushButton(str(floor_names[j])))
-            self.buttons[16+j].clicked.connect(lambda checked, floor=self.buttons[16+j]: self.update_selected_floor(floor))
-            self.grid_layout.addWidget(self.buttons[16+j])
-        
-        self.submit_button = QPushButton("Go to place")
-        self.submit_button.clicked.connect(self.submit_gameboard_pos)
-        
-        self.line_edit11_label = QLabel("Select a position,\na floor and  \n'Go to place'")
-        self.grid_layout.addWidget(self.line_edit11_label)
-        
-        # Display layouts ----------------------------------------------------------------------------------------------------
-        self.left_layout = QVBoxLayout()
-        self.left_layout.addWidget(self.push_button1)
-        self.left_layout.addWidget(self.line_edit1)
-        self.left_layout.addWidget(self.push_button2)
-        self.left_layout.addWidget(self.line_edit2)
-
-        self.top_right_layout = QVBoxLayout()
-
-        self.top_right_layout.addWidget(self.submit_button3)
-        self.top_right_layout.addWidget(self.submit_button4)
-        self.top_right_layout.addWidget(self.submit_button5)
-        self.top_right_layout.addWidget(self.submit_button6)
-        self.top_right_layout.addWidget(self.submit_button)
-        self.top_right_layout.addWidget(self.submit_button8)
-        self.top_right_layout.addWidget(self.submit_button9)
-        self.top_right_layout.addWidget(self.submit_button10)
-        self.top_right_layout.addWidget(self.submit_button11)
-
-        
-        self.new_right_layout = QVBoxLayout()
-        self.new_right_layout.addWidget(self.line_edit1_label)
-        self.new_right_layout.addWidget(self.line_edit3)
-        self.new_right_layout.addWidget(self.line_edit2_label)
-        self.new_right_layout.addWidget(self.line_edit4)
-        self.new_right_layout.addWidget(self.line_edit3_label)
-        self.new_right_layout.addWidget(self.line_edit5)
-        self.new_right_layout.addWidget(self.submit_button1)
-        self.new_right_layout.addWidget(self.line_edit4_label)
-        self.new_right_layout.addWidget(self.line_edit6)
-        self.new_right_layout.addWidget(self.line_edit5_label)
-        self.new_right_layout.addWidget(self.line_edit7)
-        self.new_right_layout.addWidget(self.submit_button2)
-        self.new_right_layout.addWidget(self.line_edit6_label)
-        self.new_right_layout.addWidget(self.line_edit7_label)
-        self.new_right_layout.addWidget(self.line_edit8_label)
-        self.new_right_layout.addWidget(self.line_edit9_label)
-        self.new_right_layout.addWidget(self.line_edit10_label)
-        self.new_right_layout.addWidget(self.line_edit12_label)
-        #self.new_right_layout.addWidget(self.ManORAuto)
-        
-        self.main_layout = QHBoxLayout()
-        self.main_layout.addLayout(self.left_layout)
-        self.main_layout.addWidget(self.label)
-        self.main_layout.addLayout(self.top_right_layout)
-        self.main_layout.addLayout(self.new_right_layout)
-        self.main_layout.addLayout(self.grid_layout)
-  
-        self.central_widget.setLayout(self.main_layout)     
+        userInterface(self)    
         return
     
- 
     def init_board(self):
         # Uses the global variables to generate the gameboard matrix
 
@@ -198,10 +55,9 @@ class gameboard(QtWidgets.QMainWindow):
 
     def add_piece(self, position_list):
         # Display the piece played on the UI to refresh the gameboard.
-
         row = int(position_list[0])
         column = int(position_list[1])
-        player_id = str(position_list[2])
+        player_id = int(position_list[2])
         limit_board = self.row_or_column_limit(row, column)
         if limit_board == 1:
             floor = self.determine_floor(row, column)
@@ -240,38 +96,183 @@ class gameboard(QtWidgets.QMainWindow):
             print('This case is not reachable. Try again.')
             self.add_piece(self.player_played())
             return None
-        else:
-            print('floor value is : ', floor)               
+        #else:
+            #print('floor value is : ', floor)               
         return floor
+
+    def detect_win(self,position_list):
+        
+        row_index = int(position_list[0])-1
+        column_index = int(position_list[1])-1
+        player_id = int(position_list[2])
+        floor_index = 0
+        for i in range(self.floor_total):
+                    if self.board[i][row_index][column_index] == 0:  
+                        floor_index = i-1
+                        break
+        #Row verification
+        streak = 0
+        for i in range(0,self.row_total):
+            if int(self.board[floor_index][i][column_index])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Column verification
+        streak = 0
+        for i in range(0,self.column_total):
+            if int(self.board[floor_index][row_index][i])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Floor verification
+        streak = 0
+        for i in range(0,self.floor_total):
+            if int(self.board[i][row_index][column_index])==player_id:
+                streak = streak + 1
+                if streak == 4:
+                    return True
+            else:
+                streak = 0
+        #Positive diagonal column and row verification
+        streak = 0
+        if row_index == column_index:
+            for i in range(0,self.column_total):
+                if int(self.board[floor_index][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative diagonal column and row verification
+        streak = 0
+        if row_index == self.column_total-1-column_index:
+            for i in range(0,self.column_total):
+                if int(self.board[floor_index][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive diagonal column and floor verification
+        streak = 0
+        gap = floor_index - row_index
+        if row_index <= floor_index and gap <= self.floor_total-self.row_total:
+            for i in range(0,self.row_total):
+                if int(self.board[i+gap][i][column_index])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative diagonal column and floor verification
+        streak = 0
+        gap = floor_index - ((self.row_total-1)-row_index)
+        if (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
+            for i in range(0,self.row_total):
+                if int(self.board[(self.row_total-1-i)+gap][i][column_index])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive diagonal row and floor verification
+        streak = 0
+        gap = floor_index - column_index
+        if column_index <= floor_index and gap <= self.floor_total-self.column_total:
+            for i in range(0,self.column_total):
+                if int(self.board[i+gap][row_index][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative diagonal row and floor verification
+        streak = 0
+        gap = floor_index - ((self.column_total-1)-column_index)
+        if (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
+            for i in range(0,self.column_total):
+                if int(self.board[(self.column_total-1-i)+gap][row_index][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive positive diagonal column, row and floor verification
+        streak = 0
+        gap = floor_index - row_index
+        if row_index == column_index and row_index <= floor_index and gap <= self.floor_total-self.row_total:
+            for i in range(0,self.row_total):
+                if int(self.board[i+gap][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Positive negative diagonal column, row and floor verification
+        streak = 0
+        gap = floor_index - ((self.row_total-1)-row_index)
+        if row_index == self.column_total-1-column_index and (self.row_total-1)-row_index <= floor_index and gap <= self.floor_total-self.row_total:
+            for i in range(0,self.row_total):
+                if int(self.board[(self.row_total-1-i)+gap][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative positive diagonal column, row and floor verification
+        streak = 0
+        gap = floor_index - column_index
+        if row_index == self.column_total-1-column_index and column_index <= floor_index and gap <= self.floor_total-self.column_total:
+            for i in range(0,self.column_total):
+                if int(self.board[i+gap][i][self.column_total-i-1])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        #Negative negative diagonal column, row and floor verification
+        streak = 0
+        gap = floor_index - ((self.column_total-1)-column_index)
+        if row_index == column_index and (self.column_total-1)-column_index <= floor_index and gap <= self.floor_total-self.column_total:
+            for i in range(0,self.column_total):
+                if int(self.board[(self.column_total-1-i)+gap][i][i])==player_id:
+                    streak = streak + 1
+                    if streak == 4:
+                        return True
+                else:
+                    streak = 0
+        return False
 
     def player_played(self):
         # Actualize the gameboard status with the new inputs
-
-        #player, column, row = self.take_picture()
-        #vision_list = [str(row), str(column), str(player)]
-        #print('vision list : ', vision_list)
-        #self.add_piece(vision_list)
+        ##player, column, row = self.take_picture()
+        ##vision_list = [str(row), str(column), str(player)]
+        ##print('vision list : ', vision_list)
+        ##self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-            user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
-            entries = user_input.split()           # Comment thoses lines to use the vision input
-            self.add_piece(entries)                # " "  
-            self.line_edit1.clear()                # " "
+            #user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
+            #entries = user_input.split()           # Comment thoses lines to use the vision input
+            #self.add_piece(entries)                # " "  
+            #self.line_edit1.clear()                # " "
             self.push_button1.setChecked(False)
 
         elif self.push_button2.isChecked():
-            user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
-            entries = user_input.split()           # Comment thoses lines to use the vision input
-            self.add_piece(entries)                # " "
-            self.line_edit2.clear()                # " "
+            #user_input = self.line_edit2.text()    # Uncomment thoses lines to use the player's input
+            #entries = user_input.split()           # Comment thoses lines to use the vision input
+            #self.add_piece(entries)                # " "
+            #self.line_edit2.clear()                # " "
             self.push_button2.setChecked(False)
-        
+        if(self.detect_win(entries)):
+                print("VICTORY!")
         self.label.setText(self.print_board())
-        return #vision_list
+        return vision_list
 
     def submit_inputs_xyz(self):
-        # Send the xyz coordinates entered from the UI to the motor control program, to move the robot to desired position. 
-
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
@@ -281,13 +282,19 @@ class gameboard(QtWidgets.QMainWindow):
         return # int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
-        # Receives the xyz coordinates from the motor control program and uses it to display it on the UI. 
+        # Link with Alex's code 
+        xActual = 1
+        yActual = 2
+        zActual = 2
+        return xActual, yActual, zActual
 
-        # Link with UI
-        xActualPos = 1
-        yActualPos = 2
-        zActualPos = 2
-        return xActualPos, yActualPos, zActualPos
+    def actual_position_joints(self): # Receives the joints coordinates from the motor control program and uses it to display it on the UI.        
+        # Link with Alex's code        
+        # # Link with UI        
+        joint1ActualPos = 1 
+        joint2ActualPos = 2
+
+        return joint1ActualPos, joint2ActualPos
 
     def submit_inputs_joints(self):
         # Send the joints coordinates entered from the UI to the motor control program, to move the robot to desired position.
@@ -306,6 +313,14 @@ class gameboard(QtWidgets.QMainWindow):
         joint1ActualPos = 1
         joint2ActualPos = 2
         return joint1ActualPos, joint2ActualPos
+
+    def on_toggled(self, checked):
+        if checked:
+            self.toggle_button.setText("Automatic Mode")
+        else:
+            self.toggle_button.setText("Manual Mode")
+
+        return
 
 
     def submit_auto_startSequence(self):
@@ -332,13 +347,18 @@ class gameboard(QtWidgets.QMainWindow):
 
         return
 
-    def submit_man_goToPick(self):
-        # Move the robot to his pick position registered, where the pieces dispenser is placed
-        
+    def submit_man_goToPick45deg(self):
+        # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
         MotorMove.mssg4 = "0"
         MotorMove.mssg5 = "1"
         MotorMove.moveCart(MotorMove, 150, 150, 2000)
+        return 
 
+    def submit_man_goToPick0deg(self):
+        # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "1"
+        MotorMove.moveCart(MotorMove, 150, 150, 2000)
         return 
 
     def submit_man_goDown(self):
@@ -374,13 +394,9 @@ class gameboard(QtWidgets.QMainWindow):
         return
 
     def update_selected_btn(self, btn):
-        # When a position button is selected on the UI, selected_btn is updated here. 
-
         self.selected_btn = btn
 
     def update_selected_floor(self, floor):
-        # When a floor button is selected on the UI, selected_floor is updated here. 
-
         self.selected_floor = floor
 
     def submit_gameboard_pos(self):
@@ -403,6 +419,9 @@ class gameboard(QtWidgets.QMainWindow):
         height_constant = 300
         height_init = 0
         gameboardPosition = [btn.text(), floor.text()]
+        print("gameboardposition : ", gameboardPosition)
+        return gameboardPosition
+
         xA1Position = 1
         yA1Position = 1
         xgap = 5
@@ -523,10 +542,12 @@ class gameboard(QtWidgets.QMainWindow):
         cap.release()                                   # Release the VideoCapture object and Close all the windows
         cv2.destroyAllWindows()
         return Player, x, y
-
+    
 if __name__ == "__main__":
+    #app = QApplication(sys.argv)
     gm = gameboard
     app = QtWidgets.QApplication(sys.argv)
     window = gameboard()
+    window.push_button2.clicked.connect(window.player_played)
     window.show()
     sys.exit(app.exec_())
