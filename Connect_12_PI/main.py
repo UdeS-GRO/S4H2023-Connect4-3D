@@ -11,10 +11,8 @@ class main():
         self.gb = gb
         self.AI = AI
         
-      
     def AI_played(self):
         play = AI.choose_play()
-        print(play)
         position_list = [str(play[0]),str(play[1]),'2']
         gb.add_piece(position_list)
         gb.line_edit2.clear()
