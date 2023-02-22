@@ -243,6 +243,14 @@ void loop()
           RestingEOAT();        
           Count_pulses = 0;
           
+          // fromPi_man_goToHome = false;
+          // fromPi_man_goToPick = false;
+          // fromPi_man_goToPlace = false;
+          // fromPi_man_goDown = false;
+          // fromPi_man_goToLS = false;
+          // fromPi_man_grip = false;
+          // fromPi_man_drop = false;
+
           if (fromPi_man_goToHome)
             STATE_MAN = SM_GO_TO_HOME;
           else if (fromPi_man_goToPick)
