@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBox
 from PyQt5.QtCore import Qt
 
 def userInterface(self):
+    # Generate the user interface
     self.setWindowTitle("User Interface")
     self.setGeometry(200, 200, 900, 500)    
     self.central_widget = QWidget()
@@ -119,7 +120,7 @@ def userInterface(self):
     self.top_right_layout.addWidget(self.submit_button9)
     self.top_right_layout.addWidget(self.submit_button10)
     self.top_right_layout.addWidget(self.submit_button11)  
-     
+
     self.new_right_layout = QVBoxLayout()
     self.new_right_layout.addWidget(self.line_edit1_label)
     self.new_right_layout.addWidget(self.line_edit3)
