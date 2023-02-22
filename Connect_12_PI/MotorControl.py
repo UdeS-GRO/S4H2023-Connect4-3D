@@ -17,16 +17,18 @@ phi = 0.001
 
 class MotorMove:
     ### Math variable
-    BicepLen:float = 200
-    ForearmLen:float = 200
+    BicepLen:float = 142.5
+    ForearmLen:float = 142.5
 
     ## Communication variables
     mssg1:str = "0000"
     mssg2:str = "0000"
-    mssg2:str = "0000"
-    mssg2:str = "0"
-    mssg2:str = "0"
-    mssg:str = "0000"
+    mssg3:str = "0000"
+    mssg4:str = "0"
+    mssg5:str = "0"
+    mssg:str = "000000000000"
+
+    Zpos:int = 0
 
     ## Motor control
     vari:int = 1
@@ -80,12 +82,32 @@ class MotorMove:
             mssg2 = "0000"
         
         ### Z Position
-        mssg3 = "0000"
+        '''
+        floor0 = 2750
+        floor1 = 2450
+        floor2 = 2150
+        floor3 = 1850
+        floor4 = 1550
+        floor5 = 1250
+        '''
+        Zlength = len(str(self.Zpos))
+        if Zlength == 1:
+            mssg3 =  "000" + str(self.Zpos)# + '|'
+        elif Zlength == 2:
+            mssg3 =  "00" + str(self.Zpos)# + '|'
+        elif Zlength == 3:
+            mssg3 =  '0' + str(self.Zpos)# + '|'
+        elif Zlength == 4:
+            mssg3 = str(self.Zpos)# + '|'
+        if mssg3 == "":
+            mssg3 = "0000"
+
+        mssg3 = mssg3
 
         ### Mode, Automatic (1) or Manual (0)
-        mssg4 = "1"
+        #mssg4 = "1"
 
-        ### Step to do:
+        ### States:
         '''
         fromPi_auto_startSequence   = 0
         fromPi_auto_resetSequence   = 1
@@ -99,9 +121,9 @@ class MotorMove:
         fromPi_man_drop             = 6
         '''
         
-        mssg5 = "0"
+        #mssg5 = "0"
 
-        mssg = mssg1 + mssg2 + mssg3 + mssg4 + mssg5
+        mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         #print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip()) #ajouter encoding = 'utf-8' dans les parenthèses de encoding
@@ -244,7 +266,7 @@ class MotorMove:
         #print(str(servoShoulderAngle) + '|' + str(servoElbowAngle))
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
         #msgReceived = self.readMsg(self)
-        time.sleep(0.1)
+        #time.sleep(0.1)
 
         '''MotorMove.sendMsg(MotorMove, gameXpos, gameYpos)
         msgReceived = MotorMove.readMsg(MotorMove)
