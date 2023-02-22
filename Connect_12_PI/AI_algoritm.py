@@ -14,7 +14,8 @@ class AI():
         self.opponent_id = 1
 
         return
-        
+    
+    #This function returns a list of all possible positions on the board
     def get_positions(self):
         possible_positions = []
         for i in range(self.gb.row_total):
@@ -26,8 +27,10 @@ class AI():
 
         return possible_positions
 
+    #This function rates a play based on the number of pieces in a row
     def rate_play(self,play):
         strength=0
+        #This rates the offensive strength of the play
         for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
             if streak == 1:
                 strength=strength+11
@@ -37,7 +40,9 @@ class AI():
                 strength=strength+1001
             elif streak == 4:
                 strength=strength+10001
+
         opponent_play = [play[0],play[1],self.opponent_id]
+        #This rates the defensive strength of the play
         for streak in streak_counter(opponent_play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
             if streak == 1:
                 strength=strength+10
@@ -50,6 +55,7 @@ class AI():
     
         return strength
 
+    #This function chooses the best play
     def choose_play(self):
         possible_positions = self.get_positions()
         max_strength = 0

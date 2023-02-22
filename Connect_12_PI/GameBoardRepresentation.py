@@ -255,10 +255,10 @@ class gameboard(QtWidgets.QMainWindow):
         ##self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
-            #user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
-            #entries = user_input.split()           # Comment thoses lines to use the vision input
-            #self.add_piece(entries)                # " "  
-            #self.line_edit1.clear()                # " "
+            user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
+            entries = user_input.split()           # Comment thoses lines to use the vision input
+            self.add_piece(entries)                # " "  
+            self.line_edit1.clear()                # " "
             self.push_button1.setChecked(False)
 
         elif self.push_button2.isChecked():
@@ -267,10 +267,8 @@ class gameboard(QtWidgets.QMainWindow):
             #self.add_piece(entries)                # " "
             #self.line_edit2.clear()                # " "
             self.push_button2.setChecked(False)
-        if(self.detect_win(entries)):
-                print("VICTORY!")
         self.label.setText(self.print_board())
-        return vision_list
+        return #vision_list
 
     def submit_inputs_xyz(self):
         xPosition = self.line_edit3.text()
