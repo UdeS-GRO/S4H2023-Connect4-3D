@@ -1,13 +1,12 @@
 def streak_counter(play,board,row_total,column_total,floor_total):
-    streak_list = []
-    row_index = int(play[0])-1
-    column_index = int(play[1])-1
+    row_index = play[0]-1
+    column_index = play[1]-1
+    player_id = play[2]
+    streak_list = [] 
     for i in range(floor_total):
                 if board[i][row_index][column_index] == 0:  
                     floor_index = i
-                    break
-    player_id = play[2]
-
+                    break   
     #Row counter
     streak = 0
     for i in range(0,row_total):
@@ -15,9 +14,9 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             streak = streak + 1
         elif board[floor_index][i][column_index]==player_id:
             streak = streak + 1
-        elif board[floor_index][i][column_index]!='0':
-               streak = 0
-               break
+        elif board[floor_index][i][column_index]!=0:
+            streak = 0
+            break
     streak_list.append(streak)
     #Column counter
     streak = 0
@@ -26,7 +25,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             streak = streak + 1
         elif board[floor_index][row_index][i]==player_id:
             streak = streak + 1
-        elif board[floor_index][row_index][i]!='0':
+        elif board[floor_index][row_index][i]!=0:
                streak = 0
                break
     streak_list.append(streak)                     
@@ -37,7 +36,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             streak = streak + 1
         elif board[i][row_index][column_index]==player_id:
             streak = streak + 1
-        elif board[i][row_index][column_index]!='0':
+        elif board[i][row_index][column_index]!=0:
                streak = 0
                break
     streak_list.append(streak)              
@@ -49,7 +48,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[floor_index][i][i]==player_id:
                 streak = streak + 1
-            elif board[floor_index][i][i]!='0':
+            elif board[floor_index][i][i]!=0:
                 streak = 0
                 break
         streak_list.append(streak)
@@ -61,7 +60,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[floor_index][(row_total-1-i)][i]==player_id:
                 streak = streak + 1
-            elif board[floor_index][(row_total-1-i)][i]!='0':
+            elif board[floor_index][(row_total-1-i)][i]!=0:
                 streak = 0
                 break
         streak_list.append(streak)
@@ -74,7 +73,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[i+gap][i][column_index]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][column_index]!='0':
+            elif board[i+gap][i][column_index]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -87,7 +86,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[(row_total-1-i)+gap][i][column_index]==player_id:
                 streak = streak + 1
-            elif board[(row_total-1-i)+gap][i][column_index]!='0':
+            elif board[(row_total-1-i)+gap][i][column_index]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -100,7 +99,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[i+gap][row_index][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][row_index][i]!='0':
+            elif board[i+gap][row_index][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -113,7 +112,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[(column_total-1-i)+gap][row_index][i]==player_id:
                 streak = streak + 1
-            elif board[(column_total-1-i)+gap][row_index][i]!='0':
+            elif board[(column_total-1-i)+gap][row_index][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -126,7 +125,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[i+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][i]!='0':
+            elif board[i+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -139,7 +138,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[(row_total-1-i)+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[(row_total-1-i)+gap][i][i]!='0':
+            elif board[(row_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -152,7 +151,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[i+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][i]!='0':
+            elif board[i+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -165,9 +164,8 @@ def streak_counter(play,board,row_total,column_total,floor_total):
                 streak = streak + 1
             elif board[(column_total-1-i)+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[(column_total-1-i)+gap][i][i]!='0':
+            elif board[(column_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
-    
     return streak_list
