@@ -1,12 +1,16 @@
+# Jacob Lambert, Februrary 22th 2023
+
+#This function, for a given play, counts the number of pieces in a row for every orientation and returns a list of every streak
 def streak_counter(play,board,row_total,column_total,floor_total):
     row_index = play[0]-1
     column_index = play[1]-1
     player_id = play[2]
-    streak_list = [] 
+    streak_list = []
+    #This finds the floor postion where the piece can be placed
     for i in range(floor_total):
                 if board[i][row_index][column_index] == 0:  
                     floor_index = i
-                    break   
+                    break 
     #Row counter
     streak = 0
     for i in range(0,row_total):
