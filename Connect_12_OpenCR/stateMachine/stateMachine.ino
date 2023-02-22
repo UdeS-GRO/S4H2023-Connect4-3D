@@ -9,8 +9,8 @@
 //Serial
 #define BAUDRATE 9600
 #define motorShoulder_SERIAL    Serial3
-#define Serial2                 Serial2
-#define DEBUG_SERIAL            Serial
+//#define Serial2                 Serial2
+#define Serial            Serial
 
 //Servos
 #define motorShoulder_DIR_PIN   84
@@ -35,6 +35,7 @@
 #define LED3_PIN                24      //LED USER 3
 #define LED4_PIN                25      //LED USER 4
 #define LED5_PIN                13      //Arduino, LED built in
+#define PIN_DEBUG               11
 
 //Delays
 #define delayBetweenStates      1000
@@ -170,8 +171,15 @@ void setup()
   pinMode(LED3_PIN, OUTPUT);
   pinMode(LED4_PIN, OUTPUT);
   pinMode(LED5_PIN, OUTPUT);
+  pinMode(PIN_DEBUG, OUTPUT);
 
   digitalWrite(PIN_EMAGNET, LOW);
+  digitalWrite(LED1_PIN, LOW);
+  digitalWrite(LED2_PIN, LOW);
+  digitalWrite(LED3_PIN, LOW);
+  digitalWrite(LED4_PIN, LOW);
+  digitalWrite(LED5_PIN, LOW);
+  digitalWrite(PIN_DEBUG, LOW);
 
   attachInterrupt(digitalPinToInterrupt(ENCA), ReadEncoder, RISING);
 
@@ -210,6 +218,8 @@ void setup()
   STATE_MAN = SM_IDLE;  
   STATE_AUTO = SA_GO_TO_HOME;
 
+  PWMDebug(0);
+
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
@@ -217,11 +227,13 @@ void setup()
 void loop() 
 {
   //readSerialPort();
+  
 
   switch (STATE)
   {
     ////////// MANUAL SEQUENCE BELOW //////////
     case S_MANUAL:
+      PWMDebug(1);
       /*
       switch (STATE_MAN)
       {
@@ -330,12 +342,14 @@ void loop()
     
     ////////// AUTOMATIC SEQUENCE BELOW //////////
     case S_AUTOMATIC:
-     
-      if (fromPi_auto_resetSequence)
-      {
-        STATE_AUTO = SA_IDLE;
-        fromPi_auto_resetSequence = false;
-      }
+      
+      readSerialPort();
+      GoToPosition(pr_place);
+      // if (fromPi_auto_resetSequence)
+      // {
+      //   STATE_AUTO = SA_IDLE;
+      //   fromPi_auto_resetSequence = false;
+      // }
       /*Serial.print("State: ");
       Serial.println(STATE_AUTO);
       Serial.print("LimitSwitch: ");
@@ -348,140 +362,142 @@ void loop()
       Serial.println(timerBetweenStates);
       */
 
-      switch (STATE_AUTO)
-      {
-        case SA_GO_TO_HOME:
-          LED_DEBUG(9);
-          RaiseEOAT();
-          if(IsLimitSwitchActivated()){
-            Count_pulses = 0;
-            GoToPosition(pr_home);
-            RestingEOAT();
-          }
+      // switch (STATE_AUTO)
+      // {
+        
+        // case SA_GO_TO_HOME:
+        //   LED_DEBUG(9);
+        //   RaiseEOAT();
+        //   if(IsLimitSwitchActivated()){
+        //     Count_pulses = 0;
+        //     GoToPosition(pr_home);
+        //     RestingEOAT();
+        //   }
 
-          if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
-          {
+        //   if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
+        //   {
             
-            STATE_AUTO = SA_IDLE;
-          }
-          break;
+        //     STATE_AUTO = SA_IDLE;
+        //   }
+        //   break;
 
-        case SA_IDLE:
-          LED_DEBUG(10);
-          DeactivateMagnet();
-          //digitalWrite(DcPWM, 0);
-          toPi_sequenceDone = true;
+        // case SA_IDLE:
+        //   LED_DEBUG(10);
+        //   DeactivateMagnet();
+        //   //digitalWrite(DcPWM, 0);
+        //   toPi_sequenceDone = true;
 
-          if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true)
-          {
-            //fromPi_auto_startSequence = false;
-            //toPi_sequenceDone = false;
-            STATE_AUTO = SA_GO_TO_PICK1;
-          }
-          break;
+        //   if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true)
+        //   {
+        //     //fromPi_auto_startSequence = false;
+        //     //toPi_sequenceDone = false;
+        //     STATE_AUTO = SA_GO_TO_PICK1;
+        //   }
+        //   break;
 
-        case SA_GO_TO_PICK1:
-          LED_DEBUG(11);
-          GoToPosition(pr_pick);
+        // case SA_GO_TO_PICK1:
+        //   LED_DEBUG(11);
+        //   GoToPosition(pr_pick);
 
-          if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
-          {
-            //timerBetweenStates = millis();
-            //if(timerBetweenStates - millis() >= delayBetweenStates)
-            //{
-              //timerBetweenStates = millis();
-              STATE_AUTO = SA_GO_TO_PIECE;
-            //}
-          }
-          break;
+        //   if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
+        //   {
+        //     //timerBetweenStates = millis();
+        //     //if(timerBetweenStates - millis() >= delayBetweenStates)
+        //     //{
+        //       //timerBetweenStates = millis();
+        //       STATE_AUTO = SA_GO_TO_PIECE;
+        //     //}
+        //   }
+        //   break;
 
-        case SA_GO_TO_PIECE:
-          LED_DEBUG(12);
-          LowerEOAT(pr_pick);
+        // case SA_GO_TO_PIECE:
+        //   LED_DEBUG(12);
+        //   LowerEOAT(pr_pick);
 
-          if (Count_pulses >= pr_pick.z)
-          {
-            RestingEOAT();
-            timerPickPieceStart = millis();
-            STATE_AUTO = SA_PICK_PIECE;
-          }
-          break;
+        //   if (Count_pulses >= pr_pick.z)
+        //   {
+        //     RestingEOAT();
+        //     timerPickPieceStart = millis();
+        //     STATE_AUTO = SA_PICK_PIECE;
+        //   }
+        //   break;
 
-        case SA_PICK_PIECE:
-          LED_DEBUG(13);
-          ActivateMagnet();
+        // case SA_PICK_PIECE:
+        //   LED_DEBUG(13);
+        //   ActivateMagnet();
 
-          if ((millis() - timerPickPieceStart) >= delayPick)
-          {
-            STATE_AUTO = SA_GO_TO_LS1;
-          }
-          break;
+        //   if ((millis() - timerPickPieceStart) >= delayPick)
+        //   {
+        //     STATE_AUTO = SA_GO_TO_LS1;
+        //   }
+        //   break;
 
-        case SA_GO_TO_LS1:
-          LED_DEBUG(14);
-          RaiseEOAT();
+        // case SA_GO_TO_LS1:
+        //   LED_DEBUG(14);
+        //   RaiseEOAT();
 
-          if(IsLimitSwitchActivated()){
-            RestingEOAT();
-            Count_pulses = 0;
-            STATE_AUTO = SA_GO_TO_POS;
-          }
-          break;
+        //   if(IsLimitSwitchActivated()){
+        //     RestingEOAT();
+        //     Count_pulses = 0;
+        //     STATE_AUTO = SA_GO_TO_POS;
+        //   }
+        //   break;
 
-        case SA_GO_TO_POS:
-          LED_DEBUG(15);
-          GoToPosition(pr_place);
+        // case SA_GO_TO_POS:
+        //   LED_DEBUG(15);
+        //   GoToPosition(pr_place);
 
-          if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6))
-          {
-            //timerBetweenStates = millis();
-            //if(timerBetweenStates >= delayBetweenStates)
-            STATE_AUTO = SA_GO_TO_FLOOR;
-          }
-          break;
+        //   if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6))
+        //   {
+        //     //timerBetweenStates = millis();
+        //     //if(timerBetweenStates >= delayBetweenStates)
+        //     STATE_AUTO = SA_GO_TO_FLOOR;
+        //   }
+        //   break;
 
-        case SA_GO_TO_FLOOR:
-          LED_DEBUG(16);
-          LowerEOAT(pr_place);
-          /*if (encoder >= pr_place.z)
-          {
-            RestingEOAT();
-            encoder = 0;
-            STATE_AUTO = SA_DROP_PIECE;
-          }*/
-          if (Count_pulses >= pr_place.z)
-          {
-            RestingEOAT();
-            timerPlacePieceStart = millis();
-            STATE_AUTO = SA_DROP_PIECE;
-          }
-          break;
+        // case SA_GO_TO_FLOOR:
+        //   LED_DEBUG(16);
+        //   LowerEOAT(pr_place);
+        //   /*if (encoder >= pr_place.z)
+        //   {
+        //     RestingEOAT();
+        //     encoder = 0;
+        //     STATE_AUTO = SA_DROP_PIECE;
+        //   }*/
+        //   if (Count_pulses >= pr_place.z)
+        //   {
+        //     RestingEOAT();
+        //     timerPlacePieceStart = millis();
+        //     STATE_AUTO = SA_DROP_PIECE;
+        //   }
+        //   break;
 
-        case SA_DROP_PIECE:
-          LED_DEBUG(17);
-          DeactivateMagnet();
-          if (millis() - timerPlacePieceStart >= delayPlace)                             // TODO: ajouter délai avec compteur
-          {
-            STATE_AUTO = SA_GO_TO_LS2;
-          }
-          break;
+        // case SA_DROP_PIECE:
+        //   LED_DEBUG(17);
+        //   DeactivateMagnet();
+        //   if (millis() - timerPlacePieceStart >= delayPlace)                             // TODO: ajouter délai avec compteur
+        //   {
+        //     STATE_AUTO = SA_GO_TO_LS2;
+        //   }
+        //   break;
 
-        case SA_GO_TO_LS2:
-          LED_DEBUG(18);
-          RaiseEOAT();
-          if (IsLimitSwitchActivated())
-          {
-            RestingEOAT();
-            Count_pulses = 0;
-            STATE_AUTO = SA_GO_TO_HOME;
-          }
-          break;
+        // case SA_GO_TO_LS2:
+        //   LED_DEBUG(18);
+        //   RaiseEOAT();
+        //   if (IsLimitSwitchActivated())
+        //   {
+        //     RestingEOAT();
+        //     Count_pulses = 0;
+        //     STATE_AUTO = SA_GO_TO_HOME;
+        //   }
+        //   break;
 
-        default:
-          STATE_AUTO = SA_GO_TO_HOME;
-          break;
-      }
-
+        // default:
+        //   STATE_AUTO = SA_GO_TO_HOME;
+        //   break;
+      // }
+      // digitalWrite( LED2_PIN, HIGH);
+      // Serial.print("1234");      
       break;
     
     default:
@@ -495,8 +511,6 @@ void loop()
 
 void GoToPosition(PositionRegister pr)
 {
-  //RaiseEOAT();
-  //LED_DEBUG(3);
   ServoMotor.setGoalPosition(motorShoulder_ID, pr.j1);
   //Serial.print("SHoulder Present position: ");
   //Serial.println(ServoMotor.getPresentPosition(motorShoulder_ID));
@@ -633,7 +647,8 @@ void sendData(){
 
     msg = msg1 + msg2 + msg3 + msg4 + msg5;
     //msg = "2000";
-    Serial.print(msg);
+    
+    //Serial.print(msg);
   }
 
   //return;
@@ -652,7 +667,6 @@ void readSerialPort() {
   }
  	else if (Serial.available() >= 0) {
  			//delay(2);
-      
       //while (Serial.available() == 0 );
  			//while (Serial.available() > 0){
         StringFromPi = Serial.readString();
@@ -685,6 +699,13 @@ void readSerialPort() {
   pr_place.j1 = stringJ1.toInt();
   pr_place.j2 = stringJ2.toInt();
   pr_place.z = stringZ.toInt();
+
+  if(pr_place.j1 == 0)
+    pr_place.j1 = pr_home.j1;
+  if(pr_place.j2 == 0)
+    pr_place.j2 = pr_home.j2;
+  if(pr_place.z == 0)
+    pr_place.z = pr_home.z;
 
   if (fromPi_Mode == 1) 
     STATE = S_AUTOMATIC;
@@ -830,6 +851,10 @@ void LED_DEBUG(int caseNumber){
   else
     digitalWrite(LED5_PIN, LOW);
 
+}
+
+void PWMDebug(int Step){
+  analogWrite(PIN_DEBUG, 25*Step);
 }
 
 bool IsAtPosition(int MotorID, int EndPos, int Treshold)

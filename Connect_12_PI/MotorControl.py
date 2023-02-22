@@ -102,9 +102,9 @@ class MotorMove:
         mssg5 = "0"
 
         mssg = mssg1 + mssg2 + mssg3 + mssg4 + mssg5
-        print(mssg)
+        #print(mssg)
         if self.serOpenCR.isOpen():
-            self.serOpenCR.write(mssg.encode().rstrip())
+            self.serOpenCR.write(mssg.encode().rstrip()) #ajouter encoding = 'utf-8' dans les parenthèses de encoding
             print("msg Sent: " + mssg)
         #while(readMsg() != message): pass
         return
@@ -123,7 +123,7 @@ class MotorMove:
                     pass'''
                 pass
             while  self.serOpenCR.inWaiting() > 0:
-                answer = self.serOpenCR.readline(14).decode()
+                answer = self.serOpenCR.readline(14).decode() #enlever le 14 des parentheses
                 print("Answer is : " + answer)
                 self.serOpenCR.flushInput()
         #answer = "2000"
