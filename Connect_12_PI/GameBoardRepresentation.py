@@ -11,6 +11,7 @@ except:
     pass
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, QLineEdit, QCheckBox
+#from QtWidgets import Toggle
 from PyQt5.QtCore import Qt
 
 class gameboard(QtWidgets.QMainWindow):
@@ -161,6 +162,7 @@ class gameboard(QtWidgets.QMainWindow):
         self.new_right_layout.addWidget(self.line_edit9_label)
         self.new_right_layout.addWidget(self.line_edit10_label)
         self.new_right_layout.addWidget(self.line_edit12_label)
+        #self.new_right_layout.addWidget(self.ManORAuto)
         
         self.main_layout = QHBoxLayout()
         self.main_layout.addLayout(self.left_layout)
@@ -273,8 +275,9 @@ class gameboard(QtWidgets.QMainWindow):
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
+        MotorMove.Zpos = zPosition
         MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
-        print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
+        #print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
         return # int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
@@ -288,9 +291,11 @@ class gameboard(QtWidgets.QMainWindow):
 
     def submit_inputs_joints(self):
         # Send the joints coordinates entered from the UI to the motor control program, to move the robot to desired position.
-
+        
+        zPosition = self.line_edit5.text()
         joint1Position = self.line_edit6.text()
         joint2Position = self.line_edit7.text()
+        MotorMove.Zpos = zPosition
         MotorMove.moveJoint(MotorMove, joint1Position, joint2Position)
         return int(joint1Position), int(joint2Position)
 
@@ -306,39 +311,65 @@ class gameboard(QtWidgets.QMainWindow):
     def submit_auto_startSequence(self):
         # Starts the state machine to make the robot play
 
+        MotorMove.mssg4 = "1"
+        MotorMove.mssg5 = "0"
+
         return
 
     def submit_auto_resetSequence(self):
         # The robot stops its sequence and goes back home
+
+        MotorMove.mssg4 = "1"
+        MotorMove.mssg5 = "1"
 
         return
 
     def submit_man_goToHome(self):
         # Move the robot to his home position registered
 
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "0"
+
         return
 
     def submit_man_goToPick(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed
+        
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "1"
+        MotorMove.moveCart(MotorMove, 150, 150, 2000)
 
         return 
-    
+
     def submit_man_goDown(self):
         # Move the z coordinate of the robot to its lower position
+
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "3"
 
         return
 
     def submit_man_goToLS(self):
         # Move the z coordinate of the robot to its limit switch
+                
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "4"
+
         return 
 
     def submit_man_grip(self):
         # Activate the electromagnet
+        
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "5"
 
         return
 
     def submit_man_drop(self):
         # Disable the electromagnet
+        
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "6"
 
         return
 
@@ -353,7 +384,13 @@ class gameboard(QtWidgets.QMainWindow):
         self.selected_floor = floor
 
     def submit_gameboard_pos(self):
-        # Once a position and a floor is selected, the gameboard position is updated and the robot can move to this position. 
+        # Once a position and a floor is selected, the gameboard position is updated and the robot can move to this position.
+        zPosition = self.line_edit5.text()
+        cartX1Position = self.line_edit3.text()
+        cartY2Position = self.line_edit4.text()
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "2"
+        MotorMove.moveCart(MotorMove, int(cartX1Position), int(cartY2Position), int(zPosition))
 
         if self.selected_btn and self.selected_floor:
             self.button_played(self.selected_btn, self.selected_floor)
@@ -363,8 +400,8 @@ class gameboard(QtWidgets.QMainWindow):
         # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
         # The reference position is A1 and then the other positinos are automatically generated. 
 
-        height_constant = 200
-        height_init = 70
+        height_constant = 300
+        height_init = 0
         gameboardPosition = [btn.text(), floor.text()]
         xA1Position = 1
         yA1Position = 1
@@ -424,7 +461,7 @@ class gameboard(QtWidgets.QMainWindow):
                 xPosition = xA1Position + 3*xgap
                 yPosition = yA1Position + 3*ygap
 
-        zPosition = int((floor.text())[5]) * height_constant + height_init
+        zPosition = height_init - int((floor.text())[5]) * height_constant
         #print("gameboardposition : ", gameboardPosition)
         #print("x  ", xPosition, "    y  ", yPosition)
         return xPosition, yPosition, zPosition
