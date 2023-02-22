@@ -276,8 +276,10 @@ class gameboard(QtWidgets.QMainWindow):
         xPosition = self.line_edit3.text()
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
-        # Link with Alex's code
-        return xPosition, yPosition, zPosition
+        MotorMove.Zpos = zPosition
+        MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
+        #print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
+        return # int(xPosition), int(yPosition), int(zPosition)
 
     def actual_position_xyz(self):
         # Link with Alex's code 
@@ -295,8 +297,12 @@ class gameboard(QtWidgets.QMainWindow):
         return joint1ActualPos, joint2ActualPos
 
     def submit_inputs_joints(self):
+        # Send the joints coordinates entered from the UI to the motor control program, to move the robot to desired position.
+        
+        zPosition = self.line_edit5.text()
         joint1Position = self.line_edit6.text()
         joint2Position = self.line_edit7.text()
+        MotorMove.Zpos = zPosition
         MotorMove.moveJoint(MotorMove, joint1Position, joint2Position)
         return int(joint1Position), int(joint2Position)
 
@@ -320,44 +326,70 @@ class gameboard(QtWidgets.QMainWindow):
     def submit_auto_startSequence(self):
         # Starts the state machine to make the robot play
 
+        MotorMove.mssg4 = "1"
+        MotorMove.mssg5 = "0"
+
         return
 
     def submit_auto_resetSequence(self):
         # The robot stops its sequence and goes back home
+
+        MotorMove.mssg4 = "1"
+        MotorMove.mssg5 = "1"
 
         return
 
     def submit_man_goToHome(self):
         # Move the robot to his home position registered
 
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "0"
+
         return
 
     def submit_man_goToPick45deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
-
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "1"
+        MotorMove.moveCart(MotorMove, 150, 150, 2000)
         return 
 
     def submit_man_goToPick0deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
-
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "1"
+        MotorMove.moveCart(MotorMove, 150, 150, 2000)
         return 
-    
+
     def submit_man_goDown(self):
         # Move the z coordinate of the robot to its lower position
+
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "3"
 
         return
 
     def submit_man_goToLS(self):
         # Move the z coordinate of the robot to its limit switch
+                
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "4"
+
         return 
 
     def submit_man_grip(self):
         # Activate the electromagnet
+        
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "5"
 
         return
 
     def submit_man_drop(self):
         # Disable the electromagnet
+        
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "6"
 
         return
 
@@ -368,13 +400,90 @@ class gameboard(QtWidgets.QMainWindow):
         self.selected_floor = floor
 
     def submit_gameboard_pos(self):
+        # Once a position and a floor is selected, the gameboard position is updated and the robot can move to this position.
+        zPosition = self.line_edit5.text()
+        cartX1Position = self.line_edit3.text()
+        cartY2Position = self.line_edit4.text()
+        MotorMove.mssg4 = "0"
+        MotorMove.mssg5 = "2"
+        MotorMove.moveCart(MotorMove, int(cartX1Position), int(cartY2Position), int(zPosition))
+
         if self.selected_btn and self.selected_floor:
             self.button_played(self.selected_btn, self.selected_floor)
 
     def button_played(self, btn, floor):
+        # Returns the xyz coordinates of the position where the robot has to move to. 
+        # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
+        # The reference position is A1 and then the other positinos are automatically generated. 
+
+        height_constant = 300
+        height_init = 0
         gameboardPosition = [btn.text(), floor.text()]
         print("gameboardposition : ", gameboardPosition)
         return gameboardPosition
+
+        xA1Position = 1
+        yA1Position = 1
+        xgap = 5
+        ygap = -5            # Use a negative value since the A1 position is at the top left
+
+        match btn.text():
+            case 'A1':
+                xPosition = xA1Position
+                yPosition = yA1Position
+            case 'A2':
+                xPosition = xA1Position
+                yPosition = yA1Position + ygap
+            case 'A3':
+                xPosition = xA1Position
+                yPosition = yA1Position + 2*ygap
+            case 'A4':
+                xPosition = xA1Position
+                yPosition = yA1Position + 3*ygap
+
+            case 'B1':
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position
+            case 'B2':
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + ygap
+            case 'B3':
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 2*ygap
+            case 'B4':
+                xPosition = xA1Position + xgap
+                yPosition = yA1Position + 3*ygap
+
+            case 'C1':
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position 
+            case 'C2':
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + ygap
+            case 'C3':
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 2*ygap
+            case 'C4':
+                xPosition = xA1Position + 2*xgap 
+                yPosition = yA1Position + 3*ygap
+            
+            case 'D1':
+                xPosition = xA1Position + 3*xgap 
+                yPosition = yA1Position 
+            case 'D2':
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + ygap
+            case 'D3':
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 2*ygap
+            case 'D4':
+                xPosition = xA1Position + 3*xgap
+                yPosition = yA1Position + 3*ygap
+
+        zPosition = height_init - int((floor.text())[5]) * height_constant
+        #print("gameboardposition : ", gameboardPosition)
+        #print("x  ", xPosition, "    y  ", yPosition)
+        return xPosition, yPosition, zPosition
 
     def take_picture(self):
         # Take picture of the gameboard when the played button is press. Actualize the UI by comparing the actual status gameboard
