@@ -70,6 +70,7 @@ enum FSM_AUTO { SA_GO_TO_HOME,
               };
 FSM_AUTO STATE_AUTO;
 
+
 enum FSM_MAN { SM_IDLE,
                SM_GO_TO_HOME,
                SM_GO_TO_PICK,
@@ -122,6 +123,7 @@ int     motorAngleElbowInt = 0;
 String  motorAngleShoulder = "";
 String  motorAngleElbow = "";
 String  StringFromPi = "";
+int     positionTreshold = 10;
 
 //DcMotor
 long Count_pulses = 0;
@@ -251,23 +253,23 @@ void loop()
           // fromPi_man_grip = false;
           // fromPi_man_drop = false;
 
-          if (fromPi_man_goToHome)
-            STATE_MAN = SM_GO_TO_HOME;
-          else if (fromPi_man_goToPick)
-            STATE_MAN = SM_GO_TO_PICK;
-          else if (fromPi_man_goToPlace)
-            STATE_MAN = SM_GO_TO_PLACE;
-          else if (fromPi_man_goDown)
-            STATE_MAN = SM_GO_DOWN_PLACE;
-          else if (fromPi_man_goToLS)
-            STATE_MAN = SM_GO_TO_LS;
-          else if (fromPi_man_grip)
-            STATE_MAN = SM_GRIP;
-          else if (fromPi_man_drop)
-            STATE_MAN = SM_DROP;
-          else
-            break;
-          break;
+          // if (fromPi_man_goToHome)
+          //   STATE_MAN = SM_GO_TO_HOME;
+          // else if (fromPi_man_goToPick)
+          //   STATE_MAN = SM_GO_TO_PICK;
+          // else if (fromPi_man_goToPlace)
+          //   STATE_MAN = SM_GO_TO_PLACE;
+          // else if (fromPi_man_goDown)
+          //   STATE_MAN = SM_GO_DOWN_PLACE;
+          // else if (fromPi_man_goToLS)
+          //   STATE_MAN = SM_GO_TO_LS;
+          // else if (fromPi_man_grip)
+          //   STATE_MAN = SM_GRIP;
+          // else if (fromPi_man_drop)
+          //   STATE_MAN = SM_DROP;
+          // else
+          //   break;
+          // break;
 
         case SM_GO_TO_HOME:
           
@@ -315,7 +317,7 @@ void loop()
           break;
 
         case SM_GO_DOWN_PLACE:
-          LED_DEBUG(5);
+          //LED_DEBUG(5);
           LowerEOAT(pr_place);
           
           if (Count_pulses >= pr_place.z)
@@ -339,13 +341,13 @@ void loop()
           break;
 
         case SM_GRIP:
-          LED_DEBUG(7);
+          //LED_DEBUG(7);
           ActivateMagnet(); 
           STATE_MAN = SM_IDLE;
           break;
 
         case SM_DROP:
-          LED_DEBUG(8);
+          //LED_DEBUG(8);
           DeactivateMagnet();
           STATE_MAN = SM_IDLE;
           break;
@@ -380,18 +382,17 @@ void loop()
 
           if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
           {
-            
             STATE_AUTO = SA_IDLE;
           }
           break;
 
         case SA_IDLE:
-          LED_DEBUG(10);
+          //LED_DEBUG(10);
+          RestingEOAT();
           DeactivateMagnet();
-          //digitalWrite(DcPWM, 0);
           toPi_sequenceDone = true;
 
-          if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true)
+          if (fromPi_auto_startSequence == true) //digitalRead(BDPIN_PUSH_SW_1))
           {
             //fromPi_auto_startSequence = false;
             //toPi_sequenceDone = false;
@@ -400,7 +401,7 @@ void loop()
           break;
 
         case SA_GO_TO_PICK1:
-          LED_DEBUG(11);
+          //LED_DEBUG(11);
           GoToPosition(pr_pick);
 
           if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
@@ -415,7 +416,7 @@ void loop()
           break;
 
         case SA_GO_TO_PIECE:
-          LED_DEBUG(12);
+          //LED_DEBUG(12);
           LowerEOAT(pr_pick);
 
           if (Count_pulses >= pr_pick.z)
@@ -427,7 +428,7 @@ void loop()
           break;
 
         case SA_PICK_PIECE:
-          LED_DEBUG(13);
+          //LED_DEBUG(13);
           ActivateMagnet();
 
           if ((millis() - timerPickPieceStart) >= delayPick)
@@ -437,7 +438,7 @@ void loop()
           break;
 
         case SA_GO_TO_LS1:
-          LED_DEBUG(14);
+          //LED_DEBUG(14);
           RaiseEOAT();
 
           if(IsLimitSwitchActivated()){
@@ -448,7 +449,7 @@ void loop()
           break;
 
         case SA_GO_TO_POS:
-          LED_DEBUG(15);
+          //LED_DEBUG(15);
           GoToPosition(pr_place);
 
           if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6))
@@ -460,7 +461,7 @@ void loop()
           break;
 
         case SA_GO_TO_FLOOR:
-          LED_DEBUG(16);
+          //LED_DEBUG(16);
           LowerEOAT(pr_place);
           /*if (encoder >= pr_place.z)
           {
@@ -477,16 +478,16 @@ void loop()
           break;
 
         case SA_DROP_PIECE:
-          LED_DEBUG(17);
+          //LED_DEBUG(17);
           DeactivateMagnet();
-          if (millis() - timerPlacePieceStart >= delayPlace)                             // TODO: ajouter délai avec compteur
+          if (millis() - timerPlacePieceStart >= delayPlace)
           {
             STATE_AUTO = SA_GO_TO_LS2;
           }
           break;
 
         case SA_GO_TO_LS2:
-          LED_DEBUG(18);
+          //LED_DEBUG(18);
           RaiseEOAT();
           if (IsLimitSwitchActivated())
           {
@@ -688,128 +689,151 @@ void readSerialPort() {
   String stringZ = String(StringFromPi.charAt(8)) + String(StringFromPi.charAt(9)) + String(StringFromPi.charAt(10)) + String(StringFromPi.charAt(11));
   //String stringMode = StringFromPi.substring(12, 12);
   String stringMode = String(StringFromPi.charAt(12));
+  fromPi_Mode = bool(stringMode);
   //String stringState = StringFromPi.substring(13, 13);
   String stringState = String(StringFromPi.charAt(13));
   fromPi_State = stringState.toInt();
 
-  fromPi_posJ1 = stringJ1.toInt();
-  fromPi_posJ2 = stringJ2.toInt();
-  fromPi_posZ = stringZ.toInt();
+  // fromPi_posJ1 = stringJ1.toInt();
+  // fromPi_posJ2 = stringJ2.toInt();
+  // fromPi_posZ = stringZ.toInt();
 
   pr_place.j1 = stringJ1.toInt();
   pr_place.j2 = stringJ2.toInt();
   pr_place.z = stringZ.toInt();
 
-  if(pr_place.j1 == 0)
+  if(pr_place.j1 <= 10)
     pr_place.j1 = pr_home.j1;
-  if(pr_place.j2 == 0)
+  if(pr_place.j2 <= 200)
     pr_place.j2 = pr_home.j2;
   if(pr_place.z == 0)
     pr_place.z = pr_home.z;
 
-  if (stringMode == "0"){
-    fromPi_Mode = false;
-    STATE = S_MANUAL;
-  }
-  else if (stringMode == "1"){
-    fromPi_Mode = true;
+  // if (stringMode == "0"){
+  //   fromPi_Mode = false;
+  //   STATE = S_MANUAL;
+  // }
+  // else if (stringMode == "1"){
+  //   fromPi_Mode = true;
+  //   STATE = S_AUTOMATIC;
+  // }
+  // else{
+  //   //LED_DEBUG(2);
+  //   error = true;
+  // }
+
+  //LED1 ON if Automatic, LED2 ON if Manual
+  if(fromPi_Mode){
     STATE = S_AUTOMATIC;
+    digitalWrite(LED1_PIN, HIGH);
+    digitalWrite(LED2_PIN, LOW);
   }
   else{
-    LED_DEBUG(2);
-    error = true;
+    STATE = S_MANUAL;
+    digitalWrite(LED1_PIN, LOW);
+    digitalWrite(LED2_PIN, HIGH);
   }
 
-  //STATE = S_AUTOMATIC;
-  
-  switch (fromPi_State) {
-    case 0:
-      if(STATE == S_AUTOMATIC){
-        fromPi_auto_startSequence = true;
-        fromPi_auto_resetSequence = false;
-        digitalWrite(LED1_PIN, HIGH);
-      }
-      else {
-        fromPi_man_goToHome = true;
-        fromPi_man_goToPick = false;
-        fromPi_man_goToPlace = false;
-        fromPi_man_goDown = false;
-        fromPi_man_goToLS = false;
-        fromPi_man_grip = false;
-        fromPi_man_drop = false;
-      }
-      break;
-    case 1:
-      if(STATE == S_AUTOMATIC){
-        fromPi_auto_startSequence = false;
-        fromPi_auto_resetSequence = true;
-        digitalWrite(LED2_PIN, HIGH);
-      }
-      else {
-        fromPi_man_goToHome = false;
-        fromPi_man_goToPick = true;
-        fromPi_man_goToPlace = false;
-        fromPi_man_goDown = false;
-        fromPi_man_goToLS = false;
-        fromPi_man_grip = false;
-        fromPi_man_drop = false;
-      }
-      break;
-    case 2:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = true;
-      fromPi_man_goDown = false;
-      fromPi_man_goToLS = false;
-      fromPi_man_grip = false;
-      fromPi_man_drop = false;
-      break;
-    case 3:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = false;
-      fromPi_man_goDown = true;
-      fromPi_man_goToLS = false;
-      fromPi_man_grip = false;
-      fromPi_man_drop = false;
-      break;
-    case 4:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = false;
-      fromPi_man_goDown = false;
-      fromPi_man_goToLS = true;
-      fromPi_man_grip = false;
-      fromPi_man_drop = false;
-      break;
-    case 5:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = false;
-      fromPi_man_goDown = false;
-      fromPi_man_goToLS = false;
-      fromPi_man_grip = true;
-      fromPi_man_drop = false;
-      break;
-    case 6:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = false;
-      fromPi_man_goDown = false;
-      fromPi_man_goToLS = false;
-      fromPi_man_grip = false;
-      fromPi_man_drop = true;
-      break;
-    default:
-      fromPi_man_goToHome = false;
-      fromPi_man_goToPick = false;
-      fromPi_man_goToPlace = false;
-      fromPi_man_goDown = false;
-      fromPi_man_goToLS = false;
-      fromPi_man_grip = false;
-      fromPi_man_drop = false;
-      break;
+  if(STATE == S_AUTOMATIC){
+    if(fromPi_State == 0){
+      fromPi_auto_resetSequence = true;
+      fromPi_auto_startSequence = false;
+    }
+    else if (fromPi_State == 1){
+      fromPi_auto_resetSequence = false;
+      fromPi_auto_startSequence = true;
+    }
   }
+  else{
+    STATE_MAN = (FSM_MAN)fromPi_State;
+  }
+  // switch (fromPi_State) {
+  //   case 0:
+  //     if(STATE == S_AUTOMATIC){
+  //       fromPi_auto_startSequence = true;
+  //       fromPi_auto_resetSequence = false;
+  //     }
+  //     else {
+  //       fromPi_man_goToHome = true;
+  //       fromPi_man_goToPick = false;
+  //       fromPi_man_goToPlace = false;
+  //       fromPi_man_goDown = false;
+  //       fromPi_man_goToLS = false;
+  //       fromPi_man_grip = false;
+  //       fromPi_man_drop = false;
+  //     }
+  //     break;
+  //   case 1:
+  //     if(STATE == S_AUTOMATIC){
+  //       fromPi_auto_startSequence = false;
+  //       fromPi_auto_resetSequence = true;
+  //       //digitalWrite(LED2_PIN, HIGH);
+  //     }
+  //     else {
+  //       fromPi_man_goToHome = false;
+  //       fromPi_man_goToPick = true;
+  //       fromPi_man_goToPlace = false;
+  //       fromPi_man_goDown = false;
+  //       fromPi_man_goToLS = false;
+  //       fromPi_man_grip = false;
+  //       fromPi_man_drop = false;
+  //     }
+  //     break;
+  //   case 2:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = true;
+  //     fromPi_man_goDown = false;
+  //     fromPi_man_goToLS = false;
+  //     fromPi_man_grip = false;
+  //     fromPi_man_drop = false;
+  //     break;
+  //   case 3:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = false;
+  //     fromPi_man_goDown = true;
+  //     fromPi_man_goToLS = false;
+  //     fromPi_man_grip = false;
+  //     fromPi_man_drop = false;
+  //     break;
+  //   case 4:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = false;
+  //     fromPi_man_goDown = false;
+  //     fromPi_man_goToLS = true;
+  //     fromPi_man_grip = false;
+  //     fromPi_man_drop = false;
+  //     break;
+  //   case 5:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = false;
+  //     fromPi_man_goDown = false;
+  //     fromPi_man_goToLS = false;
+  //     fromPi_man_grip = true;
+  //     fromPi_man_drop = false;
+  //     break;
+  //   case 6:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = false;
+  //     fromPi_man_goDown = false;
+  //     fromPi_man_goToLS = false;
+  //     fromPi_man_grip = false;
+  //     fromPi_man_drop = true;
+  //     break;
+  //   default:
+  //     fromPi_man_goToHome = false;
+  //     fromPi_man_goToPick = false;
+  //     fromPi_man_goToPlace = false;
+  //     fromPi_man_goDown = false;
+  //     fromPi_man_goToLS = false;
+  //     fromPi_man_grip = false;
+  //     fromPi_man_drop = false;
+  //     break;
+  // }
 
   /*int firstIndexDelimiter = StringFromPi.indexOf('|');
   motorAngleShoulder = StringFromPi.substring(0, firstIndexDelimiter);

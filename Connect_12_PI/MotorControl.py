@@ -19,26 +19,29 @@ class MotorMove:
     ### Math variable
     BicepLen:float = 142.5
     ForearmLen:float = 142.5
+    J1Offset:int = 2000
+    J2Offset:int = 2000
 
     ## Communication variables
     mssg1:str = "0000"
     mssg2:str = "0000"
     mssg3:str = "0000"
-    mssg4:str = "0"
-    mssg5:str = "0"
+    mssg4:str = "0"             #default is manual
+    mssg5:str = "1"             #default is Home
     mssg:str = "000000000000"
 
     Zpos:int = 0
 
     ## Motor control
+    '''
     vari:int = 1
     vari2:int = 1
+    '''
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)
 
     #serOpenCR = serial.tools.list_ports.comports(include_links=False)
     serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
-    #print(serOpenCR)
 
     ## Methods
     def __init__(self):
@@ -58,13 +61,13 @@ class MotorMove:
         ### First Joint Position
         Shoulderlength = len(str(Shouldermessage))
         if Shoulderlength == 1:
-            mssg1 =  "000" + str(Shouldermessage)# + '|'
+            mssg1 =  "000" + str(Shouldermessage)
         elif Shoulderlength == 2:
-            mssg1 =  "00" + str(Shouldermessage)# + '|'
+            mssg1 =  "00" + str(Shouldermessage)
         elif Shoulderlength == 3:
-            mssg1 =  '0' + str(Shouldermessage)# + '|'
+            mssg1 =  '0' + str(Shouldermessage)
         elif Shoulderlength == 4:
-            mssg1 = str(Shouldermessage)# + '|'
+            mssg1 = str(Shouldermessage)
         if mssg1 == "":
             mssg1 = "0000"
 
@@ -102,8 +105,6 @@ class MotorMove:
         if mssg3 == "":
             mssg3 = "0000"
 
-        mssg3 = mssg3
-
         ### Mode, Automatic (1) or Manual (0)
         #mssg4 = "1"
 
@@ -112,23 +113,24 @@ class MotorMove:
         fromPi_auto_startSequence   = 0
         fromPi_auto_resetSequence   = 1
 
-        fromPi_man_goToHome         = 0
-        fromPi_man_goToPick         = 1
-        fromPi_man_goToPlace        = 2
-        fromPi_man_goDown           = 3
-        fromPi_man_goToLS           = 4
-        fromPi_man_grip             = 5
-        fromPi_man_drop             = 6
+        fromPi_man_Idle             = 0
+        fromPi_man_goToHome         = 1
+        fromPi_man_goToPick         = 2
+        fromPi_man_goToPlace        = 3
+        fromPi_man_goDownPlace      = 4
+        fromPi_man_goDownPick       = 5
+        fromPi_man_goToLS           = 6
+        fromPi_man_grip             = 7
+        fromPi_man_drop             = 8
         '''
         
-        #mssg5 = "0"
+        #mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         #print(mssg)
         if self.serOpenCR.isOpen():
-            self.serOpenCR.write(mssg.encode().rstrip()) #ajouter encoding = 'utf-8' dans les parenthèses de encoding
+            self.serOpenCR.write(mssg.encode().rstrip())
             print("msg Sent: " + mssg)
-        #while(readMsg() != message): pass
         return
 
     def readMsg(self):
@@ -145,15 +147,13 @@ class MotorMove:
                     pass'''
                 pass
             while  self.serOpenCR.inWaiting() > 0:
-                answer = self.serOpenCR.readline(14).decode() #enlever le 14 des parentheses
+                answer = self.serOpenCR.readline().decode()
                 print("Answer is : " + answer)
                 self.serOpenCR.flushInput()
-        #answer = "2000"
         return int(answer)
 
     def rad2Servo(self, angleRad:float):
         angleServo = angleRad * 4095 / (2*np.pi)
-        #print(angleServo)
         return angleServo
 
     def lawOfCos(self, a, b, c):
@@ -176,12 +176,18 @@ class MotorMove:
 
         phi = self.lawOfCos(self, self.BicepLen, self.ForearmLen, distance)
         
-        thetaInt:int = round(self.rad2Servo(self, theta))
-        phiInt:int = round(self.rad2Servo(self, phi))
-        print("phi: " + str(phiInt))
-        print("theta: " + str(thetaInt))
+        J1:int = round(self.rad2Servo(self, theta) * 2) + self.J1Offset
+        J2:int = round(self.rad2Servo(self, phi)) + self.J2Offset
 
-        return thetaInt, phiInt
+        if J1 > 4095:
+            J1 = 4095
+        if J2 > 4095:
+            J2 = 4095
+
+        print("phi: " + str(J1))
+        print("theta: " + str(J2))
+
+        return J1, J2
 
     def Interpolation(self, posXStart: int, posYStart: int, posXEnd: int, posYEnd: int):
         jointAngles = self.cart2cyl(self, posXStart, posYStart)
@@ -260,17 +266,9 @@ class MotorMove:
         return posx, posy, ztarget
 
     def moveCart(self, gameXpos, gameYpos, gameZpos):
-        #gameXpos, gameYpos, gameZpos = game.submit_inputs_xyz()
 
         servoShoulderAngle, servoElbowAngle = self.cart2cyl(self, gameXpos, gameYpos)
-        #print(str(servoShoulderAngle) + '|' + str(servoElbowAngle))
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
-        #msgReceived = self.readMsg(self)
-        #time.sleep(0.1)
-
-        '''MotorMove.sendMsg(MotorMove, gameXpos, gameYpos)
-        msgReceived = MotorMove.readMsg(MotorMove)
-        time.sleep(0.1)'''
     
     def moveJoint(self, J1, J2):
         self.sendMsg(self, J1, J2)
