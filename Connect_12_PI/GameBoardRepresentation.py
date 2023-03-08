@@ -85,13 +85,9 @@ class gameboard(QtWidgets.QMainWindow):
         return floor
 
     def detect_win(self,play):
-        
-        row_index = int(position_list[0])-1
-        column_index = int(position_list[1])-1
-        player_id = int(position_list[2])
-        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,self.AI_id):
-            if streak == 1:
-                strength=strength+11
+        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total,'2'):
+            if streak == 4:
+                return True
         return False
 
     
@@ -241,8 +237,8 @@ class gameboard(QtWidgets.QMainWindow):
         height_constant = 300
         height_init = 0
         
-        xA1Position = 1
-        yA1Position = 1
+        xA1Position = 2000
+        yA1Position = 2000
         xgap = 5
         ygap = -5            # Use a negative value since the A1 position is at the top left
 
@@ -267,7 +263,8 @@ class gameboard(QtWidgets.QMainWindow):
         zPosition = height_init - floor* height_constant
 
         MotorMove.Zpos = zPosition
-        MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
+        #MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
+        MotorMove.moveJoint(MotorMove, int(xPosition), int(yPosition))
         return xPosition, yPosition, zPosition
 
     def take_picture(self):

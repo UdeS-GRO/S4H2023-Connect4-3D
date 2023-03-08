@@ -2,9 +2,9 @@
 
 #This function, for a given play, counts the number of pieces in a row for every orientation and returns a list of every streak
 def streak_counter(play,board,row_total,column_total,floor_total,player_id):
-    row_index = play[0]-1
-    column_index = play[1]-1
-    floor_index = play[2]-1
+    row_index = int(play[0])-1
+    column_index = int(play[1])-1
+    floor_index = int(play[2])-1
 
     opponent_id = not 0
 
