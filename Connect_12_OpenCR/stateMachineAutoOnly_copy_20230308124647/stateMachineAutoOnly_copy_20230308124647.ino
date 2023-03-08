@@ -46,9 +46,12 @@
 #define HOME_POS_J1             4050       // TODO: hardcoder la valeur
 #define HOME_POS_J2             3000       // TODO: hardcoder la valeur
 #define HOME_POS_Z              0       // TODO: hardcoder la valeur
-#define PICK_POS_J1             4050    // TODO: hardcoder la valeur
-#define PICK_POS_J2             1500    // TODO: hardcoder la valeur
-#define PICK_POS_Z              2750       // TODO: hardcoder la valeur
+#define PICK_90_POS_J1             2350
+#define PICK_90_POS_J2             3000
+#define PICK_90_POS_Z              3150
+#define PICK_45_POS_J1             2850
+#define PICK_45_POS_J2             2350
+#define PICK_45_POS_Z              3150
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -68,10 +71,14 @@ FSM_AUTO STATE_AUTO;
 struct PositionRegister { int j1;
                           int j2;
                           int z;
+                          int PieceLeft;                          
                         };
 PositionRegister pr_home;
 PositionRegister pr_pick;
+PositionRegister pr_pick_90;
+PositionRegister pr_pick_45;
 PositionRegister pr_place;
+
 
 /*---------------------------- FUNCTIONS DEFINITIONS --------------------------*/
 
@@ -86,6 +93,7 @@ void DeactivateMagnet();
 void readSerialPort();
 void sendData(int msg2send);
 void LED_DEBUG(int caseNumber);
+void PosPick(PositionRegister pr);
 
 /*---------------------------- VARIABLES DEFINITIONS --------------------------*/
 
@@ -184,9 +192,20 @@ void setup()
   pr_home.j2 = HOME_POS_J2;
   pr_home.z = HOME_POS_Z;
 
-  pr_pick.j1 = PICK_POS_J1;
-  pr_pick.j2 = PICK_POS_J2;
-  pr_pick.z = PICK_POS_Z;
+  pr_pick_90.j1 = PICK_90_POS_J1;
+  pr_pick_90.j2 = PICK_90_POS_J2;
+  pr_pick_90.z = PICK_90_POS_Z;
+  pr_pick_90.PieceLeft = 8;
+
+  pr_pick.j1 = PICK_45_POS_J1;
+  pr_pick.j2 = PICK_45_POS_J2;
+  pr_pick.z = PICK_45_POS_Z;
+  pr_pick.PieceLeft = 8;
+
+  pr_pick_45.j1 = PICK_45_POS_J1;
+  pr_pick_45.j2 = PICK_45_POS_J2;
+  pr_pick_45.z = PICK_45_POS_Z;
+  pr_pick_45.PieceLeft = 8;
 
   pr_place.j1 = 3000;
   pr_place.j2 = 1000;
@@ -204,17 +223,8 @@ void loop()
 {
   readSerialPort();
 
-  Serial.println("After Read");
+  //Serial.println(Count_pulses);
 
-  Serial.println(STATE_AUTO);
-
-  Serial.print(pr_place.j1);
-  Serial.print("\t");
-  Serial.print(pr_place.j2);
-  Serial.print("\t");
-  Serial.println(pr_place.z);
-
-  //GoToPosition(pr_place);
   if (fromPi_auto_resetSequence)
   {
     STATE_AUTO = SA_IDLE;
@@ -234,7 +244,7 @@ void loop()
         
         if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
         {
-          Serial.println("Not at home anymore");
+          // Serial.println("Not at home anymore");
           STATE_AUTO = SA_IDLE;
         }
       }
@@ -244,7 +254,7 @@ void loop()
 
     case SA_IDLE:
       //LED_DEBUG(10);
-      Serial.println("Idle time!!:)");
+      // Serial.println("Idle time!!:)");
       RestingEOAT();
       DeactivateMagnet();
       toPi_sequenceDone = true;
@@ -259,9 +269,9 @@ void loop()
 
     case SA_GO_TO_PICK1:
       //LED_DEBUG(11);
-      Serial.println("BeforeGotoPosition +++++++++++++++++++-");
+      // Serial.println("BeforeGotoPosition +++++++++++++++++++-");
       GoToPosition(pr_pick);
-      Serial.println("AfterGotoPosition --------------");
+      // Serial.println("AfterGotoPosition --------------");
       if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
       {
         //timerBetweenStates = millis();
@@ -275,11 +285,13 @@ void loop()
 
     case SA_GO_TO_PIECE:
       //LED_DEBUG(12);
+      delay(500);
       LowerEOAT(pr_pick);
 
       if (Count_pulses >= pr_pick.z)
       {
         RestingEOAT();
+        PosPick(pr_pick);
         timerPickPieceStart = millis();
         STATE_AUTO = SA_PICK_PIECE;
       }
@@ -319,6 +331,7 @@ void loop()
 
     case SA_GO_TO_FLOOR:
       //LED_DEBUG(16);
+      delay(500);
       LowerEOAT(pr_place);
       /*if (encoder >= pr_place.z)
       {
@@ -559,4 +572,11 @@ void PWMDebug(int Step){
 bool IsAtPosition(int MotorID, int EndPos, int Treshold)
 {
   return (ServoMotor.getPresentPosition(MotorID) >= (EndPos-Treshold)) && (ServoMotor.getPresentPosition(MotorID) <= (EndPos+Treshold));
+}
+
+void PosPick(PositionRegister pr){
+  if(pr.PieceLeft > 0){
+    pr.z = 3450 - pr.PieceLeft * 300;
+  }
+  pr.PieceLeft -= 1;
 }

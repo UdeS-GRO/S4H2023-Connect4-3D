@@ -27,7 +27,7 @@ class MotorMove:
     mssg2:str = "0000"
     mssg3:str = "0000"
     mssg4:str = "0"             #default is manual
-    mssg5:str = "1"             #default is Home
+    mssg5:str = "0"             #default is Home
     mssg:str = "000000000000"
 
     Zpos:int = 0 #zposition
