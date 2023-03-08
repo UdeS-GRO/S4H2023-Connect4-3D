@@ -24,14 +24,13 @@ class AI():
                     if self.gb.board[i][j][k] == 0:  
                         possible_positions.append([i+1,j+1,k+1])
                         break
-
         return possible_positions
 
     #This function rates a play based on the number of pieces in a row
-    def rate_play(self,play):
+    def rate_position(self,play):
         strength=0
         #This rates the offensive strength of the play
-        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
+        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,self.AI_id):
             if streak == 1:
                 strength=strength+11
             elif streak == 2:
@@ -40,10 +39,13 @@ class AI():
                 strength=strength+1001
             elif streak == 4:
                 strength=strength+10001
+            elif streak == 5:
+                strength=strength+100001
+            elif streak == 6:
+                strength=strength+1000001
 
-        opponent_play = [play[0],play[1],self.opponent_id]
         #This rates the defensive strength of the play
-        for streak in streak_counter(opponent_play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
+        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,self.opponent_id):
             if streak == 1:
                 strength=strength+10
             elif streak == 2:
@@ -52,6 +54,10 @@ class AI():
                 strength=strength+1000
             elif streak == 4:
                 strength=strength+10000
+            elif streak == 5:
+                strength=strength+100000
+            elif streak == 6:
+                strength=strength+1000000
     
         return strength
 
@@ -59,17 +65,17 @@ class AI():
     def choose_play(self):
         possible_positions = self.get_positions()
         max_strength = 0
-        best_plays = []
+        best_positions = []
         for position in possible_positions:
-            play = [position[0]]+[position[1]]+[self.AI_id]
-            strength = self.rate_play(play)
+            strength = self.rate_position(position)
             if strength > max_strength:
                 max_strength = strength
-                best_plays = [play]
+                best_positions = [position]
             elif strength == max_strength:
-                best_plays.append(play)
-        best_play = random.choice(best_plays)
-
+                best_positions.append(position)
+        best_position = random.choice(best_positions)
+        best_play = [best_position[0],best_position[1]]
+        print("AI play: ",best_play)
         return best_play
  
 
