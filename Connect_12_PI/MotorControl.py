@@ -125,13 +125,15 @@ class MotorMove:
         fromPi_man_drop             = 8
         '''
         
-        mssg5 = "1"
+        self.mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         #print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip())
             print("msg Sent: " + mssg)
+        
+        self.mssg5 = "0"
         return
 
     def readMsg(self):

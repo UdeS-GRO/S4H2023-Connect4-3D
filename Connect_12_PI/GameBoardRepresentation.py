@@ -29,7 +29,7 @@ class gameboard(QtWidgets.QMainWindow):
         userInterface(self)    
 
         # start camera
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
+        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
         return
@@ -81,13 +81,6 @@ class gameboard(QtWidgets.QMainWindow):
             if self.board[i - 1][row - 1][column - 1] != 0:
                 floor = floor + 1               
         return floor
-
-    def detect_win(self,play):
-        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total,'2'):
-            if streak == 4:
-                return True
-        return False
-
     
     def submit_inputs_xyz(self):
         xPosition = self.line_edit3.text()
@@ -235,10 +228,10 @@ class gameboard(QtWidgets.QMainWindow):
         height_constant = 300
         height_init = 0
         
-        xA1Position = 2000
-        yA1Position = 2000
-        xgap = 5
-        ygap = -5            # Use a negative value since the A1 position is at the top left
+        xA1Position = 500
+        yA1Position = 500
+        xgap = 500
+        ygap = 500            # Use a negative value since the A1 position is at the top left
 
         if row == 1:
             xPosition = xA1Position
@@ -247,7 +240,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif row == 3:
             xPosition = xA1Position + 2*xgap
         elif row == 4:
-            yPosition = yA1Position + 3*ygap
+            xPosition = xA1Position + 3*xgap
         
         if column == 1:
             yPosition = yA1Position
@@ -258,8 +251,10 @@ class gameboard(QtWidgets.QMainWindow):
         elif column == 4:
             yPosition = yA1Position + 3*ygap
 
-        zPosition = height_init - floor* height_constant
+        zPosition = floor*height_constant
 
+        MotorMove.mssg5 = "1"
+        print(MotorMove.mssg5)
         MotorMove.Zpos = zPosition
         #MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
         MotorMove.moveJoint(MotorMove, int(xPosition), int(yPosition))
@@ -314,9 +309,3 @@ class gameboard(QtWidgets.QMainWindow):
 
         return Player, x, y
     
-if __name__ == "__main__":
-    gm = gameboard
-    app = QtWidgets.QApplication(sys.argv)
-    window = gameboard()
-    window.show()
-    sys.exit(app.exec_())

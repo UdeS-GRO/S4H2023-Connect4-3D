@@ -92,7 +92,7 @@ void ActivateMagnet();
 void DeactivateMagnet();
 void readSerialPort();
 void sendData(int msg2send);
-void LED_DEBUG(int caseNumber);
+//void LED_DEBUG(int caseNumber);
 void PosPick(PositionRegister pr);
 
 /*---------------------------- VARIABLES DEFINITIONS --------------------------*/
@@ -129,14 +129,13 @@ int  fromPi_posJ1 = 0;
 int  fromPi_posJ2 = 0;
 int  fromPi_posZ = 0;
 
-//bool fromPi_manual = true;
-//bool fromPi_automatic = false;
-bool fromPi_Mode = true;   //Auto by default
-int fromPi_State = 0;
+bool fromPi_Mode = true;    //Auto by default
+int fromPi_State = 0;       //0 = idle, 1 = start, 2 = reset
+int tempState = 0;
+int lastState = 0;
 
 bool fromPi_auto_startSequence = false;
 bool fromPi_auto_resetSequence = false;
-
 
 bool toPi_sequenceDone = false;
 
@@ -212,9 +211,6 @@ void setup()
   pr_place.z = 1000;
  
   STATE_AUTO = SA_GO_TO_HOME;
-
-  PWMDebug(0);
-
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
@@ -222,7 +218,7 @@ void setup()
 void loop() 
 {
   readSerialPort();
-
+  digitalWrite(LED2_PIN, !bool(fromPi_State));
   //Serial.println(Count_pulses);
 
   if (fromPi_auto_resetSequence)
@@ -242,6 +238,8 @@ void loop()
         
         GoToPosition(pr_home);
         
+        fromPi_auto_startSequence = false;
+
         if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
         {
           // Serial.println("Not at home anymore");
@@ -253,15 +251,15 @@ void loop()
       break;
 
     case SA_IDLE:
-      //LED_DEBUG(10);
-      // Serial.println("Idle time!!:)");
       RestingEOAT();
       DeactivateMagnet();
-      toPi_sequenceDone = true;
-
-      if (digitalRead(BDPIN_PUSH_SW_1)) //fromPi_State == 0)
+      //toPi_sequenceDone = true;
+      //readSerialPort();
+      if (fromPi_State != 0)//tempState == 1) //fromPi_auto_startSequence) //digitalRead(BDPIN_PUSH_SW_1))
       {
-        //fromPi_State = 2;
+        fromPi_State = 0;
+        //tempState = 0;
+        //fromPi_auto_startSequence = false;
         STATE_AUTO = SA_GO_TO_PICK1;
       }
       break;
@@ -273,12 +271,7 @@ void loop()
       // Serial.println("AfterGotoPosition --------------");
       if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10))
       {
-        //timerBetweenStates = millis();
-        //if(timerBetweenStates - millis() >= delayBetweenStates)
-        //{
-          //timerBetweenStates = millis();
-          STATE_AUTO = SA_GO_TO_PIECE;
-        //}
+        STATE_AUTO = SA_GO_TO_PIECE;
       }
       break;
 
@@ -509,8 +502,9 @@ void readSerialPort() {
                           ]*/
 
   if (Serial.available() == 0){
+    StringFromPi = "";
   }
- 	else if (Serial.available() >= 0) {
+ 	else if (Serial.available() > 0) {
  			//delay(2);
       //while (Serial.available() == 0 );
  			//while (Serial.available() > 0){
@@ -521,7 +515,10 @@ void readSerialPort() {
       //}
  			
  	}
+   
   Serial.flush();
+
+  Serial.println(StringFromPi);
 
   //String stringJ1 = StringFromPi.substring(0, 3);
   String stringJ1 = String(StringFromPi.charAt(0)) + String(StringFromPi.charAt(1)) + String(StringFromPi.charAt(2)) + String(StringFromPi.charAt(3));
@@ -535,7 +532,7 @@ void readSerialPort() {
   //String stringState = StringFromPi.substring(13, 13);
   String stringState = String(StringFromPi.charAt(13));
   fromPi_State = stringState.toInt();
-
+  
   // fromPi_posJ1 = stringJ1.toInt();
   // fromPi_posJ2 = stringJ2.toInt();
   // fromPi_posZ = stringZ.toInt();
@@ -551,15 +548,39 @@ void readSerialPort() {
   if(pr_place.z == 0)
     pr_place.z = pr_home.z;
 
+  if(lastState != fromPi_State){    //if state changes, tempState = fromPi_State
+    //tempState = fromPi_State;
+    if(fromPi_State == 1){
+      tempState = 1;
+      fromPi_auto_resetSequence = false;
+      fromPi_auto_startSequence = true;
+    }
+    else if (fromPi_State == 2){
+      tempState = 2;
+      fromPi_auto_resetSequence = true;
+      fromPi_auto_startSequence = false;
+    }
+  }
+  else{
+      tempState = 0;
+      fromPi_auto_resetSequence = false;
+      fromPi_auto_startSequence = false;
+  }
 
-  if(fromPi_State == 0){
-    fromPi_auto_resetSequence = false;
-    fromPi_auto_startSequence = true;
-  }
-  else if (fromPi_State == 1){
-    fromPi_auto_resetSequence = true;
-    fromPi_auto_startSequence = false;
-  }
+  lastState = fromPi_State;
+
+  // if(tempState == 1){
+  //   fromPi_auto_resetSequence = false;
+  //   fromPi_auto_startSequence = true;
+  // }
+  // else if (tempState == 2){
+  //   fromPi_auto_resetSequence = true;
+  //   fromPi_auto_startSequence = false;
+  // }
+  // else{
+  //   fromPi_auto_resetSequence = false;
+  //   fromPi_auto_startSequence = false;
+  // }
   
   return;
 }
