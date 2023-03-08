@@ -110,8 +110,9 @@ class MotorMove:
 
         ### States:
         '''
-        fromPi_auto_startSequence   = 0
-        fromPi_auto_resetSequence   = 1
+        fromPi_Idle                 = 0
+        fromPi_auto_startSequence   = 1
+        fromPi_auto_resetSequence   = 2
 
         fromPi_man_Idle             = 0
         fromPi_man_goToHome         = 1

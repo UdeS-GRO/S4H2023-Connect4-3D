@@ -48,10 +48,10 @@
 #define HOME_POS_Z              0       // TODO: hardcoder la valeur
 #define PICK_90_POS_J1             2350
 #define PICK_90_POS_J2             3000
-#define PICK_90_POS_Z              3150
+#define PICK_90_POS_Z              3050
 #define PICK_45_POS_J1             2850
 #define PICK_45_POS_J2             2350
-#define PICK_45_POS_Z              3150
+#define PICK_45_POS_Z              3050
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -259,10 +259,9 @@ void loop()
       DeactivateMagnet();
       toPi_sequenceDone = true;
 
-      if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true) 
+      if (digitalRead(BDPIN_PUSH_SW_1)) //fromPi_State == 0)
       {
-        //fromPi_auto_startSequence = false;
-        //toPi_sequenceDone = false;
+        //fromPi_State = 2;
         STATE_AUTO = SA_GO_TO_PICK1;
       }
       break;
