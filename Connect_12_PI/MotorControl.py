@@ -30,13 +30,13 @@ class MotorMove:
     mssg5:str = "1"             #default is Home
     mssg:str = "000000000000"
 
-    Zpos:int = 0
+    Zpos:int = 0 #zposition
 
     ## Motor control
-    '''
+    
     vari:int = 1
     vari2:int = 1
-    '''
+    
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)
 
@@ -106,7 +106,7 @@ class MotorMove:
             mssg3 = "0000"
 
         ### Mode, Automatic (1) or Manual (0)
-        #mssg4 = "1"
+        mssg4 = "1"
 
         ### States:
         '''
@@ -124,7 +124,7 @@ class MotorMove:
         fromPi_man_drop             = 8
         '''
         
-        #mssg5 = "1"
+        mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         #print(mssg)

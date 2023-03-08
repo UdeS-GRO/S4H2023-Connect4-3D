@@ -141,7 +141,7 @@ int  fromPi_posZ = 0;
 
 //bool fromPi_manual = true;
 //bool fromPi_automatic = false;
-bool fromPi_Mode = false;   //Manual by default
+bool fromPi_Mode = true;   //Auto by default
 int fromPi_State = 0;
 
 bool fromPi_auto_startSequence = false;
@@ -218,8 +218,8 @@ void setup()
   pr_place.z = 1000;
 
   //STATE = S_MANUAL;
-  STATE = S_MANUAL;
-  STATE_MAN = SM_IDLE;  
+  STATE = S_AUTOMATIC;
+  //STATE_MAN = SM_IDLE;  
   STATE_AUTO = SA_GO_TO_HOME;
 
   PWMDebug(0);
@@ -231,12 +231,15 @@ void setup()
 void loop() 
 {
   readSerialPort();
-  //Serial.println(digitalRead(PIN_LIMITSWITCH));
+
+  Serial.println("After Read");
+  Serial.println(STATE);
 
   switch (STATE)
   {
     ////////// MANUAL SEQUENCE BELOW //////////
     case S_MANUAL:
+
       //GoToPosition(pr_pick);
       
       switch (STATE_MAN)
@@ -269,7 +272,7 @@ void loop()
           //   STATE_MAN = SM_DROP;
           // else
           //   break;
-          // break;
+          break;
 
         case SM_GO_TO_HOME:
           
@@ -376,23 +379,30 @@ void loop()
           RaiseEOAT();
           if(IsLimitSwitchActivated()){
             Count_pulses = 0;
-            GoToPosition(pr_home);
             RestingEOAT();
+            
+              Serial.println("After Resting");
+            GoToPosition(pr_home);
+            
+              Serial.println("After GoToPosition ----");
+            if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
+            {
+              Serial.println("Not at home anymore");
+              STATE_AUTO = SA_IDLE;
+            }
           }
 
-          if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6))
-          {
-            STATE_AUTO = SA_IDLE;
-          }
+          
           break;
 
         case SA_IDLE:
           //LED_DEBUG(10);
+          Serial.println("Idle time!!:)");
           RestingEOAT();
           DeactivateMagnet();
           toPi_sequenceDone = true;
 
-          if (fromPi_auto_startSequence == true) //digitalRead(BDPIN_PUSH_SW_1))
+          if (digitalRead(BDPIN_PUSH_SW_1))//fromPi_auto_startSequence == true) 
           {
             //fromPi_auto_startSequence = false;
             //toPi_sequenceDone = false;
@@ -498,7 +508,7 @@ void loop()
           break;
 
         default:
-          STATE_AUTO = SA_GO_TO_HOME;
+          STATE_AUTO = SA_IDLE;
           break;
       }   
       break;
@@ -515,39 +525,19 @@ void loop()
 void GoToPosition(PositionRegister pr)
 {
   ServoMotor.setGoalPosition(motorShoulder_ID, pr.j1);
-  //Serial.print("SHoulder Present position: ");
-  //Serial.println(ServoMotor.getPresentPosition(motorShoulder_ID));
-  //LED_DEBUG(4);
-  //sendData();
   ServoMotor.setGoalPosition(motorElbow_ID,   pr.j2);
-  //while(ServoMotor.getPresentPosition(motorShoulder_ID) != pr.j1 && ServoMotor.getPresentPosition(motorElbow_ID) != pr.j2);
-  
 }
 
 void LowerEOAT(PositionRegister pr)
 {
   digitalWrite(DcDir, HIGH);
   analogWrite(DcPWM, 200);
-  
-  /*
-  do{
-    //Read DC encoder
-  }
-  while(Count_pulses <= pr.z);
-
-  analogWrite(DcPWM, 0);*/
-
 }
 
 void RaiseEOAT()
 {
   digitalWrite(DcDir, LOW);
   analogWrite(DcPWM, 127);
-
-  /*if(IsLimitSwitchActivated() || Count_pulses < 0){
-    analogWrite(DcPWM, 0);
-    Count_pulses = 0;
-  }*/
 }
 
 void RestingEOAT()
@@ -564,11 +554,11 @@ void ReadEncoder()
   else{
     Count_pulses--;
   }
-  //return Count_pulses;
 }
 
 bool IsLimitSwitchActivated()
 {  
+  //Serial.println(digitalRead(PIN_LIMITSWITCH));
   return !digitalRead(PIN_LIMITSWITCH);
 }
 
@@ -723,7 +713,7 @@ void readSerialPort() {
   // }
 
   //LED1 ON if Automatic, LED2 ON if Manual
-  if(fromPi_Mode){
+  if(!fromPi_Mode){
     STATE = S_AUTOMATIC;
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, LOW);

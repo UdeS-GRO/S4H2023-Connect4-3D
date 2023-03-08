@@ -5,10 +5,7 @@ import cv2
 import pyzbar.pyzbar as pyzbar
 import time
 import os
-try:
-    from MotorControl import MotorMove
-except:
-    pass
+from MotorControl import MotorMove
 from PyQt5 import QtWidgets
 
 import os
@@ -249,10 +246,10 @@ class gameboard(QtWidgets.QMainWindow):
 
     def player_played(self):
         # Actualize the gameboard status with the new inputs
-        ##player, column, row = self.take_picture()
-        ##vision_list = [str(row), str(column), str(player)]
-        ##print('vision list : ', vision_list)
-        ##self.add_piece(vision_list)
+        # player, column, row = self.take_picture()
+        # vision_list = [str(row), str(column), str(player)]
+        # print('vision list : ', vision_list)
+        # self.add_piece(vision_list)
 
         if self.push_button1.isChecked():
             #user_input = self.line_edit1.text()    # Uncomment thoses lines to use the player's input
