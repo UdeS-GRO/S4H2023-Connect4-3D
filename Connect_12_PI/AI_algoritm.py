@@ -31,7 +31,7 @@ class AI():
     def rate_play(self,play):
         strength=0
         #This rates the offensive strength of the play
-        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
+        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,self.AI_id):
             if streak == 1:
                 strength=strength+11
             elif streak == 2:
@@ -43,7 +43,7 @@ class AI():
 
         opponent_play = [play[0],play[1],self.opponent_id]
         #This rates the defensive strength of the play
-        for streak in streak_counter(opponent_play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
+        for streak in streak_counter(opponent_play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,self.AI_id):
             if streak == 1:
                 strength=strength+10
             elif streak == 2:
