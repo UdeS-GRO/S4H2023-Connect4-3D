@@ -25,13 +25,12 @@ class gameboard(QtWidgets.QMainWindow):
     def __init__(self):
         # Function used to display the user interface (UI) and let the user use inputs to move the robot
         # to a certain position or tell the program he's done playing. 
-
         self.init_board()
         super().__init__()
         userInterface(self)    
 
         # start camera
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
+        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
         return
@@ -85,7 +84,9 @@ class gameboard(QtWidgets.QMainWindow):
         return floor
 
     def detect_win(self,play):
-        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total,'2'):
+        # Detect if there is a win on the gameboard.
+        play = [int(play[0])]+[int(play[1])]+[int(play[2])]
+        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total):
             if streak == 4:
                 return True
         return False
