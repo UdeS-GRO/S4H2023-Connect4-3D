@@ -19,8 +19,8 @@ class MotorMove:
     ### Math variable
     BicepLen:float = 142.5
     ForearmLen:float = 142.5
-    J1Offset:int = 2000
-    J2Offset:int = 2000
+    J1Offset:int = 0
+    J2Offset:int = 0
 
     ## Communication variables
     mssg1:str = "0000"
@@ -172,13 +172,23 @@ class MotorMove:
         phiY = ((self.BicepLen + self.ForearmLen*C2)*cartX)-(self.ForearmLen * S2 * cartY)
         phi = np.arctan2(((self.ForearmLen * S2 * cartX) + ((self.BicepLen + self.ForearmLen*C2)*cartY)), (((self.BicepLen + self.ForearmLen*C2)*cartX)-(self.ForearmLen * S2 * cartY)))
         '''
+        '''
         distance = np.sqrt(cartX*cartX + cartY*cartY)
         theta1 = np.arctan2(cartX, cartY)
         theta2 = self.lawOfCos(self, distance, self.BicepLen, self.ForearmLen)
         theta = theta1 + theta2
 
         phi = self.lawOfCos(self, self.BicepLen, self.ForearmLen, distance)
-        
+        '''
+
+        t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
+        theta2:float = np.arccos(t2)
+        t1 = (self.BicepLen*np.sin(theta2)) / (self.BicepLen + self.ForearmLen*np.cos(theta2))
+        theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)
+
+        theta = theta1
+        phi = theta2
+
         J1:int = round(self.rad2Servo(self, theta) * 2) + self.J1Offset
         J2:int = round(self.rad2Servo(self, phi)) + self.J2Offset
 
