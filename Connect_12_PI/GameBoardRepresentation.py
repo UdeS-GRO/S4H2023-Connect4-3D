@@ -23,7 +23,6 @@ class gameboard(QtWidgets.QMainWindow):
     def __init__(self):
         # Function used to display the user interface (UI) and let the user use inputs to move the robot
         # to a certain position or tell the program he's done playing. 
-
         self.init_board()
         super().__init__()
         userInterface(self)    
@@ -81,6 +80,15 @@ class gameboard(QtWidgets.QMainWindow):
             if self.board[i - 1][row - 1][column - 1] != 0:
                 floor = floor + 1               
         return floor
+
+    def detect_win(self,play):
+        # Detect if there is a win on the gameboard.
+        play = [int(play[0])]+[int(play[1])]+[int(play[2])]
+        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total):
+            if streak == 4:
+                return True
+        return False
+
     
     def submit_inputs_xyz(self):
         xPosition = self.line_edit3.text()
