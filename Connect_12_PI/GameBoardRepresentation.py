@@ -233,9 +233,62 @@ class gameboard(QtWidgets.QMainWindow):
         # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
         # The reference position is A1 and then the other positinos are automatically generated. 
 
-        height_constant = 300
-        height_init = 0
+
+        if(row == 1 & column == 1):
+            J1 = 1783
+            J2 = 3523
+        elif (row == 1 & column == 2):
+            J1 = 1082
+            J2 = 3677
+        elif (row == 1 & column == 3):
+            J1 = 3401
+            J2 = 517
+        elif (row == 1 & column == 4):
+            J1 = 2706
+            J2 = 685
+        elif (row == 2 & column == 1):
+            J1 = 3998
+            J2 = 934
+        elif (row == 2 & column == 2):
+            J1 = 3711
+            J2 = 800
+        elif (row == 2 & column == 3):
+            J1 = 3229
+            J2 = 796
+        elif (row == 2 & column == 4):
+            J1 = 2719
+            J2 = 931
+        elif (row == 3 & column == 1):
+            J1 = 3555
+            J2 = 1250
+        elif (row == 3 & column == 2):
+            J1 = 3307
+            J2 = 1139
+        elif (row == 3 & column == 3):
+            J1 = 2978
+            J2 = 1155
+        elif (row == 3 & column == 4):
+            J1 = 2567
+            J2 = 1240
+        elif (row == 4 & column == 1):
+            J1 = 2829
+            J2 = 1897
+        elif (row == 4 & column == 2):
+            J1 = 2828
+            J2 = 1633
+        elif (row == 4 & column == 3):
+            J1 = 2523
+            J2 = 1660
+        elif (row == 4 & column == 4):
+            J1 = 1987
+            J2 = 1962
+        else:
+            J1 = 0
+            J2 = 0
         
+        height_constant = -300
+        height_init = 2700
+        '''
         xA1Position = 0.111
         yA1Position = 0.110
         xgap = 0.056
@@ -258,15 +311,15 @@ class gameboard(QtWidgets.QMainWindow):
             yPosition = yA1Position + 2*ygap
         elif column == 4:
             yPosition = yA1Position + 3*ygap
-
-        zPosition = floor*height_constant
-
+        '''
+        zPosition = height_init + floor*height_constant
+        
         MotorMove.mssg5 = "1"
         print(MotorMove.mssg5)
         MotorMove.Zpos = zPosition
-        #MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
-        MotorMove.moveJoint(MotorMove, int(xPosition), int(yPosition))
-        return xPosition, yPosition, zPosition
+        #MotorMove.moveCart(MotorMove, xPosition, yPosition, zPosition)
+        MotorMove.moveJoint(MotorMove, J1, J2)
+        return J1, J2, zPosition
 
     def take_picture(self):
         # Take picture of the gameboard when the played button is press. Actualize the UI by comparing the actual status gameboard

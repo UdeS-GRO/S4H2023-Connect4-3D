@@ -17,8 +17,8 @@ phi = 0.001
 
 class MotorMove:
     ### Math variable
-    BicepLen:float = 142.5
-    ForearmLen:float = 142.5
+    BicepLen:float = 0.1425
+    ForearmLen:float = 0.1425
     J1Offset:int = 0
     J2Offset:int = 0
 
@@ -128,7 +128,7 @@ class MotorMove:
         self.mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
-        #print(mssg)
+        print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip())
             print("msg Sent: " + mssg)
@@ -163,7 +163,7 @@ class MotorMove:
         modulus = np.power(a, 2) + np.power(b, 2) - np.power(c, 2)
         return np.arccos(modulus / (2*a*b))
 
-    def cart2cyl(self, cartX:int, cartY:int):
+    def cart2cyl(self, cartX:float, cartY:float):
         '''
         C2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
         S2:float = 1-C2**(0.5)  
@@ -183,7 +183,7 @@ class MotorMove:
 
         t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
         theta2:float = np.arccos(t2)
-        t1 = (self.BicepLen*np.sin(theta2)) / (self.BicepLen + self.ForearmLen*np.cos(theta2))
+        t1 = (self.ForearmLen*np.sin(theta2)) / (self.BicepLen*np.cos(theta2))
         theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)
 
         theta = theta1
