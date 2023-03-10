@@ -11,10 +11,16 @@ class AI():
     def __init__(self, gb):
         self.gb = gb
         self.AI_id = 2
-        self.opponent_id = 1
+        self.opponent_id = 4
 
         return
     
+
+    def detect_win(self,play,player_id):
+        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,player_id):
+            if streak == 4:
+                return True
+        return False
     #This function returns a list of all possible positions on the board
     def get_positions(self):
         possible_positions = []
@@ -61,7 +67,7 @@ class AI():
         max_strength = 0
         best_plays = []
         for position in possible_positions:
-            play = [position[0]]+[position[1]]+[self.AI_id]
+            play = [position[0]]+[position[1]]+[position[2]]+[self.AI_id]
             strength = self.rate_play(play)
             if strength > max_strength:
                 max_strength = strength
