@@ -228,10 +228,10 @@ class gameboard(QtWidgets.QMainWindow):
         height_constant = 300
         height_init = 0
         
-        xA1Position = 500
-        yA1Position = 500
-        xgap = 500
-        ygap = 500            # Use a negative value since the A1 position is at the top left
+        xA1Position = 0.111
+        yA1Position = 0.110
+        xgap = 0.056
+        ygap = 0.056            # Use a negative value since the A1 position is at the top left
 
         if row == 1:
             xPosition = xA1Position
