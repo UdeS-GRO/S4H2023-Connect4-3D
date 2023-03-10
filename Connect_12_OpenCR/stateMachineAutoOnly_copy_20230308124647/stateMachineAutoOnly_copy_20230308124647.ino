@@ -209,15 +209,6 @@ void setup() {
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() {
-  // readSerialPort();
-  // digitalWrite(LED2_PIN, !bool(fromPi_State));
-  //Serial.println(Count_pulses);
-
-  // if (fromPi_auto_resetSequence)
-  // {
-  //   STATE_AUTO = SA_IDLE;
-  //   fromPi_auto_resetSequence = false;
-  // }
 
   switch (STATE_AUTO) {
 
@@ -229,15 +220,10 @@ void loop() {
 
         GoToPosition(pr_home);
 
-        fromPi_auto_startSequence = false;
-
         if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
-          // Serial.println("Not at home anymore");
           STATE_AUTO = SA_IDLE;
         }
       }
-
-
       break;
 
     case SA_IDLE:
@@ -245,7 +231,7 @@ void loop() {
       DeactivateMagnet();
       readSerialPort();
 
-      if (fromPi_State != 0)  //tempState == 1) //fromPi_auto_startSequence) //digitalRead(BDPIN_PUSH_SW_1))
+      if (fromPi_State != 0)
       {
         fromPi_State = 0;
         STATE_AUTO = SA_GO_TO_PICK1;
@@ -281,7 +267,6 @@ void loop() {
       break;
 
     case SA_GO_TO_LS1:
-      //LED_DEBUG(14);
       RaiseEOAT();
 
       if (IsLimitSwitchActivated()) {
@@ -292,26 +277,16 @@ void loop() {
       break;
 
     case SA_GO_TO_POS:
-      //LED_DEBUG(15);
       GoToPosition(pr_place);
 
       if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
-        //timerBetweenStates = millis();
-        //if(timerBetweenStates >= delayBetweenStates)
         STATE_AUTO = SA_GO_TO_FLOOR;
       }
       break;
 
     case SA_GO_TO_FLOOR:
-      //LED_DEBUG(16);
       delay(500);
       LowerEOAT(pr_place);
-      /*if (encoder >= pr_place.z)
-      {
-        RestingEOAT();
-        encoder = 0;
-        STATE_AUTO = SA_DROP_PIECE;
-      }*/
       if (Count_pulses >= pr_place.z) {
         RestingEOAT();
         timerPlacePieceStart = millis();
@@ -320,7 +295,6 @@ void loop() {
       break;
 
     case SA_DROP_PIECE:
-      //LED_DEBUG(17);
       DeactivateMagnet();
       if (millis() - timerPlacePieceStart >= delayPlace) {
         STATE_AUTO = SA_GO_TO_LS2;
@@ -328,7 +302,6 @@ void loop() {
       break;
 
     case SA_GO_TO_LS2:
-      //LED_DEBUG(18);
       RaiseEOAT();
       if (IsLimitSwitchActivated()) {
         RestingEOAT();
@@ -374,7 +347,6 @@ void ReadEncoder() {
 }
 
 bool IsLimitSwitchActivated() {
-  //Serial.println(digitalRead(PIN_LIMITSWITCH));
   return !digitalRead(PIN_LIMITSWITCH);
 }
 
@@ -387,8 +359,7 @@ void DeactivateMagnet() {
 }
 
 void sendData() {
-  //besoin d<Envoyer quoi?:
-  //mode; sequence finished; erreur; ???
+
   while (Serial.available() < 1) {
     float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
     int SendShoulderPos = round(SendShoulderPosFloat);
@@ -441,12 +412,7 @@ void sendData() {
     msg5 = String(fromPi_State);
 
     msg = msg1 + msg2 + msg3 + msg4 + msg5;
-    //msg = "2000";
-
-    //Serial.print(msg);
   }
-
-  //return;
 }
 
 void readSerialPort() {
@@ -459,36 +425,18 @@ void readSerialPort() {
                           ]*/
 
   if (Serial.available() == 0) {
-    // StringFromPi = "";
-    //fromPi_State = 0;
   }
   else if (Serial.available() > 0) {
-    //delay(2);
-    //while (Serial.available() == 0 );
-    //while (Serial.available() > 0){
+
     StringFromPi = Serial.readString();
-    //LED_DEBUG(StringFromPi.length());
 
-    //delay(1000);
-    //}
-    Serial.println(StringFromPi);
-
-    //String stringJ1 = StringFromPi.substring(0, 3);
     String stringJ1 = String(StringFromPi.charAt(0)) + String(StringFromPi.charAt(1)) + String(StringFromPi.charAt(2)) + String(StringFromPi.charAt(3));
-    //String stringJ2 = StringFromPi.substring(4, 7);
     String stringJ2 = String(StringFromPi.charAt(4)) + String(StringFromPi.charAt(5)) + String(StringFromPi.charAt(6)) + String(StringFromPi.charAt(7));
-    //String stringZ = StringFromPi.substring(8, 11);
     String stringZ = String(StringFromPi.charAt(8)) + String(StringFromPi.charAt(9)) + String(StringFromPi.charAt(10)) + String(StringFromPi.charAt(11));
-    //String stringMode = StringFromPi.substring(12, 12);
     String stringMode = String(StringFromPi.charAt(12));
     fromPi_Mode = bool(stringMode);
-    //String stringState = StringFromPi.substring(13, 13);
     String stringState = String(StringFromPi.charAt(13));
     fromPi_State = stringState.toInt();
-
-    // fromPi_posJ1 = stringJ1.toInt();
-    // fromPi_posJ2 = stringJ2.toInt();
-    // fromPi_posZ = stringZ.toInt();
 
     pr_place.j1 = stringJ1.toInt();
     pr_place.j2 = stringJ2.toInt();
@@ -501,46 +449,8 @@ void readSerialPort() {
     if (pr_place.z == 0)
       pr_place.z = pr_home.z;
 
-    tempState = fromPi_State;
-
-    // if (lastState != fromPi_State) {  //if state changes, tempState = fromPi_State
-    //   //tempState = fromPi_State;
-    //   if (fromPi_State == 1) {
-    //     tempState = 1;
-    //     fromPi_auto_resetSequence = false;
-    //     fromPi_auto_startSequence = true;
-    //   } else if (fromPi_State == 2) {
-    //     tempState = 2;
-    //     fromPi_auto_resetSequence = true;
-    //     fromPi_auto_startSequence = false;
-    //   }
-    // } else {
-    //   tempState = 0;
-    //   fromPi_auto_resetSequence = false;
-    //   fromPi_auto_startSequence = false;
-    // }
-
-    // lastState = fromPi_State;
-
-
     Serial.flush();
   }
-
-
-
-
-  // if(tempState == 1){
-  //   fromPi_auto_resetSequence = false;
-  //   fromPi_auto_startSequence = true;
-  // }
-  // else if (tempState == 2){
-  //   fromPi_auto_resetSequence = true;
-  //   fromPi_auto_startSequence = false;
-  // }
-  // else{
-  //   fromPi_auto_resetSequence = false;
-  //   fromPi_auto_startSequence = false;
-  // }
 
   return;
 }
