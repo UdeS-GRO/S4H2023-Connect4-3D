@@ -232,62 +232,63 @@ class gameboard(QtWidgets.QMainWindow):
         # Returns the xyz coordinates of the position where the robot has to move to. 
         # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
         # The reference position is A1 and then the other positinos are automatically generated. 
+        print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
-
-        if(row == 1 & column == 1):
+        if(row == 1 and column == 1):
             J1 = 1783
             J2 = 3523
-        elif (row == 1 & column == 2):
+        elif (row == 1 and column == 2):
             J1 = 1082
             J2 = 3677
-        elif (row == 1 & column == 3):
+        elif (row == 1 and column == 3):
             J1 = 3401
             J2 = 517
-        elif (row == 1 & column == 4):
+        elif (row == 1 and column == 4):
             J1 = 2706
             J2 = 685
-        elif (row == 2 & column == 1):
+        elif (row == 2 and column == 1):
             J1 = 3998
             J2 = 934
-        elif (row == 2 & column == 2):
+        elif (row == 2 and column == 2):
             J1 = 3711
             J2 = 800
-        elif (row == 2 & column == 3):
+        elif (row == 2 and column == 3):
             J1 = 3229
             J2 = 796
-        elif (row == 2 & column == 4):
+        elif (row == 2 and column == 4):
             J1 = 2719
             J2 = 931
-        elif (row == 3 & column == 1):
+        elif (row == 3 and column == 1):
             J1 = 3555
             J2 = 1250
-        elif (row == 3 & column == 2):
+        elif (row == 3 and column == 2):
             J1 = 3307
             J2 = 1139
-        elif (row == 3 & column == 3):
+        elif (row == 3 and column == 3):
             J1 = 2978
             J2 = 1155
-        elif (row == 3 & column == 4):
+        elif (row == 3 and column == 4):
             J1 = 2567
             J2 = 1240
-        elif (row == 4 & column == 1):
+        elif (row == 4 and column == 1):
             J1 = 2829
             J2 = 1897
-        elif (row == 4 & column == 2):
+        elif (row == 4 and column == 2):
             J1 = 2828
             J2 = 1633
-        elif (row == 4 & column == 3):
+        elif (row == 4 and column == 3):
             J1 = 2523
             J2 = 1660
-        elif (row == 4 & column == 4):
+        elif (row == 4 and column == 4):
             J1 = 1987
             J2 = 1962
         else:
             J1 = 0
             J2 = 0
+            print("Error: Invalid position")
         
         height_constant = -300
-        height_init = 2700
+        height_init = 2150
         '''
         xA1Position = 0.111
         yA1Position = 0.110

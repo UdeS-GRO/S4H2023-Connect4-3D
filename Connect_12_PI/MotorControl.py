@@ -41,7 +41,7 @@ class MotorMove:
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)
 
     #serOpenCR = serial.tools.list_ports.comports(include_links=False)
-    serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)
+    serOpenCR = serial.Serial('COM3', baudrate= 9600, timeout=2.0)
 
     ## Methods
     def __init__(self):
