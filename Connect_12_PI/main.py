@@ -17,6 +17,7 @@ def AI_played(self):
     gb.take_picture()
 
 
+
 def player_played(self):
         # Actualize the gameboard status with the new inputs
         player, column, row = gb.take_picture()
@@ -32,7 +33,6 @@ def player_played(self):
             gb.push_button1.setChecked(False)
         if(gb.detect_win(entries)):
                 print("VICTORY!")
-                #close camera
                 gb.cap.release()                                   # Release the VideoCapture object and Close all the windows
         gb.label.setText(gb.print_board())
         AI_played(self)
