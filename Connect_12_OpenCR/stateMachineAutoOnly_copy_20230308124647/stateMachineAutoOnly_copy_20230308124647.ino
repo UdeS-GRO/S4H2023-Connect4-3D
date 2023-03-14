@@ -51,7 +51,7 @@
 #define PICK_90_POS_Z 3050
 #define PICK_45_POS_J1 2850
 #define PICK_45_POS_J2 2350
-#define PICK_45_POS_Z 3050
+#define PICK_45_POS_Z 675
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -252,7 +252,10 @@ void loop() {
 
       if (Count_pulses >= pr_pick.z) {
         RestingEOAT();
-        PosPick(pr_pick);
+        if(true)
+          PosPick(45);
+        else 
+          PosPick(90);
         timerPickPieceStart = millis();
         STATE_AUTO = SA_PICK_PIECE;
       }
@@ -463,9 +466,29 @@ bool IsAtPosition(int MotorID, int EndPos, int Treshold) {
   return (ServoMotor.getPresentPosition(MotorID) >= (EndPos - Treshold)) && (ServoMotor.getPresentPosition(MotorID) <= (EndPos + Treshold));
 }
 
-void PosPick(PositionRegister pr) {
-  if (pr.PieceLeft > 0) {
-    pr.z = 3450 - pr.PieceLeft * 300;
-  }
-  pr.PieceLeft -= 1;
+void PosPick(int angle) {
+    if (angle == 45 && pr_pick.PieceLeft > 0)
+    {  
+        pr_pick.z += 300;
+        pr_pick.PieceLeft -= 1;
+    }
+    else if (angle  = 90 && pr_pick_90.PieceLeft > 0)
+    {
+        pr_pick_90.z += 300;
+        pr_pick_90.PieceLeft -= 1;
+    }  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

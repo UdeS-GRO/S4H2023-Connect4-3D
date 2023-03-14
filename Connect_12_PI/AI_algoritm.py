@@ -24,13 +24,11 @@ class AI():
     #This function returns a list of all possible positions on the board
     def get_positions(self):
         possible_positions = []
+        print(self.gb.print_board())
         for i in range(self.gb.row_total):
             for j in range(self.gb.column_total):
-                for k in range(self.gb.column_total):
-                    if self.gb.board[i][j][k] == 0:  
-                        possible_positions.append([i+1,j+1,k+1])
-                        break
-
+                k = self.gb.determine_floor(i+1, j+1)
+                possible_positions.append([i+1,j+1,k])
         return possible_positions
 
     #This function rates a play based on the number of pieces in a row

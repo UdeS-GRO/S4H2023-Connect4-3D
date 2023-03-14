@@ -9,12 +9,13 @@ def AI_played(self):
     play = AI.choose_play()
     print(play)
     position_list = [str(play[0]),str(play[1]),AI.AI_id]
-    gb.submit_robot_pos(play[0],play[1],play[2])
+    gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
     gb.add_piece(position_list)
     if(gb.detect_win(play)):
             print("VICTORY!")
     gb.label.setText(gb.print_board())
     gb.take_picture()
+
 
 
 def player_played(self):
@@ -32,7 +33,6 @@ def player_played(self):
             gb.push_button1.setChecked(False)
         if(gb.detect_win(entries)):
                 print("VICTORY!")
-                #close camera
                 gb.cap.release()                                   # Release the VideoCapture object and Close all the windows
         gb.label.setText(gb.print_board())
         AI_played(self)
