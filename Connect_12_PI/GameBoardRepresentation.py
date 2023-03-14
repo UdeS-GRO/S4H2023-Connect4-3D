@@ -264,7 +264,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 2 and column == 3):
             J1 = 3229
             J2 = 796
-            PickPlace = 45
+            PickPlace = 90
         elif (row == 2 and column == 4):
             J1 = 2719
             J2 = 931
