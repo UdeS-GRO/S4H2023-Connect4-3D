@@ -26,8 +26,8 @@ class MotorMove:
     mssg1:str = "0000"
     mssg2:str = "0000"
     mssg3:str = "0000"
-    mssg4:str = "0"             #default is manual
-    mssg5:str = "0"             #default is Home
+    mssg4:str = "0"             #default is 
+    mssg5:str = "3"             #default is Reset all
     mssg:str = "000000000000"
 
     Zpos:int = 0 #zposition
@@ -125,7 +125,7 @@ class MotorMove:
         fromPi_man_drop             = 8
         '''
         
-        self.mssg5 = "1"
+        
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         print(mssg)
