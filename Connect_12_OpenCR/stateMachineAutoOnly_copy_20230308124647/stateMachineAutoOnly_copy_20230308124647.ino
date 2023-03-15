@@ -435,6 +435,8 @@ void readSerialPort() {
     pickPlace = stringPickPlace.toInt();
     String stringPickReset = String(StringFromPi.charAt(13));
     pickReset = stringPickReset.toInt();
+    String StringresetSequence = String(StringFromPi.charAt(14));
+    resetSequence = StringresetSequence.toInt();
 
     pr_place.j1 = stringJ1.toInt();
     pr_place.j2 = stringJ2.toInt();
