@@ -4,17 +4,17 @@
 def streak_counter(play,board,row_total,column_total,floor_total):
     row_index = play[0]-1
     column_index = play[1]-1
-    player_id = play[2]
-
-    opponent_id = not 0
+    player_id = int(play[2])
 
     streak_list = []
 
     #This finds the floor postion where the piece can be placed
-    for i in range(floor_total):
+    for i in range(floor_total-1):
                 if board[i][row_index][column_index] == 0:  
                     floor_index = i
-                    break 
+                    break
+                elif i==floor_total-1:
+                     return []
 
     #This places the piece on the board to analazyse the move
     board[floor_index][row_index][column_index]=player_id
@@ -25,7 +25,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
     for i in range(0,row_total):
         if board[floor_index][i][column_index]==player_id:
             streak = streak + 1
-        elif board[floor_index][i][column_index]==opponent_id:
+        elif board[floor_index][i][column_index]!=player_id and board[floor_index][i][column_index]!=0:
             streak = 0
             break
     streak_list.append(streak)
@@ -36,21 +36,19 @@ def streak_counter(play,board,row_total,column_total,floor_total):
     for i in range(0,column_total):
         if board[floor_index][row_index][i]==player_id:
             streak = streak + 1
-        elif board[floor_index][row_index][i]==opponent_id:
-               streak = 0
-               break
-    streak_list.append(streak)    
-
+        elif board[floor_index][row_index][i]!=player_id and board[floor_index][row_index][i]!=0:
+            streak = 0
+            break
+    streak_list.append(streak)
 
     #Floor counter
     streak = 0
     for i in range(0,floor_total):
         if board[i][row_index][column_index]==player_id:
             streak = streak + 1
-        elif board[i][row_index][column_index]==opponent_id:
-               streak = 0
-               break
-    streak_list.append(streak)   
+        elif board[i][row_index][column_index]!=player_id and board[i][row_index][column_index]!=0:
+            streak = 0
+    streak_list.append(streak)
 
 
     #Positive diagonal column and row counter
@@ -60,7 +58,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[floor_index][i][i]==player_id:
                 streak = streak + 1
-            elif board[floor_index][i][i]==opponent_id:
+            elif board[floor_index][i][i]!=player_id and board[floor_index][i][i]!=0:
                 streak = 0
                 break
         streak_list.append(streak)
@@ -73,7 +71,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[floor_index][(row_total-1-i)][i]==player_id:
                 streak = streak + 1
-            elif board[floor_index][(row_total-1-i)][i]==opponent_id:
+            elif board[floor_index][(row_total-1-i)][i]!=player_id and board[floor_index][(row_total-1-i)][i]!=0:
                 streak = 0
                 break
         streak_list.append(streak)
@@ -87,7 +85,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,row_total):
             if board[i+gap][i][column_index]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][column_index]==opponent_id:
+            elif board[i+gap][i][column_index]!=player_id and board[i+gap][i][column_index]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -101,7 +99,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,row_total):
             if board[(row_total-1-i)+gap][i][column_index]==player_id:
                 streak = streak + 1
-            elif board[(row_total-1-i)+gap][i][column_index]==opponent_id:
+            elif board[(row_total-1-i)+gap][i][column_index]!=player_id and board[(row_total-1-i)+gap][i][column_index]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -115,7 +113,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[i+gap][row_index][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][row_index][i]==opponent_id:
+            elif board[i+gap][row_index][i]!=player_id and board[i+gap][row_index][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -129,7 +127,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[(column_total-1-i)+gap][row_index][i]==player_id:
                 streak = streak + 1
-            elif board[(column_total-1-i)+gap][row_index][i]==opponent_id:
+            elif board[(column_total-1-i)+gap][row_index][i]!=player_id and board[(column_total-1-i)+gap][row_index][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -143,7 +141,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,row_total):
             if board[i+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][i]==opponent_id:
+            elif board[i+gap][i][i]!=player_id and board[i+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -157,7 +155,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,row_total):
             if board[(row_total-1-i)+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[(row_total-1-i)+gap][i][i]==opponent_id:
+            elif board[(row_total-1-i)+gap][i][i]!=player_id and board[(row_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -171,7 +169,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[i+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[i+gap][i][i]==opponent_id:
+            elif board[i+gap][i][i]!=player_id and board[i+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
@@ -185,7 +183,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
         for i in range(0,column_total):
             if board[(column_total-1-i)+gap][i][i]==player_id:
                 streak = streak + 1
-            elif board[(column_total-1-i)+gap][i][i]==opponent_id:
+            elif board[(column_total-1-i)+gap][i][i]!=player_id and board[(column_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
         streak_list.append(streak)
