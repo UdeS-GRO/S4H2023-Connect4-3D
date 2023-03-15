@@ -164,18 +164,21 @@ class gameboard(QtWidgets.QMainWindow):
 
         return
 
-    def submit_man_goToPick45deg(self):
+    def submit_man_resetPick45deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "1"
-        MotorMove.moveCart(MotorMove, 150, 150, 2000)
+        if MotorMove.mssg5 == "2" or MotorMove.mssg5 == "3":
+            MotorMove.mssg5 = "3"
+        else:
+            MotorMove.mssg5 = "1"
+        print("MotorMove.mssg5 = 1")
         return 
 
-    def submit_man_goToPick0deg(self):
+    def submit_man_resetPick90deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "1"
-        MotorMove.moveCart(MotorMove, 150, 150, 2000)
+        if MotorMove.mssg5 == "1" or MotorMove.mssg5 == "3":
+            MotorMove.mssg5 = "3"
+        else:
+            MotorMove.mssg5 = "2"
         return 
 
     def submit_man_goDown(self):
@@ -234,69 +237,71 @@ class gameboard(QtWidgets.QMainWindow):
         # The reference position is A1 and then the other positinos are automatically generated. 
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
+        offestJ2 = 450
+
         if(row == 1 and column == 1):
             J1 = 1783
-            J2 = 3523
-            PickPlace = 90
+            J2 = 3523 + offestJ2
+            PickPlace = 45
         elif (row == 1 and column == 2):
             J1 = 1082
-            J2 = 3677
-            PickPlace = 90
+            J2 = 3677 + offestJ2
+            PickPlace = 45
         elif (row == 1 and column == 3):
             J1 = 3401
-            J2 = 517
-            PickPlace = 90
+            J2 = 517 + offestJ2
+            PickPlace = 45
         elif (row == 1 and column == 4):
             J1 = 2706
-            J2 = 685
-            PickPlace = 90
+            J2 = 635 + offestJ2
+            PickPlace = 45
         elif (row == 2 and column == 1):
             J1 = 3998
-            J2 = 934
-            PickPlace = 90
+            J2 = 934 + offestJ2
+            PickPlace = 45
         elif (row == 2 and column == 2):
             J1 = 3711
-            J2 = 800
-            PickPlace = 90
+            J2 = 800 + offestJ2
+            PickPlace = 45
         elif (row == 2 and column == 3):
             J1 = 3229
-            J2 = 796
+            J2 = 796 + offestJ2
             PickPlace = 90
         elif (row == 2 and column == 4):
             J1 = 2719
-            J2 = 931
-            PickPlace = 90
+            J2 = 931 + offestJ2
+            PickPlace = 45
         elif (row == 3 and column == 1):
             J1 = 3555
-            J2 = 1250
+            J2 = 1250 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 2):
             J1 = 3307
-            J2 = 1139
-            PickPlace = 90
+            J2 = 1139 + offestJ2
+            PickPlace = 45
         elif (row == 3 and column == 3):
             J1 = 2978
-            J2 = 1155
+            J2 = 1155 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 4):
             J1 = 2567
-            J2 = 1240
+            J2 = 1240 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 1):
             J1 = 2829
-            J2 = 1897
+            J2 = 1897 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 2):
             J1 = 2828
-            J2 = 1633
+            J2 = 1633 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 3):
             J1 = 2523
-            J2 = 1660
+            J2 = 1660 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 4):
             J1 = 1987
-            J2 = 1962
+            J2 = 1962 + offestJ2
             PickPlace = 90
         else:
             J1 = 0
@@ -331,14 +336,15 @@ class gameboard(QtWidgets.QMainWindow):
             yPosition = yA1Position + 3*ygap
         '''
         zPosition = height_init + floor*height_constant
-        if PickPlace == 90:
-            MotorMove.mssg5 = "1"
-        elif PickPlace == 45:
-            MotorMove.mssg5 = "0"
+        if PickPlace == 45:
+            MotorMove.mssg4 = "0"
+        elif PickPlace == 90:
+            MotorMove.mssg4 = "1"
     
         MotorMove.Zpos = zPosition
         #MotorMove.moveCart(MotorMove, xPosition, yPosition, zPosition)
         MotorMove.moveJoint(MotorMove, J1, J2)
+
         return J1, J2, zPosition
 
     def take_picture(self):

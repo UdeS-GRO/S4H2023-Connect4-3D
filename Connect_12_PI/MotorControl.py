@@ -26,8 +26,8 @@ class MotorMove:
     mssg1:str = "0000"
     mssg2:str = "0000"
     mssg3:str = "0000"
-    mssg4:str = "0"             #default is manual
-    mssg5:str = "0"             #default is Home
+    mssg4:str = "0"             #default is 
+    mssg5:str = "3"             #default is Reset all
     mssg:str = "000000000000"
 
     Zpos:int = 0 #zposition
@@ -108,8 +108,29 @@ class MotorMove:
         ### Pick to go to, 0 = 45deg, 1 = 90deg
         #self.mssg4 = "1"
 
+<<<<<<< HEAD
         ### Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
         self.mssg5 = "1"
+=======
+        ### States:
+        '''
+        fromPi_Idle                 = 0
+        fromPi_auto_startSequence   = 1
+        fromPi_auto_resetSequence   = 2
+
+        fromPi_man_Idle             = 0
+        fromPi_man_goToHome         = 1
+        fromPi_man_goToPick         = 2
+        fromPi_man_goToPlace        = 3
+        fromPi_man_goDownPlace      = 4
+        fromPi_man_goDownPick       = 5
+        fromPi_man_goToLS           = 6
+        fromPi_man_grip             = 7
+        fromPi_man_drop             = 8
+        '''
+        
+        
+>>>>>>> 9d2a8d4a0ddab98ab74c79af2b23e43ecb31c1fb
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
         print(mssg)

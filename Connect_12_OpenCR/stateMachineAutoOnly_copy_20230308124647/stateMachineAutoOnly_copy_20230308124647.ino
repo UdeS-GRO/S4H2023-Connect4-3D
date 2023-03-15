@@ -44,14 +44,16 @@
 
 //Positions
 #define HOME_POS_J1 4050  // TODO: hardcoder la valeur
-#define HOME_POS_J2 3000  // TODO: hardcoder la valeur
+#define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2350
-#define PICK_90_POS_J2 3000
-#define PICK_90_POS_Z 3050
+#define PICK_90_POS_J1 2575
+#define PICK_90_POS_J2 2968+450
+#define PICK_90_POS_Z 675
 #define PICK_45_POS_J1 2850
-#define PICK_45_POS_J2 2350
+#define PICK_45_POS_J2 2350+450
 #define PICK_45_POS_Z 675
+#define PICK_45_ID 0
+#define PICK_90_ID 1
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -93,7 +95,7 @@ void ActivateMagnet();
 void DeactivateMagnet();
 void readSerialPort();
 void sendData(int msg2send);
-void PosPick(PositionRegister pr);
+void PosPick();
 
 /*---------------------------- VARIABLES DEFINITIONS --------------------------*/
 
@@ -129,11 +131,10 @@ int fromPi_posJ1 = 0;
 int fromPi_posJ2 = 0;
 int fromPi_posZ = 0;
 
-bool fromPi_Mode = true;  //Auto by default
-int fromPi_State = 0;     //0 = idle, 1 = start, 2 = reset
+bool StartSequence = 0;
 
-// bool fromPi_auto_startSequence = false;
-// bool fromPi_auto_resetSequence = false;
+int pickPlace = 0;  //Choose wich position to pick (0 for 45 degree and 1 for 90 degree)
+int pickReset = 0;  //Reset to 8 the number of pieces (0 = nothing, 1 = reset 45, 2 = reset 90)
 
 void setup() {
   Serial.begin(BAUDRATE);
@@ -189,10 +190,10 @@ void setup() {
   pr_pick_90.z = PICK_90_POS_Z;
   pr_pick_90.PieceLeft = 8;
 
-  pr_pick.j1 = PICK_45_POS_J1;
-  pr_pick.j2 = PICK_45_POS_J2;
-  pr_pick.z = PICK_45_POS_Z;
-  pr_pick.PieceLeft = 8;
+  // pr_pick.j1 = PICK_45_POS_J1;
+  // pr_pick.j2 = PICK_45_POS_J2;
+  // pr_pick.z = PICK_45_POS_Z;
+  // pr_pick.PieceLeft = 8;
 
   pr_pick_45.j1 = PICK_45_POS_J1;
   pr_pick_45.j2 = PICK_45_POS_J2;
@@ -231,15 +232,13 @@ void loop() {
       DeactivateMagnet();
       readSerialPort();
 
-      if (fromPi_State != 0)
-      {
-        fromPi_State = 0;
+      if (StartSequence) {
+        StartSequence = 0;
         STATE_AUTO = SA_GO_TO_PICK1;
       }
       break;
 
     case SA_GO_TO_PICK1:
-
       GoToPosition(pr_pick);
       if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
         STATE_AUTO = SA_GO_TO_PIECE;
@@ -252,10 +251,7 @@ void loop() {
 
       if (Count_pulses >= pr_pick.z) {
         RestingEOAT();
-        if(true)
-          PosPick(45);
-        else 
-          PosPick(90);
+        PosPick();
         timerPickPieceStart = millis();
         STATE_AUTO = SA_PICK_PIECE;
       }
@@ -410,9 +406,9 @@ void sendData() {
 
     msg3 = "1234";
 
-    msg4 = String(fromPi_Mode);
+    //msg4 = String(fromPi_Mode);
 
-    msg5 = String(fromPi_State);
+    //msg5 = String(fromPi_State);
 
     msg = msg1 + msg2 + msg3 + msg4 + msg5;
   }
@@ -428,23 +424,24 @@ void readSerialPort() {
                           ]*/
 
   if (Serial.available() == 0) {
-  }
-  else if (Serial.available() > 0) {
+  } else if (Serial.available() > 0) {
 
     StringFromPi = Serial.readString();
 
     String stringJ1 = String(StringFromPi.charAt(0)) + String(StringFromPi.charAt(1)) + String(StringFromPi.charAt(2)) + String(StringFromPi.charAt(3));
     String stringJ2 = String(StringFromPi.charAt(4)) + String(StringFromPi.charAt(5)) + String(StringFromPi.charAt(6)) + String(StringFromPi.charAt(7));
     String stringZ = String(StringFromPi.charAt(8)) + String(StringFromPi.charAt(9)) + String(StringFromPi.charAt(10)) + String(StringFromPi.charAt(11));
-    String stringMode = String(StringFromPi.charAt(12));
-    fromPi_Mode = bool(stringMode);
-    String stringState = String(StringFromPi.charAt(13));
-    fromPi_State = stringState.toInt();
+    String stringPickPlace = String(StringFromPi.charAt(12));
+    pickPlace = stringPickPlace.toInt();
+    String stringPickReset = String(StringFromPi.charAt(13));
+    pickReset = stringPickReset.toInt();
 
     pr_place.j1 = stringJ1.toInt();
     pr_place.j2 = stringJ2.toInt();
     pr_place.z = stringZ.toInt();
 
+
+    // Safety - Go to home if message is (0,0,0)
     if (pr_place.j1 <= 10)
       pr_place.j1 = pr_home.j1;
     if (pr_place.j2 <= 200)
@@ -452,6 +449,37 @@ void readSerialPort() {
     if (pr_place.z == 0)
       pr_place.z = pr_home.z;
 
+
+    // Reset PieceLeft
+    if (pickReset == 1 || pickReset == 3) //First move of the match is 3, so reset all
+    {
+      pr_pick_45.PieceLeft = 8;
+      pr_pick_45.z = PICK_45_POS_Z;
+    }
+    if (pickReset == 2 || pickReset == 3)
+    {
+      pr_pick_90.PieceLeft = 8;
+      pr_pick_90.z = PICK_90_POS_Z;
+    }
+    
+
+
+    // Detect if Pickplace is 45 or 90
+    if (pickPlace == 0) 
+    {
+    pr_pick.j1 = pr_pick_45.j1;
+    pr_pick.j2 = pr_pick_45.j2;
+    pr_pick.z = pr_pick_45.z;
+    pr_pick.PieceLeft = pr_pick_45.PieceLeft;
+    }
+    else 
+    {
+      pr_pick.j1 = pr_pick_90.j1;
+      pr_pick.j2 = pr_pick_90.j2;
+      pr_pick.z = pr_pick_90.z;
+      pr_pick.PieceLeft = pr_pick_90.PieceLeft;
+    }
+    StartSequence = 1;
     Serial.flush();
   }
 
@@ -466,29 +494,12 @@ bool IsAtPosition(int MotorID, int EndPos, int Treshold) {
   return (ServoMotor.getPresentPosition(MotorID) >= (EndPos - Treshold)) && (ServoMotor.getPresentPosition(MotorID) <= (EndPos + Treshold));
 }
 
-void PosPick(int angle) {
-    if (angle == 45 && pr_pick.PieceLeft > 0)
-    {  
-        pr_pick.z += 300;
-        pr_pick.PieceLeft -= 1;
-    }
-    else if (angle  = 90 && pr_pick_90.PieceLeft > 0)
-    {
-        pr_pick_90.z += 300;
-        pr_pick_90.PieceLeft -= 1;
-    }  
+void PosPick() {
+  if (pickPlace == PICK_45_ID && pr_pick_45.PieceLeft > 0) {
+    pr_pick_45.z += 300;
+    pr_pick_45.PieceLeft -= 1;
+  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 0) {
+    pr_pick_90.z += 300;
+    pr_pick_90.PieceLeft -= 1;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
