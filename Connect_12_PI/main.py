@@ -7,21 +7,14 @@ import os
 from MotorControl import MotorMove
 def AI_played(self):
     play = AI.choose_play()
-<<<<<<< HEAD
     print(play)
-    position_list = [str(play[0]),str(play[1]),AI.AI_id]
     if(gb.detect_win(play)):
-            MotorMove.mssg7 = "2"
+            MotorMove.sendVictory(MotorMove, 2)
+        #     MotorMove.mssg7 = "2"
             print("VICTORY!")
-    gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
-    gb.add_piece(position_list)
-=======
     entries = [str(play[0]),str(play[1]),play[3]]
-    gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
-    if(gb.detect_win(entries)):
-            print("VICTORY! Robot")
     gb.add_piece(entries)
->>>>>>> 78583e1ddf996da572fc083b5f52570d821ae64d
+    gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
     gb.label.setText(gb.print_board())
     gb.take_picture()
 
@@ -38,12 +31,9 @@ def player_played(self):
             #self.line_edit1.clear()                # " "
             gb.push_button1.setChecked(False)
         if(gb.detect_win(entries)):
-<<<<<<< HEAD
-                MotorMove.mssg7 = "1"
+                # MotorMove.mssg7 = "1"
+                MotorMove.sendVictory(MotorMove, 1)
                 print("VICTORY!")
-=======
-                print("VICTORY! Player")
->>>>>>> 78583e1ddf996da572fc083b5f52570d821ae64d
                 gb.cap.release()                                   # Release the VideoCapture object and Close all the windows
         gb.add_piece(entries)
         AI_played(self)
