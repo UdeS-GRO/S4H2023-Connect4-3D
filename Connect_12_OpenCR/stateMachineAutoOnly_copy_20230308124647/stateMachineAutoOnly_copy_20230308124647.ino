@@ -9,7 +9,6 @@
 //Serial
 #define BAUDRATE 9600
 #define motorShoulder_SERIAL Serial3
-//#define Serial2                 Serial2
 #define Serial Serial
 
 //Servos
@@ -30,12 +29,9 @@
 #define BDPIN_PUSH_SW_2 35  //Button 2
 #define PIN_EMAGNET 9       //Digital I/O
 #define PIN_LIMITSWITCH 6   //Digital I/O
-#define LED1_PIN 22         //LED USER 1
-#define LED2_PIN 23         //LED USER 2
-#define LED3_PIN 24         //LED USER 3
-#define LED4_PIN 25         //LED USER 4
-#define LED5_PIN 13         //Arduino, LED built in
-#define PIN_DEBUG 11
+#define RED_LED_PIN 12         //LED USER 1
+#define GREEN_LED_PIN 13         //LED USER 2
+
 
 //Delays
 #define delayBetweenStates 1000
@@ -43,14 +39,16 @@
 #define delayPlace 1000
 
 //Positions
+#define OFFSET_J1 40
+#define OFFSET_J2 450
 #define HOME_POS_J1 4050  // TODO: hardcoder la valeur
 #define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2575
-#define PICK_90_POS_J2 2968+450
+#define PICK_90_POS_J1 2575 + OFFSET_J1
+#define PICK_90_POS_J2 2968 + OFFSET_J2
 #define PICK_90_POS_Z 675
-#define PICK_45_POS_J1 2850
-#define PICK_45_POS_J2 2350+450
+#define PICK_45_POS_J1 2850 + OFFSET_J1
+#define PICK_45_POS_J2 2350 + OFFSET_J2
 #define PICK_45_POS_Z 675
 #define PICK_45_ID 0
 #define PICK_90_ID 1
@@ -96,6 +94,9 @@ void DeactivateMagnet();
 void readSerialPort();
 void sendData(int msg2send);
 void PosPick();
+void RobotTurnLED();
+void HumanTurnLED();
+void VictoryLED();
 
 /*---------------------------- VARIABLES DEFINITIONS --------------------------*/
 
@@ -125,6 +126,10 @@ int DcDirection = 0;
 unsigned long timerPickPieceStart;
 unsigned long timerPlacePieceStart;
 unsigned long timerBetweenStates;
+int ledState = LOW;  // ledState used to set the LED in Victory
+unsigned long previousMillis = 0;  // will store last time LED was updated
+const long interval = 200;  // interval at which to blink (milliseconds)
+unsigned long VictoryTimer = 0;
 
 //States
 int fromPi_posJ1 = 0;
@@ -135,6 +140,8 @@ bool StartSequence = 0;
 
 int pickPlace = 0;  //Choose wich position to pick (0 for 45 degree and 1 for 90 degree)
 int pickReset = 0;  //Reset to 8 the number of pieces (0 = nothing, 1 = reset 45, 2 = reset 90)
+bool SequenceReset = 0;
+int VictoryMsg = 0;
 
 void setup() {
   Serial.begin(BAUDRATE);
@@ -146,20 +153,14 @@ void setup() {
   pinMode(ENCA, INPUT);
   pinMode(ENCB, INPUT);
   pinMode(PIN_LIMITSWITCH, INPUT_PULLUP);
-  pinMode(LED1_PIN, OUTPUT);
-  pinMode(LED2_PIN, OUTPUT);
-  pinMode(LED3_PIN, OUTPUT);
-  pinMode(LED4_PIN, OUTPUT);
-  pinMode(LED5_PIN, OUTPUT);
-  pinMode(PIN_DEBUG, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+
 
   digitalWrite(PIN_EMAGNET, LOW);
-  digitalWrite(LED1_PIN, LOW);
-  digitalWrite(LED2_PIN, LOW);
-  digitalWrite(LED3_PIN, LOW);
-  digitalWrite(LED4_PIN, LOW);
-  digitalWrite(LED5_PIN, LOW);
-  digitalWrite(PIN_DEBUG, LOW);
+  digitalWrite(RED_LED_PIN, LOW);
+  digitalWrite(GREEN_LED_PIN, LOW);
+
 
   attachInterrupt(digitalPinToInterrupt(ENCA), ReadEncoder, RISING);
 
@@ -210,6 +211,12 @@ void setup() {
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() {
+  readSerialPort();
+  if(SequenceReset)
+  {
+    STATE_AUTO = SA_GO_TO_HOME;
+    SequenceReset = false;
+  }
 
   switch (STATE_AUTO) {
 
@@ -230,11 +237,15 @@ void loop() {
     case SA_IDLE:
       RestingEOAT();
       DeactivateMagnet();
-      readSerialPort();
+      HumanTurnLED();
+      VictoryLED();
+
+      
 
       if (StartSequence) {
         StartSequence = 0;
         STATE_AUTO = SA_GO_TO_PICK1;
+        RobotTurnLED();
       }
       break;
 
@@ -435,6 +446,10 @@ void readSerialPort() {
     pickPlace = stringPickPlace.toInt();
     String stringPickReset = String(StringFromPi.charAt(13));
     pickReset = stringPickReset.toInt();
+    String stringSequenceReset = String(StringFromPi.charAt(14));
+    SequenceReset = bool(stringSequenceReset);
+    String stringVictoryMsg = String(StringFromPi.charAt(15));
+    VictoryMsg = stringVictoryMsg.toInt();
 
     pr_place.j1 = stringJ1.toInt();
     pr_place.j2 = stringJ2.toInt();
@@ -486,9 +501,6 @@ void readSerialPort() {
   return;
 }
 
-void PWMDebug(int Step) {
-  analogWrite(PIN_DEBUG, 25 * Step);
-}
 
 bool IsAtPosition(int MotorID, int EndPos, int Treshold) {
   return (ServoMotor.getPresentPosition(MotorID) >= (EndPos - Treshold)) && (ServoMotor.getPresentPosition(MotorID) <= (EndPos + Treshold));
@@ -503,3 +515,57 @@ void PosPick() {
     pr_pick_90.PieceLeft -= 1;
   }
 }
+
+void RobotTurnLED() {
+
+  if(VictoryMsg == 0)
+  {
+    digitalWrite(RED_LED_PIN, true);
+    digitalWrite(GREEN_LED_PIN, false);
+  }
+
+}
+void HumanTurnLED() {
+  if(VictoryMsg == 0)
+  {
+    digitalWrite(RED_LED_PIN, false);
+    digitalWrite(GREEN_LED_PIN, true);
+  }
+
+}
+void VictoryLED() {
+
+  
+  bool VictoryTimerStarted = 0;
+  if(VictoryMsg == 1 && !VictoryTimerStarted)
+  {
+    VictoryTimer = millis();
+  }
+
+  int LED_PIN;
+
+  if(VictoryMsg == 1)
+    LED_PIN = GREEN_LED_PIN;
+  else if(VictoryMsg == 2)
+    LED_PIN = RED_LED_PIN;
+  
+  if(VictoryMsg != 0)
+    {
+    if (millis() - previousMillis >= interval) {
+    // save the last time you blinked the LED
+    previousMillis = millis();
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(LED_PIN, ledState);
+    }
+  }
+}
+
+
