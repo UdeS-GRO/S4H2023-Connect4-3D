@@ -137,13 +137,16 @@ class MotorMove:
 
     def cart2cyl(self, cartX:float, cartY:float):
 
-        t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
+        phi = np.arccos((pow(cartX,2) + np.pow(cartY,2) - np.pow(self.BicepLen,2) - np.pow(self.ForearmLen,2) )/(2 * self.BicepLen * self.ForearmLen))
+        theta = np.pi/2 - (np.atan2(cartY,cartX) - np.atan2(self.ForearmLen * np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(THETA[1]))))
+
+        '''t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
         theta2:float = np.arccos(t2)
         t1 = (self.ForearmLen*np.sin(theta2)) / (self.BicepLen*np.cos(theta2))
-        theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)
+        theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)'''
 
-        theta = theta1
-        phi = theta2
+        theta = theta * 2
+        phi = phi
 
         J1:int = round(self.rad2Servo(self, theta) * 2) + self.J1Offset
         J2:int = round(self.rad2Servo(self, phi)) + self.J2Offset
@@ -159,7 +162,6 @@ class MotorMove:
         return J1, J2
 
     def moveCart(self, gameXpos, gameYpos, gameZpos):
-
         servoShoulderAngle, servoElbowAngle = self.cart2cyl(self, gameXpos, gameYpos)
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
     
@@ -167,6 +169,7 @@ class MotorMove:
         self.sendMsg(self, J1, J2)
 
     def sendVictory(self, winner):
+        # 0 = player, 1 = robot
         if winner == 0:
             self.mssg5 = "3"
             self.mssg7 = "1"
