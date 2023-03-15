@@ -96,7 +96,7 @@ class gameboard(QtWidgets.QMainWindow):
         yPosition = self.line_edit4.text()
         zPosition = self.line_edit5.text()
         MotorMove.Zpos = zPosition
-        MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
+        MotorMove.moveCart(MotorMove, float(xPosition), float(yPosition), float(zPosition))
         #print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
         return # int(xPosition), int(yPosition), int(zPosition)
 
@@ -225,205 +225,6 @@ class gameboard(QtWidgets.QMainWindow):
         cartX1Position = self.line_edit3.text()
         cartY2Position = self.line_edit4.text()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
         MotorMove.mssg4 = "0"
         MotorMove.mssg5 = "2"
         MotorMove.moveCart(MotorMove, int(cartX1Position), int(cartY2Position), int(zPosition))
@@ -438,7 +239,7 @@ class gameboard(QtWidgets.QMainWindow):
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
         offsetJ1 = 40
-        offestJ2 = 450
+        offestJ2 = 490
 
         if(row == 1 and column == 1):
             J1 = 1783 + offsetJ1
