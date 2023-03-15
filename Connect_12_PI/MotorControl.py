@@ -52,8 +52,8 @@ class MotorMove:
         communication order:    [j1 j1 j1 j1  --> int 0-9 times 4
                                 j2 j2 j2 j2   --> int 0-9 times 4
                                 z z z z       --> int 0-9 times 4
-                                mode          --> int 0 = manual, 1 = automatic
-                                state          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
+                                Pos to go     --> int 0 = 45deg, 1 = 90deg
+                                Pos to reset  --> int 0 = nothing, 1 = 45deg, 2 = 90deg
                                 ]
         ex: 01230123012300
         '''
@@ -105,26 +105,10 @@ class MotorMove:
         if mssg3 == "":
             mssg3 = "0000"
 
-        ### Mode, Automatic (1) or Manual (0)
-        mssg4 = "1"
+        ### Pick to go to, 0 = 45deg, 1 = 90deg
+        #self.mssg4 = "1"
 
-        ### States:
-        '''
-        fromPi_Idle                 = 0
-        fromPi_auto_startSequence   = 1
-        fromPi_auto_resetSequence   = 2
-
-        fromPi_man_Idle             = 0
-        fromPi_man_goToHome         = 1
-        fromPi_man_goToPick         = 2
-        fromPi_man_goToPlace        = 3
-        fromPi_man_goDownPlace      = 4
-        fromPi_man_goDownPick       = 5
-        fromPi_man_goToLS           = 6
-        fromPi_man_grip             = 7
-        fromPi_man_drop             = 8
-        '''
-        
+        ### Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
         self.mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5
