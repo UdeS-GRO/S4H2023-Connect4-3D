@@ -14,7 +14,7 @@ from UserInterface import userInterface
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
-    floor_total = 6
+    floor_total = 8
     board = []
     LastList = [0 for _ in range(16)]
     var = 0
@@ -84,7 +84,8 @@ class gameboard(QtWidgets.QMainWindow):
     def detect_win(self,play):
         # Detect if there is a win on the gameboard.
         play = [int(play[0])]+[int(play[1])]+[int(play[2])]
-        for streak in streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total):
+        streaks = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
+        for streak in streaks:
             if streak == 4:
                 return True
         return False
@@ -151,8 +152,7 @@ class gameboard(QtWidgets.QMainWindow):
     def submit_auto_resetSequence(self):
         # The robot stops its sequence and goes back home
 
-        MotorMove.mssg4 = "1"
-        MotorMove.mssg5 = "1"
+        MotorMove.mssg6 = "1"
 
         return
 
@@ -437,70 +437,71 @@ class gameboard(QtWidgets.QMainWindow):
         # The reference position is A1 and then the other positinos are automatically generated. 
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
+        offsetJ1 = 40
         offestJ2 = 450
 
         if(row == 1 and column == 1):
-            J1 = 1783
+            J1 = 1783 + offsetJ1
             J2 = 3523 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 2):
-            J1 = 1082
+            J1 = 1082 + offsetJ1
             J2 = 3677 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 3):
-            J1 = 3401
+            J1 = 3401 + offsetJ1
             J2 = 517 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 4):
-            J1 = 2706
+            J1 = 2706 + offsetJ1
             J2 = 635 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 1):
-            J1 = 3998
+            J1 = 3998 + offsetJ1
             J2 = 934 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 2):
-            J1 = 3711
+            J1 = 3711 + offsetJ1
             J2 = 800 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 3):
-            J1 = 3229
+            J1 = 3229 + offsetJ1
             J2 = 796 + offestJ2
             PickPlace = 90
         elif (row == 2 and column == 4):
-            J1 = 2719
+            J1 = 2719 + offsetJ1
             J2 = 931 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 1):
-            J1 = 3555
+            J1 = 3555 + offsetJ1
             J2 = 1250 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 2):
-            J1 = 3307
+            J1 = 3307 + offsetJ1
             J2 = 1139 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 3):
-            J1 = 2978
+            J1 = 2978 + offsetJ1
             J2 = 1155 + offestJ2
-            PickPlace = 90
+            PickPlace = 45
         elif (row == 3 and column == 4):
-            J1 = 2567
+            J1 = 2567 + offsetJ1
             J2 = 1240 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 1):
-            J1 = 2829
+            J1 = 2829 + offsetJ1
             J2 = 1897 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 2):
-            J1 = 2828
+            J1 = 2828 + offsetJ1
             J2 = 1633 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 3):
-            J1 = 2523
+            J1 = 2523 + offsetJ1
             J2 = 1660 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 4):
-            J1 = 1987
+            J1 = 1987 + offsetJ1
             J2 = 1962 + offestJ2
             PickPlace = 90
         else:
