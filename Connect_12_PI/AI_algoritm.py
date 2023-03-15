@@ -14,17 +14,9 @@ class AI():
         self.opponent_id = 4
 
         return
-    
-
-    def detect_win(self,play,player_id):
-        for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total,player_id):
-            if streak == 4:
-                return True
-        return False
     #This function returns a list of all possible positions on the board
     def get_positions(self):
         possible_positions = []
-        print(self.gb.print_board())
         for i in range(self.gb.row_total):
             for j in range(self.gb.column_total):
                 k = self.gb.determine_floor(i+1, j+1)
@@ -34,6 +26,7 @@ class AI():
     #This function rates a play based on the number of pieces in a row
     def rate_play(self,play):
         strength=0
+        play = [int(play[0])]+[int(play[1])]+[int(play[3])]
         #This rates the offensive strength of the play
         for streak in streak_counter(play,self.gb.board,self.gb.row_total,self.gb.column_total,self.gb.floor_total):
             if streak == 1:
