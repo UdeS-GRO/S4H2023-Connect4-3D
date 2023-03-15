@@ -152,8 +152,7 @@ class gameboard(QtWidgets.QMainWindow):
     def submit_auto_resetSequence(self):
         # The robot stops its sequence and goes back home
 
-        MotorMove.mssg4 = "1"
-        MotorMove.mssg5 = "1"
+        MotorMove.mssg6 = "1"
 
         return
 
