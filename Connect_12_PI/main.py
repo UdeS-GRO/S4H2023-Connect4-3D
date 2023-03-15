@@ -10,15 +10,12 @@ def AI_played(self):
     print(play)
     if(gb.detect_win(play)):
             MotorMove.sendVictory(MotorMove, 2)
-        #     MotorMove.mssg7 = "2"
             print("VICTORY!")
     entries = [str(play[0]),str(play[1]),play[3]]
     gb.add_piece(entries)
     gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
     gb.label.setText(gb.print_board())
     gb.take_picture()
-
-
 
 def player_played(self):
         # Actualize the gameboard status with the new inputs
@@ -31,7 +28,6 @@ def player_played(self):
             #self.line_edit1.clear()                # " "
             gb.push_button1.setChecked(False)
         if(gb.detect_win(entries)):
-                # MotorMove.mssg7 = "1"
                 MotorMove.sendVictory(MotorMove, 1)
                 print("VICTORY!")
                 gb.cap.release()                                   # Release the VideoCapture object and Close all the windows
