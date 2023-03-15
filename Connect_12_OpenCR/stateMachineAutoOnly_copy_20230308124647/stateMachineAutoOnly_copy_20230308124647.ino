@@ -518,7 +518,7 @@ void PosPick() {
 
 void RobotTurnLED() {
 
-  if(VictoryMsg == 0)
+  if(VictoryMsg == 0 || millis()-VictoryTimer > 10000)
   {
     digitalWrite(RED_LED_PIN, true);
     digitalWrite(GREEN_LED_PIN, false);
@@ -526,7 +526,7 @@ void RobotTurnLED() {
 
 }
 void HumanTurnLED() {
-  if(VictoryMsg == 0)
+  if(VictoryMsg == 0 || millis()-VictoryTimer > 10000)
   {
     digitalWrite(RED_LED_PIN, false);
     digitalWrite(GREEN_LED_PIN, true);
@@ -534,22 +534,24 @@ void HumanTurnLED() {
 
 }
 void VictoryLED() {
+  int LED_PIN;
 
-  
+  // Stop after 10 sec
   bool VictoryTimerStarted = 0;
   if(VictoryMsg == 1 && !VictoryTimerStarted)
   {
     VictoryTimer = millis();
   }
 
-  int LED_PIN;
-
+  
+  // Select LED to open
   if(VictoryMsg == 1)
     LED_PIN = GREEN_LED_PIN;
   else if(VictoryMsg == 2)
     LED_PIN = RED_LED_PIN;
   
-  if(VictoryMsg != 0)
+  // Flash the LED
+  if(VictoryMsg != 0 && millis()-VictoryTimer < 10000)
     {
     if (millis() - previousMillis >= interval) {
     // save the last time you blinked the LED
