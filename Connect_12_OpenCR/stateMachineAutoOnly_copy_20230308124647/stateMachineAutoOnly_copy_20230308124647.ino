@@ -40,7 +40,7 @@
 
 //Positions
 #define OFFSET_J1 40
-#define OFFSET_J2 450
+#define OFFSET_J2 490
 #define HOME_POS_J1 4050  // TODO: hardcoder la valeur
 #define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
