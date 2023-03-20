@@ -206,122 +206,126 @@ void setup() {
   pr_place.z = 1000;
 
   STATE_AUTO = SA_GO_TO_HOME;
+
+  GotoPosition(pr_home);
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() {
   readSerialPort();
-  if(SequenceReset)
-  {
-    STATE_AUTO = SA_GO_TO_HOME;
-    SequenceReset = false;
-  }
+  GoToPosition(pr_place);
 
-  switch (STATE_AUTO) {
+  // if(SequenceReset)
+  // {
+  //   STATE_AUTO = SA_GO_TO_HOME;
+  //   SequenceReset = false;
+  // }
 
-    case SA_GO_TO_HOME:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        Count_pulses = 0;
-        RestingEOAT();
+  // switch (STATE_AUTO) {
 
-        GoToPosition(pr_home);
+  //   case SA_GO_TO_HOME:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       Count_pulses = 0;
+  //       RestingEOAT();
 
-        if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
-          STATE_AUTO = SA_IDLE;
-        }
-      }
-      break;
+  //       GoToPosition(pr_home);
 
-    case SA_IDLE:
-      RestingEOAT();
-      DeactivateMagnet();
-      HumanTurnLED();
-      VictoryLED();
+  //       if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
+  //         STATE_AUTO = SA_IDLE;
+  //       }
+  //     }
+  //     break;
 
-      if (StartSequence) {
-        StartSequence = 0;
-        STATE_AUTO = SA_GO_TO_PICK1;
-        RobotTurnLED();
-      }
-      break;
+  //   case SA_IDLE:
+  //     RestingEOAT();
+  //     DeactivateMagnet();
+  //     HumanTurnLED();
+  //     VictoryLED();
 
-    case SA_GO_TO_PICK1:
-      GoToPosition(pr_pick);
-      if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
-        STATE_AUTO = SA_GO_TO_PIECE;
-        delay(500);
-      }
-      break;
+  //     if (StartSequence) {
+  //       StartSequence = 0;
+  //       STATE_AUTO = SA_GO_TO_PICK1;
+  //       RobotTurnLED();
+  //     }
+  //     break;
 
-    case SA_GO_TO_PIECE:
-      LowerEOAT(pr_pick);
+  //   case SA_GO_TO_PICK1:
+  //     GoToPosition(pr_pick);
+  //     if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
+  //       STATE_AUTO = SA_GO_TO_PIECE;
+  //       delay(500);
+  //     }
+  //     break;
 
-      if (Count_pulses >= pr_pick.z) {
-        RestingEOAT();
-        PosPick();
-        timerPickPieceStart = millis();
-        STATE_AUTO = SA_PICK_PIECE;
-      }
-      break;
+  //   case SA_GO_TO_PIECE:
+  //     LowerEOAT(pr_pick);
 
-    case SA_PICK_PIECE:
-      ActivateMagnet();
+  //     if (Count_pulses >= pr_pick.z) {
+  //       RestingEOAT();
+  //       PosPick();
+  //       timerPickPieceStart = millis();
+  //       STATE_AUTO = SA_PICK_PIECE;
+  //     }
+  //     break;
 
-      if ((millis() - timerPickPieceStart) >= delayPick) {
-        STATE_AUTO = SA_GO_TO_LS1;
-      }
-      break;
+  //   case SA_PICK_PIECE:
+  //     ActivateMagnet();
 
-    case SA_GO_TO_LS1:
-      RaiseEOAT();
+  //     if ((millis() - timerPickPieceStart) >= delayPick) {
+  //       STATE_AUTO = SA_GO_TO_LS1;
+  //     }
+  //     break;
 
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_POS;
-      }
-      break;
+  //   case SA_GO_TO_LS1:
+  //     RaiseEOAT();
 
-    case SA_GO_TO_POS:
-      GoToPosition(pr_place);
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_POS;
+  //     }
+  //     break;
 
-      if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
-        STATE_AUTO = SA_GO_TO_FLOOR;
-        delay(500);
-      }
-      break;
+  //   case SA_GO_TO_POS:
+  //     GoToPosition(pr_place);
 
-    case SA_GO_TO_FLOOR:
-      LowerEOAT(pr_place);
-      if (Count_pulses >= pr_place.z) {
-        RestingEOAT();
-        timerPlacePieceStart = millis();
-        STATE_AUTO = SA_DROP_PIECE;
-      }
-      break;
+  //     if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
+  //       STATE_AUTO = SA_GO_TO_FLOOR;
+  //       delay(500);
+  //     }
+  //     break;
 
-    case SA_DROP_PIECE:
-      DeactivateMagnet();
-      if (millis() - timerPlacePieceStart >= delayPlace) {
-        STATE_AUTO = SA_GO_TO_LS2;
-      }
-      break;
+  //   case SA_GO_TO_FLOOR:
+  //     LowerEOAT(pr_place);
+  //     if (Count_pulses >= pr_place.z) {
+  //       RestingEOAT();
+  //       timerPlacePieceStart = millis();
+  //       STATE_AUTO = SA_DROP_PIECE;
+  //     }
+  //     break;
 
-    case SA_GO_TO_LS2:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_HOME;
-      }
-      break;
+  //   case SA_DROP_PIECE:
+  //     DeactivateMagnet();
+  //     if (millis() - timerPlacePieceStart >= delayPlace) {
+  //       STATE_AUTO = SA_GO_TO_LS2;
+  //     }
+  //     break;
 
-    default:
-      STATE_AUTO = SA_GO_TO_HOME;
-      break;
-  }
+  //   case SA_GO_TO_LS2:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_HOME;
+  //     }
+  //     break;
+
+  //   default:
+  //     STATE_AUTO = SA_GO_TO_HOME;
+  //     break;
+  // }
 }
 
 /*---------------------------- FUNCTIONS --------------------------------------*/
