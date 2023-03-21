@@ -17,6 +17,7 @@ def AI_played(self):
     gb.label.setText(gb.print_board())
     gb.take_picture()
 
+
 def player_played(self):
         # Actualize the gameboard status with the new inputs
         player, column, row = gb.take_picture()
