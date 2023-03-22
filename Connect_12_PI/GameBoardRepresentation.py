@@ -44,7 +44,6 @@ class gameboard(QtWidgets.QMainWindow):
 
     def print_board(self):
         # Generate a visual representation of the gameboard to see what the robot / program knows of the game status.
-
         i = 1
         usermatrix = ('')
         for row in self.board:
@@ -90,81 +89,12 @@ class gameboard(QtWidgets.QMainWindow):
                 return True
         return False
 
-    
-    def submit_inputs_xyz(self):
-        xPosition = self.line_edit3.text()
-        yPosition = self.line_edit4.text()
-        zPosition = self.line_edit5.text()
-        MotorMove.Zpos = zPosition
-        MotorMove.moveCart(MotorMove, int(xPosition), int(yPosition), int(zPosition))
-        #print(str(int(xPosition)) + str(int(yPosition)) + str(int(zPosition)))
-        return # int(xPosition), int(yPosition), int(zPosition)
-
-    def actual_position_xyz(self):
-        # Link with Alex's code 
-        xActual = 1
-        yActual = 2
-        zActual = 2
-        return xActual, yActual, zActual
-
-    def actual_position_joints(self): # Receives the joints coordinates from the motor control program and uses it to display it on the UI.        
-        # Link with Alex's code        
-        # # Link with UI        
-        joint1ActualPos = 1 
-        joint2ActualPos = 2
-
-        return joint1ActualPos, joint2ActualPos
-
-    def submit_inputs_joints(self):
-        # Send the joints coordinates entered from the UI to the motor control program, to move the robot to desired position.
-        
-        zPosition = self.line_edit5.text()
-        joint1Position = self.line_edit6.text()
-        joint2Position = self.line_edit7.text()
-        MotorMove.Zpos = zPosition
-        MotorMove.moveJoint(MotorMove, joint1Position, joint2Position)
-        return int(joint1Position), int(joint2Position)
-
-    def actual_position_joints(self):
-        # Receives the joints coordinates from the motor control program and uses it to display it on the UI.
-
-        # Link with UI
-        joint1ActualPos = 1
-        joint2ActualPos = 2
-        return joint1ActualPos, joint2ActualPos
-
-    def on_toggled(self, checked):
-        if checked:
-            self.toggle_button.setText("Automatic Mode")
-        else:
-            self.toggle_button.setText("Manual Mode")
+    def start_new_game(self):
+        # This function starts a completely new game
 
         return
 
-    def submit_auto_startSequence(self):
-        # Starts the state machine to make the robot play
-
-        MotorMove.mssg4 = "1"
-        MotorMove.mssg5 = "0"
-
-        return
-
-    def submit_auto_resetSequence(self):
-        # The robot stops its sequence and goes back home
-
-        MotorMove.mssg6 = "1"
-
-        return
-
-    def submit_man_goToHome(self):
-        # Move the robot to his home position registered
-
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "0"
-
-        return
-
-    def submit_man_resetPick45deg(self):
+    def resetPick45deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
         if MotorMove.mssg5 == "2" or MotorMove.mssg5 == "3":
             MotorMove.mssg5 = "3"
@@ -173,7 +103,7 @@ class gameboard(QtWidgets.QMainWindow):
         print("MotorMove.mssg5 = 1")
         return 
 
-    def submit_man_resetPick90deg(self):
+    def resetPick90deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
         if MotorMove.mssg5 == "1" or MotorMove.mssg5 == "3":
             MotorMove.mssg5 = "3"
@@ -181,255 +111,6 @@ class gameboard(QtWidgets.QMainWindow):
             MotorMove.mssg5 = "2"
         return 
 
-    def submit_man_goDown(self):
-        # Move the z coordinate of the robot to its lower position
-
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "3"
-
-        return
-
-    def submit_man_goToLS(self):
-        # Move the z coordinate of the robot to its limit switch
-                
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "4"
-
-        return 
-
-    def submit_man_grip(self):
-        # Activate the electromagnet
-        
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "5"
-
-        return
-
-    def submit_man_drop(self):
-        # Disable the electromagnet
-        
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "6"
-
-        return
-
-    def update_selected_btn(self, btn):
-        self.selected_btn = btn
-
-    def update_selected_floor(self, floor):
-        self.selected_floor = floor
-
-    def submit_gameboard_pos(self):
-        # Once a position and a floor is selected, the gameboard position is updated and the robot can move to this position.
-        zPosition = self.line_edit5.text()
-        cartX1Position = self.line_edit3.text()
-        cartY2Position = self.line_edit4.text()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        MotorMove.mssg4 = "0"
-        MotorMove.mssg5 = "2"
-        MotorMove.moveCart(MotorMove, int(cartX1Position), int(cartY2Position), int(zPosition))
-
-        if self.selected_btn and self.selected_floor:
-            self.submit_robot_pos(self.selected_btn, self.selected_floor)
 
     def submit_robot_pos(self, row, column, floor):
         # Returns the xyz coordinates of the position where the robot has to move to. 
@@ -438,7 +119,7 @@ class gameboard(QtWidgets.QMainWindow):
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
         offsetJ1 = 40
-        offestJ2 = 450
+        offestJ2 = 490
 
         if(row == 1 and column == 1):
             J1 = 1783 + offsetJ1

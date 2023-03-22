@@ -137,27 +137,30 @@ class MotorMove:
 
     def cart2cyl(self, cartX:float, cartY:float):
 
-        phi = np.arccos((pow(cartX,2) + np.pow(cartY,2) - np.pow(self.BicepLen,2) - np.pow(self.ForearmLen,2) )/(2 * self.BicepLen * self.ForearmLen))
-        theta = np.pi/2 - (np.atan2(cartY,cartX) - np.atan2(self.ForearmLen * np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(THETA[1]))))
+        phi = np.arccos((np.power(cartX,2) + np.power(cartY,2) - np.power(self.BicepLen,2) - np.power(self.ForearmLen,2) )/(2 * self.BicepLen * self.ForearmLen))
+        theta = np.pi/2 - (np.arctan2(cartY,cartX) - np.arctan2(self.ForearmLen * np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(phi))))
 
         '''t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
         theta2:float = np.arccos(t2)
         t1 = (self.ForearmLen*np.sin(theta2)) / (self.BicepLen*np.cos(theta2))
         theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)'''
 
-        theta = theta * 2
-        phi = phi
+        print("phi1: " + str(phi))
+        print("theta1: " + str(theta))
 
-        J1:int = round(self.rad2Servo(self, theta) * 2) + self.J1Offset
-        J2:int = round(self.rad2Servo(self, phi)) + self.J2Offset
 
-        if J1 > 4095:
-            J1 = 4095
-        if J2 > 4095:
-            J2 = 4095
+        J1:int = round(self.rad2Servo(self, theta*2 + 4*np.pi/4) ) + self.J1Offset
+        J2:int = round(self.rad2Servo(self, phi+5*np.pi/4)) + self.J2Offset
 
-        print("phi: " + str(J1))
-        print("theta: " + str(J2))
+        print("phi2: " + str(J1))
+        print("theta2: " + str(J2))
+
+        J1 = J1 % 4096
+        J2 = J2 % 4096
+        
+
+        print("phi3: " + str(J1))
+        print("theta3: " + str(J2))
 
         return J1, J2
 
