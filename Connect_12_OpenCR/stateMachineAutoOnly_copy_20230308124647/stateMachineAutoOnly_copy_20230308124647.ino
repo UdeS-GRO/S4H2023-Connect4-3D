@@ -39,17 +39,16 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 40
-#define OFFSET_J2 490
-#define HOME_POS_J1 4050  // TODO: hardcoder la valeur
-#define HOME_POS_J2 3500  // TODO: hardcoder la valeur
+#define OFFSET_J1 0
+#define OFFSET_J2 0
+#define HOME_POS_J1 4000 + OFFSET_J1 // TODO: hardcoder la valeur
+#define HOME_POS_J2 3525 + OFFSET_J1 // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2575 + OFFSET_J1
-#define PICK_90_POS_J2 2968 + OFFSET_J2
-#define PICK_90_POS_Z 675
-#define PICK_45_POS_J1 2850 + OFFSET_J1
-#define PICK_45_POS_J2 2350 + OFFSET_J2
-#define PICK_45_POS_Z 675
+#define PICK_90_POS_J1 2600 + OFFSET_J1
+#define PICK_90_POS_J2 3374 + OFFSET_J2
+#define PICK_POS_Z 675
+#define PICK_45_POS_J1 2900 + OFFSET_J1
+#define PICK_45_POS_J2 2781 + OFFSET_J2
 #define PICK_45_ID 0
 #define PICK_90_ID 1
 
@@ -188,17 +187,17 @@ void setup() {
 
   pr_pick_90.j1 = PICK_90_POS_J1;
   pr_pick_90.j2 = PICK_90_POS_J2;
-  pr_pick_90.z = PICK_90_POS_Z;
+  pr_pick_90.z = PICK_POS_Z;
   pr_pick_90.PieceLeft = 8;
 
   // pr_pick.j1 = PICK_45_POS_J1;
   // pr_pick.j2 = PICK_45_POS_J2;
-  // pr_pick.z = PICK_45_POS_Z;
+  // pr_pick.z = PICK_POS_Z;
   // pr_pick.PieceLeft = 8;
 
   pr_pick_45.j1 = PICK_45_POS_J1;
   pr_pick_45.j2 = PICK_45_POS_J2;
-  pr_pick_45.z = PICK_45_POS_Z;
+  pr_pick_45.z = PICK_POS_Z;
   pr_pick_45.PieceLeft = 8;
 
   pr_place.j1 = 3000;
@@ -469,12 +468,12 @@ void readSerialPort() {
     if (pickReset == 1 || pickReset == 3) //First move of the match is 3, so reset all
     {
       pr_pick_45.PieceLeft = 8;
-      pr_pick_45.z = PICK_45_POS_Z;
+      pr_pick_45.z = PICK_POS_Z;
     }
     if (pickReset == 2 || pickReset == 3)
     {
       pr_pick_90.PieceLeft = 8;
-      pr_pick_90.z = PICK_90_POS_Z;
+      pr_pick_90.z = PICK_POS_Z;
     }
     
 
