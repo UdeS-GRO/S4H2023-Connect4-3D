@@ -39,16 +39,17 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 0
-#define OFFSET_J2 0
-#define HOME_POS_J1 4000 + OFFSET_J1 // TODO: hardcoder la valeur
-#define HOME_POS_J2 3525 + OFFSET_J1 // TODO: hardcoder la valeur
+#define OFFSET_J1 40
+#define OFFSET_J2 450
+#define HOME_POS_J1 4050  // TODO: hardcoder la valeur
+#define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2600 + OFFSET_J1
-#define PICK_90_POS_J2 3374 + OFFSET_J2
-#define PICK_POS_Z 675
-#define PICK_45_POS_J1 2900 + OFFSET_J1
-#define PICK_45_POS_J2 2781 + OFFSET_J2
+#define PICK_90_POS_J1 2575 + OFFSET_J1
+#define PICK_90_POS_J2 2968 + OFFSET_J2
+#define PICK_90_POS_Z 675
+#define PICK_45_POS_J1 2850 + OFFSET_J1
+#define PICK_45_POS_J2 2350 + OFFSET_J2
+#define PICK_45_POS_Z 675
 #define PICK_45_ID 0
 #define PICK_90_ID 1
 
@@ -187,17 +188,17 @@ void setup() {
 
   pr_pick_90.j1 = PICK_90_POS_J1;
   pr_pick_90.j2 = PICK_90_POS_J2;
-  pr_pick_90.z = PICK_POS_Z;
+  pr_pick_90.z = PICK_90_POS_Z;
   pr_pick_90.PieceLeft = 8;
 
   // pr_pick.j1 = PICK_45_POS_J1;
   // pr_pick.j2 = PICK_45_POS_J2;
-  // pr_pick.z = PICK_POS_Z;
+  // pr_pick.z = PICK_45_POS_Z;
   // pr_pick.PieceLeft = 8;
 
   pr_pick_45.j1 = PICK_45_POS_J1;
   pr_pick_45.j2 = PICK_45_POS_J2;
-  pr_pick_45.z = PICK_POS_Z;
+  pr_pick_45.z = PICK_45_POS_Z;
   pr_pick_45.PieceLeft = 8;
 
   pr_place.j1 = 3000;
@@ -205,122 +206,126 @@ void setup() {
   pr_place.z = 1000;
 
   STATE_AUTO = SA_GO_TO_HOME;
+
+  GotoPosition(pr_home);
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() {
   readSerialPort();
-  if(SequenceReset)
-  {
-    STATE_AUTO = SA_GO_TO_HOME;
-    SequenceReset = false;
-  }
+  GoToPosition(pr_place);
 
-  switch (STATE_AUTO) {
+  // if(SequenceReset)
+  // {
+  //   STATE_AUTO = SA_GO_TO_HOME;
+  //   SequenceReset = false;
+  // }
 
-    case SA_GO_TO_HOME:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        Count_pulses = 0;
-        RestingEOAT();
+  // switch (STATE_AUTO) {
 
-        GoToPosition(pr_home);
+  //   case SA_GO_TO_HOME:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       Count_pulses = 0;
+  //       RestingEOAT();
 
-        if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
-          STATE_AUTO = SA_IDLE;
-        }
-      }
-      break;
+  //       GoToPosition(pr_home);
 
-    case SA_IDLE:
-      RestingEOAT();
-      DeactivateMagnet();
-      HumanTurnLED();
-      VictoryLED();
+  //       if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
+  //         STATE_AUTO = SA_IDLE;
+  //       }
+  //     }
+  //     break;
 
-      if (StartSequence) {
-        StartSequence = 0;
-        STATE_AUTO = SA_GO_TO_PICK1;
-        RobotTurnLED();
-      }
-      break;
+  //   case SA_IDLE:
+  //     RestingEOAT();
+  //     DeactivateMagnet();
+  //     HumanTurnLED();
+  //     VictoryLED();
 
-    case SA_GO_TO_PICK1:
-      GoToPosition(pr_pick);
-      if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
-        STATE_AUTO = SA_GO_TO_PIECE;
-        delay(500);
-      }
-      break;
+  //     if (StartSequence) {
+  //       StartSequence = 0;
+  //       STATE_AUTO = SA_GO_TO_PICK1;
+  //       RobotTurnLED();
+  //     }
+  //     break;
 
-    case SA_GO_TO_PIECE:
-      LowerEOAT(pr_pick);
+  //   case SA_GO_TO_PICK1:
+  //     GoToPosition(pr_pick);
+  //     if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
+  //       STATE_AUTO = SA_GO_TO_PIECE;
+  //       delay(500);
+  //     }
+  //     break;
 
-      if (Count_pulses >= pr_pick.z) {
-        RestingEOAT();
-        PosPick();
-        timerPickPieceStart = millis();
-        STATE_AUTO = SA_PICK_PIECE;
-      }
-      break;
+  //   case SA_GO_TO_PIECE:
+  //     LowerEOAT(pr_pick);
 
-    case SA_PICK_PIECE:
-      ActivateMagnet();
+  //     if (Count_pulses >= pr_pick.z) {
+  //       RestingEOAT();
+  //       PosPick();
+  //       timerPickPieceStart = millis();
+  //       STATE_AUTO = SA_PICK_PIECE;
+  //     }
+  //     break;
 
-      if ((millis() - timerPickPieceStart) >= delayPick) {
-        STATE_AUTO = SA_GO_TO_LS1;
-      }
-      break;
+  //   case SA_PICK_PIECE:
+  //     ActivateMagnet();
 
-    case SA_GO_TO_LS1:
-      RaiseEOAT();
+  //     if ((millis() - timerPickPieceStart) >= delayPick) {
+  //       STATE_AUTO = SA_GO_TO_LS1;
+  //     }
+  //     break;
 
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_POS;
-      }
-      break;
+  //   case SA_GO_TO_LS1:
+  //     RaiseEOAT();
 
-    case SA_GO_TO_POS:
-      GoToPosition(pr_place);
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_POS;
+  //     }
+  //     break;
 
-      if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
-        STATE_AUTO = SA_GO_TO_FLOOR;
-        delay(500);
-      }
-      break;
+  //   case SA_GO_TO_POS:
+  //     GoToPosition(pr_place);
 
-    case SA_GO_TO_FLOOR:
-      LowerEOAT(pr_place);
-      if (Count_pulses >= pr_place.z) {
-        RestingEOAT();
-        timerPlacePieceStart = millis();
-        STATE_AUTO = SA_DROP_PIECE;
-      }
-      break;
+  //     if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
+  //       STATE_AUTO = SA_GO_TO_FLOOR;
+  //       delay(500);
+  //     }
+  //     break;
 
-    case SA_DROP_PIECE:
-      DeactivateMagnet();
-      if (millis() - timerPlacePieceStart >= delayPlace) {
-        STATE_AUTO = SA_GO_TO_LS2;
-      }
-      break;
+  //   case SA_GO_TO_FLOOR:
+  //     LowerEOAT(pr_place);
+  //     if (Count_pulses >= pr_place.z) {
+  //       RestingEOAT();
+  //       timerPlacePieceStart = millis();
+  //       STATE_AUTO = SA_DROP_PIECE;
+  //     }
+  //     break;
 
-    case SA_GO_TO_LS2:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_HOME;
-      }
-      break;
+  //   case SA_DROP_PIECE:
+  //     DeactivateMagnet();
+  //     if (millis() - timerPlacePieceStart >= delayPlace) {
+  //       STATE_AUTO = SA_GO_TO_LS2;
+  //     }
+  //     break;
 
-    default:
-      STATE_AUTO = SA_GO_TO_HOME;
-      break;
-  }
+  //   case SA_GO_TO_LS2:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_HOME;
+  //     }
+  //     break;
+
+  //   default:
+  //     STATE_AUTO = SA_GO_TO_HOME;
+  //     break;
+  // }
 }
 
 /*---------------------------- FUNCTIONS --------------------------------------*/
@@ -466,12 +471,12 @@ void readSerialPort() {
     if (pickReset == 1 || pickReset == 3) //First move of the match is 3, so reset all
     {
       pr_pick_45.PieceLeft = 8;
-      pr_pick_45.z = PICK_POS_Z;
+      pr_pick_45.z = PICK_45_POS_Z;
     }
     if (pickReset == 2 || pickReset == 3)
     {
       pr_pick_90.PieceLeft = 8;
-      pr_pick_90.z = PICK_POS_Z;
+      pr_pick_90.z = PICK_90_POS_Z;
     }
     
 

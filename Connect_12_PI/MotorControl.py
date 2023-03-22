@@ -35,7 +35,7 @@ class MotorMove:
     Zpos:int = 0 #zposition
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)        #Linux or Pi
-    serOpenCR = serial.Serial('COM3', baudrate= 9600, timeout=2.0)  #Windows
+    serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)  #Windows
 
     ## Methods
     def __init__(self):
