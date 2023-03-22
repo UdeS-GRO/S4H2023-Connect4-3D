@@ -39,16 +39,16 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 40
-#define OFFSET_J2 490
+#define OFFSET_J1 0
+#define OFFSET_J2 0
 #define HOME_POS_J1 4050  // TODO: hardcoder la valeur
 #define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2575 + OFFSET_J1
-#define PICK_90_POS_J2 2968 + OFFSET_J2
+#define PICK_90_POS_J1 2617 + OFFSET_J1
+#define PICK_90_POS_J2 3370 + OFFSET_J2
 #define PICK_90_POS_Z 675
 #define PICK_45_POS_J1 2850 + OFFSET_J1
-#define PICK_45_POS_J2 2350 + OFFSET_J2
+#define PICK_45_POS_J2 2770 + OFFSET_J2
 #define PICK_45_POS_Z 675
 #define PICK_45_ID 0
 #define PICK_90_ID 1

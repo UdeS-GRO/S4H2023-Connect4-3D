@@ -28,7 +28,7 @@ class gameboard(QtWidgets.QMainWindow):
         userInterface(self)    
 
         # start camera
-        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
         return
@@ -91,24 +91,21 @@ class gameboard(QtWidgets.QMainWindow):
 
     def start_new_game(self):
         # This function starts a completely new game
-
+        MotorMove.mssg5 = "3"
         return
 
     def resetPick45deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
-        if MotorMove.mssg5 == "2" or MotorMove.mssg5 == "3":
-            MotorMove.mssg5 = "3"
-        else:
-            MotorMove.mssg5 = "1"
+        MotorMove.mssg5 = "1"
+
         print("MotorMove.mssg5 = 1")
         return 
 
     def resetPick90deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
-        if MotorMove.mssg5 == "1" or MotorMove.mssg5 == "3":
-            MotorMove.mssg5 = "3"
-        else:
-            MotorMove.mssg5 = "2"
+        MotorMove.mssg5 = "2"
+        
+        print("MotorMove.mssg5 = 2")
         return 
 
 
@@ -118,72 +115,74 @@ class gameboard(QtWidgets.QMainWindow):
         # The reference position is A1 and then the other positinos are automatically generated. 
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
-        offsetJ1 = 40
-        offestJ2 = 490
+        offsetJ1 = 0
+        offestJ2 = 0
+
+        #row = 123    column = abc
 
         if(row == 1 and column == 1):
-            J1 = 1783 + offsetJ1
-            J2 = 3523 + offestJ2
+            J1 = 1790 + offsetJ1
+            J2 = 3912 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 2):
-            J1 = 1082 + offsetJ1
-            J2 = 3677 + offestJ2
+            J1 = 1121 + offsetJ1
+            J2 = 4048 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 3):
-            J1 = 3401 + offsetJ1
-            J2 = 517 + offestJ2
+            J1 = 3161 + offsetJ1
+            J2 = 916 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 4):
-            J1 = 2706 + offsetJ1
-            J2 = 635 + offestJ2
+            J1 = 2560 + offsetJ1
+            J2 = 1060 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 1):
-            J1 = 3998 + offsetJ1
-            J2 = 934 + offestJ2
+            J1 = 1790 + offsetJ1
+            J2 = 3650 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 2):
-            J1 = 3711 + offsetJ1
-            J2 = 800 + offestJ2
+            J1 = 1295 + offsetJ1
+            J2 = 3755 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 3):
-            J1 = 3229 + offsetJ1
-            J2 = 796 + offestJ2
+            J1 = 3000 + offsetJ1
+            J2 = 1205 + offestJ2
             PickPlace = 90
         elif (row == 2 and column == 4):
-            J1 = 2719 + offsetJ1
-            J2 = 931 + offestJ2
+            J1 = 2505 + offsetJ1
+            J2 = 1320 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 1):
-            J1 = 3555 + offsetJ1
-            J2 = 1250 + offestJ2
+            J1 = 3300 + offsetJ1
+            J2 = 1665 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 2):
-            J1 = 3307 + offsetJ1
-            J2 = 1139 + offestJ2
+            J1 = 3090 + offsetJ1
+            J2 = 1545 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 3):
-            J1 = 2978 + offsetJ1
-            J2 = 1155 + offestJ2
+            J1 = 2740 + offsetJ1
+            J2 = 1545 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 4):
-            J1 = 2567 + offsetJ1
-            J2 = 1240 + offestJ2
+            J1 = 2320 + offsetJ1
+            J2 = 1650 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 1):
-            J1 = 2829 + offsetJ1
-            J2 = 1897 + offestJ2
+            J1 = 2655 + offsetJ1
+            J2 = 2190 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 2):
-            J1 = 2828 + offsetJ1
-            J2 = 1633 + offestJ2
+            J1 = 2565 + offsetJ1
+            J2 = 2030 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 3):
-            J1 = 2523 + offsetJ1
-            J2 = 1660 + offestJ2
+            J1 = 2290 + offsetJ1
+            J2 = 2045 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 4):
-            J1 = 1987 + offsetJ1
-            J2 = 1962 + offestJ2
+            J1 = 1340 + offsetJ1
+            J2 = 2725 + offestJ2
             PickPlace = 90
         else:
             J1 = 0

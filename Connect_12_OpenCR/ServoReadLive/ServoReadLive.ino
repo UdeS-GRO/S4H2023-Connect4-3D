@@ -46,11 +46,11 @@
 #define HOME_POS_J1 4050  // TODO: hardcoder la valeur
 #define HOME_POS_J2 3000  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2350
-#define PICK_90_POS_J2 3000
+#define PICK_90_POS_J1 2617
+#define PICK_90_POS_J2 3370
 #define PICK_90_POS_Z 3050
-#define PICK_45_POS_J1 2850
-#define PICK_45_POS_J2 2350
+#define PICK_45_POS_J1 2857
+#define PICK_45_POS_J2 2770
 #define PICK_45_POS_Z 3050
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
