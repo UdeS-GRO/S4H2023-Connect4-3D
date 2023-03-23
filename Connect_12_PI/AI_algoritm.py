@@ -36,7 +36,7 @@ class AI():
             elif streak == 3:
                 strength=strength+1001
             elif streak == 4:
-                strength=strength+10001
+                strength=strength+100001
 
         opponent_play = [play[0],play[1],self.opponent_id]
         #This rates the defensive strength of the play

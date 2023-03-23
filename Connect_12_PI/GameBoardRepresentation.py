@@ -28,7 +28,7 @@ class gameboard(QtWidgets.QMainWindow):
         userInterface(self)    
 
         # start camera
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
+        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
         return
@@ -84,6 +84,7 @@ class gameboard(QtWidgets.QMainWindow):
         # Detect if there is a win on the gameboard.
         play = [int(play[0])]+[int(play[1])]+[int(play[2])]
         streaks = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
+        print("streak",streaks)
         for streak in streaks:
             if streak == 4:
                 return True
@@ -115,18 +116,18 @@ class gameboard(QtWidgets.QMainWindow):
         # The reference position is A1 and then the other positinos are automatically generated. 
         print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
 
-        offsetJ1 = 0
+        offsetJ1 = 250
         offestJ2 = 0
 
         #row = 123    column = abc
 
         if(row == 1 and column == 1):
-            J1 = 1790 + offsetJ1
-            J2 = 3912 + offestJ2
+            J1 = 1560 + offsetJ1
+            J2 = 3920 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 2):
-            J1 = 1121 + offsetJ1
-            J2 = 4048 + offestJ2
+            J1 = 770 + offsetJ1
+            J2 = 4095 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 3):
             J1 = 3161 + offsetJ1
@@ -137,16 +138,16 @@ class gameboard(QtWidgets.QMainWindow):
             J2 = 1060 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 1):
-            J1 = 1790 + offsetJ1
-            J2 = 3650 + offestJ2
+            J1 = 1490 + offsetJ1
+            J2 = 3750 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 2):
-            J1 = 1295 + offsetJ1
-            J2 = 3755 + offestJ2
+            J1 = 960 + offsetJ1
+            J2 = 3810 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 3):
-            J1 = 3000 + offsetJ1
-            J2 = 1205 + offestJ2
+            J1 = 3025 + offsetJ1
+            J2 = 1140 + offestJ2
             PickPlace = 90
         elif (row == 2 and column == 4):
             J1 = 2505 + offsetJ1
@@ -154,36 +155,36 @@ class gameboard(QtWidgets.QMainWindow):
             PickPlace = 45
         elif (row == 3 and column == 1):
             J1 = 3300 + offsetJ1
-            J2 = 1665 + offestJ2
+            J2 = 1640 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 2):
             J1 = 3090 + offsetJ1
             J2 = 1545 + offestJ2
-            PickPlace = 45
+            PickPlace = 90
         elif (row == 3 and column == 3):
             J1 = 2740 + offsetJ1
             J2 = 1545 + offestJ2
-            PickPlace = 45
+            PickPlace = 90
         elif (row == 3 and column == 4):
             J1 = 2320 + offsetJ1
             J2 = 1650 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 1):
             J1 = 2655 + offsetJ1
-            J2 = 2190 + offestJ2
+            J2 = 2240 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 2):
-            J1 = 2565 + offsetJ1
+            J1 = 2585 + offsetJ1
             J2 = 2030 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 3):
             J1 = 2290 + offsetJ1
             J2 = 2045 + offestJ2
-            PickPlace = 90
+            PickPlace = 45
         elif (row == 4 and column == 4):
-            J1 = 1340 + offsetJ1
-            J2 = 2725 + offestJ2
-            PickPlace = 90
+            J1 = 1350 + offsetJ1
+            J2 = 2735 + offestJ2
+            PickPlace = 45
         else:
             J1 = 0
             J2 = 0
@@ -191,7 +192,7 @@ class gameboard(QtWidgets.QMainWindow):
             print("Error: Invalid position")
         
         height_constant = -300
-        height_init = 2150
+        height_init = 2100
         '''
         xA1Position = 0.111
         yA1Position = 0.110

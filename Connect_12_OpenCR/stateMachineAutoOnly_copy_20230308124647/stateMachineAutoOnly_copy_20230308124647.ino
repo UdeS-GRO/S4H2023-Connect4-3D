@@ -39,16 +39,16 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 0
+#define OFFSET_J1 250
 #define OFFSET_J2 0
-#define HOME_POS_J1 4000 + OFFSET_J1 // TODO: hardcoder la valeur
-#define HOME_POS_J2 3525 + OFFSET_J1 // TODO: hardcoder la valeur
+#define HOME_POS_J1 4095 //+ OFFSET_J1 // TODO: hardcoder la valeur
+#define HOME_POS_J2 3500 + OFFSET_J2 // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2600 + OFFSET_J1
-#define PICK_90_POS_J2 3374 + OFFSET_J2
-#define PICK_POS_Z 675
-#define PICK_45_POS_J1 2900 + OFFSET_J1
-#define PICK_45_POS_J2 2781 + OFFSET_J2
+#define PICK_90_POS_J1 2318 + OFFSET_J1
+#define PICK_90_POS_J2 3378 + OFFSET_J2
+#define PICK_POS_Z 910
+#define PICK_45_POS_J1 2600 + OFFSET_J1
+#define PICK_45_POS_J2 2780 + OFFSET_J2
 #define PICK_45_ID 0
 #define PICK_90_ID 1
 
@@ -200,9 +200,7 @@ void setup() {
   pr_pick_45.z = PICK_POS_Z;
   pr_pick_45.PieceLeft = 8;
 
-  pr_place.j1 = 3000;
-  pr_place.j2 = 1000;
-  pr_place.z = 1000;
+
 
   STATE_AUTO = SA_GO_TO_HOME;
 }

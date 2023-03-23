@@ -61,7 +61,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[floor_index][i][i]!=player_id and board[floor_index][i][i]!=0:
                 streak = 0
                 break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Negative diagonal column and row counter
@@ -74,7 +74,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[floor_index][(row_total-1-i)][i]!=player_id and board[floor_index][(row_total-1-i)][i]!=0:
                 streak = 0
                 break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Positive diagonal column and floor counter
@@ -88,7 +88,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[i+gap][i][column_index]!=player_id and board[i+gap][i][column_index]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Negative diagonal column and floor counter
@@ -102,7 +102,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[(row_total-1-i)+gap][i][column_index]!=player_id and board[(row_total-1-i)+gap][i][column_index]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Positive diagonal row and floor counter
@@ -116,7 +116,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[i+gap][row_index][i]!=player_id and board[i+gap][row_index][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Negative diagonal row and floor counter
@@ -130,7 +130,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[(column_total-1-i)+gap][row_index][i]!=player_id and board[(column_total-1-i)+gap][row_index][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Positive positive diagonal column, row and floor counter
@@ -144,7 +144,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[i+gap][i][i]!=player_id and board[i+gap][i][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Positive negative diagonal column, row and floor counter
@@ -158,7 +158,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[(row_total-1-i)+gap][i][i]!=player_id and board[(row_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Negative positive diagonal column, row and floor counter
@@ -172,7 +172,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[i+gap][i][i]!=player_id and board[i+gap][i][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
 
     #Negative negative diagonal column, row and floor counter
@@ -186,7 +186,7 @@ def streak_counter(play,board,row_total,column_total,floor_total):
             elif board[(column_total-1-i)+gap][i][i]!=player_id and board[(column_total-1-i)+gap][i][i]!=0:
                     streak = 0
                     break
-        streak_list.append(streak)
+    streak_list.append(streak)
 
     #This removes the placed piece from the board
     board[floor_index][row_index][column_index]=0

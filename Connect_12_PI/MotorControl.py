@@ -27,7 +27,7 @@ class MotorMove:
     mssg2:str = "0000"
     mssg3:str = "0000"
     mssg4:str = "0"             #default is go to 45deg
-    mssg5:str = "0"             #default is no reset of magazines
+    mssg5:str = "3"             #default is no reset of magazines
     mssg6:str = "0"             #default is not reset
     mssg7:str = "0"             #default is no victory
     mssg:str = "0000000000000000"
@@ -35,7 +35,7 @@ class MotorMove:
     Zpos:int = 0 #zposition
 
     #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)        #Linux or Pi
-    serOpenCR = serial.Serial('COM5', baudrate= 9600, timeout=2.0)  #Windows
+    serOpenCR = serial.Serial('COM3', baudrate= 9600, timeout=2.0)  #Windows
 
     ## Methods
     def __init__(self):
@@ -109,7 +109,7 @@ class MotorMove:
         print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip())
-            print("msg Sent: " + mssg)
+            print("msg Sent: " + mssg+"\n")
         
         self.mssg5 = "0"
         self.mssg7 = "0"

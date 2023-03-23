@@ -5,12 +5,14 @@ import sys
 from PyQt5 import QtWidgets
 import os
 from MotorControl import MotorMove
+
 def AI_played(self):
     play = AI.choose_play()
     print(play)
+    print("AI")
     if(gb.detect_win(play)):
             MotorMove.sendVictory(MotorMove, 2)
-            print("VICTORY!")
+            print("VICTORY! AI")
     entries = [str(play[0]),str(play[1]),play[3]]
     gb.add_piece(entries)
     gb.submit_robot_pos(int(play[0]),int(play[1]),int(play[2]))
@@ -22,9 +24,10 @@ def player_played(self):
     # Actualize the gameboard status with the new inputs
     player, column, row = gb.take_picture()
     entries = [str(row), str(column), str(player)]
+    print("Player")
     if(gb.detect_win(entries)):
             MotorMove.sendVictory(MotorMove, 1)
-            print("VICTORY!")
+            print("VICTORY! Human")
             gb.cap.release()  # Release the VideoCapture object and Close all the windows
     gb.add_piece(entries)
     AI_played(self)
@@ -32,6 +35,7 @@ def player_played(self):
     return 
 
 if __name__=="__main__":
+    
     os.system('cls')
     app = QtWidgets.QApplication(sys.argv)
     gb = gameboard()
