@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets
 from streak_counter import streak_counter
 from UserInterface import userInterface
 
+
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
@@ -19,27 +20,31 @@ class gameboard(QtWidgets.QMainWindow):
     LastList = [0 for _ in range(16)]
     var = 0
     global cap
-    
+
     def __init__(self):
         # Function used to display the user interface (UI) and let the user use inputs to move the robot
-        # to a certain position or tell the program he's done playing. 
+        # to a certain position or tell the program he's done playing.
         self.init_board()
         super().__init__()
-        userInterface(self)    
+        userInterface(self)
 
         # start camera
-        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)         # Set the focus distance
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)        # Set the focus distance
+        # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
+        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        # Set the focus distance
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        # Set the focus distance
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         return
-    
+
     def init_board(self):
         # Uses the global variables to generate the gameboard matrix
 
         x = self.row_total
         y = self.column_total
         z = self.floor_total
-        self.board = [[[0 for k in range(x)] for j in range(y)] for i in range(z)]
+        self.board = [[[0 for k in range(x)]
+                       for j in range(y)] for i in range(z)]
         return
 
     def print_board(self):
@@ -52,15 +57,13 @@ class gameboard(QtWidgets.QMainWindow):
             usermatrix = usermatrix + stringmatrix
             i += 1
         return usermatrix
-    
+
     def print_stats(self):
-         # Open the text file in read mode
+        # Open the text file in read mode
         with open('Stats.txt', 'r') as f:
             # Read the values of the variables and convert them to integers
             VictoryHuman, VictoryRobot = map(int, f.readlines())
         return "Human Victory: " + str(VictoryHuman) + "\n" + "Robot Victory: " + str(VictoryRobot)
-
-
 
     def add_piece(self, position_list):
         # Display the piece played on the UI to refresh the gameboard.
@@ -79,26 +82,27 @@ class gameboard(QtWidgets.QMainWindow):
         return
 
     def determine_floor(self, row, column):
-        # Calculate the actual floor of the piece, knowing the previous pieces played at this exact position. 
+        # Calculate the actual floor of the piece, knowing the previous pieces played at this exact position.
 
         floor = 1
         row = int(row)
         column = int(column)
         for i in range(1, 7):
             if self.board[i - 1][row - 1][column - 1] != 0:
-                floor = floor + 1               
+                floor = floor + 1
         return floor
 
-    def detect_win(self,play):
+    def detect_win(self, play):
         # Detect if there is a win on the gameboard.
         play = [int(play[0])]+[int(play[1])]+[int(play[2])]
-        streaks = streak_counter(play,self.board,self.row_total,self.column_total,self.floor_total)
-        print("streak",streaks)
+        streaks = streak_counter(
+            play, self.board, self.row_total, self.column_total, self.floor_total)
+        print("streak", streaks)
         for streak in streaks:
             if streak == 4:
                 return True
         return False
- 
+
     def start_new_game(self):
         # This function starts a completely new game
         print("New game started")
@@ -115,28 +119,60 @@ class gameboard(QtWidgets.QMainWindow):
         MotorMove.mssg5 = "1"
 
         print("MotorMove.mssg5 = 1")
-        return 
+        return
 
     def resetPick90deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
         MotorMove.mssg5 = "2"
-        
-        print("MotorMove.mssg5 = 2")
-        return 
 
+        print("MotorMove.mssg5 = 2")
+        return
+
+    def move_button1_down(self):
+        self.submit_button1.move(
+            self.submit_button1.x(), self.submit_button1.y() + 5)
+
+    def move_button1_up(self):
+        self.submit_button1.move(
+            self.submit_button1.x(), self.submit_button1.y() - 5)
+
+    def move_button2_down(self):
+        self.submit_button2.move(
+            self.submit_button2.x(), self.submit_button2.y() + 5)
+
+    def move_button2_up(self):
+        self.submit_button2.move(
+            self.submit_button2.x(), self.submit_button2.y() - 5)
+
+    def move_button3_down(self):
+        self.submit_button3.move(
+            self.submit_button3.x(), self.submit_button3.y() + 5)
+
+    def move_button3_up(self):
+        self.submit_button3.move(
+            self.submit_button3.x(), self.submit_button3.y() - 5)
+
+    def move_button4_down(self):
+        self.submit_button4.move(
+            self.submit_button4.x(), self.submit_button4.y() + 5)
+
+    def move_button4_up(self):
+        self.submit_button4.move(
+            self.submit_button4.x(), self.submit_button4.y() - 5)
 
     def submit_robot_pos(self, row, column, floor):
-        # Returns the xyz coordinates of the position where the robot has to move to. 
-        # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment. 
-        # The reference position is A1 and then the other positinos are automatically generated. 
-        print("row: " + str(row) + " column: " + str(column) + " floor: " + str(floor))
+        # Returns the xyz coordinates of the position where the robot has to move to.
+        # The xyz values are hard coded based on experimental moves. The values may changes according to the robot environment.
+        # The reference position is A1 and then the other positinos are automatically generated.
+        print("row: " + str(row) + " column: " +
+              str(column) + " floor: " + str(floor))
 
         offsetJ1 = 250
         offestJ2 = 0
 
-        #row = 123    column = abc
+        # row = 123    column = abc
 
-        if(row == 1 and column == 1):
+        if (row == 1 and column == 1):
             J1 = 1560 + offsetJ1
             J2 = 3920 + offestJ2
             PickPlace = 45
@@ -175,7 +211,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 3 and column == 2):
             J1 = 3130 + offsetJ1
             J2 = 1545 + offestJ2
-            PickPlace = 45
+            PickPlace = 90
         elif (row == 3 and column == 3):
             J1 = 2780 + offsetJ1
             J2 = 1545 + offestJ2
@@ -205,7 +241,7 @@ class gameboard(QtWidgets.QMainWindow):
             J2 = 0
             PickPlace = 90
             print("Error: Invalid position")
-        
+
         height_constant = -300
         height_init = 2350
         '''
@@ -237,9 +273,9 @@ class gameboard(QtWidgets.QMainWindow):
             MotorMove.mssg4 = "0"
         elif PickPlace == 90:
             MotorMove.mssg4 = "1"
-    
+
         MotorMove.Zpos = zPosition
-        #MotorMove.moveCart(MotorMove, xPosition, yPosition, zPosition)
+        # MotorMove.moveCart(MotorMove, xPosition, yPosition, zPosition)
         MotorMove.moveJoint(MotorMove, J1, J2)
 
         return J1, J2, zPosition
@@ -250,39 +286,45 @@ class gameboard(QtWidgets.QMainWindow):
 
         start_time = time.time()
         list = self.LastList[:]
-        ret, img = self.cap.read()                       # Capture a frame from the webcam
+        # Capture a frame from the webcam
+        ret, img = self.cap.read()
 
         while list == self.LastList:
-            i=0
-            ret, img = self.cap.read()                       # Capture a frame from the webcam
+            i = 0
+            # Capture a frame from the webcam
+            ret, img = self.cap.read()
 
-            center = (img.shape[1]//2, img.shape[0]//2) # Crop the image and divise it into 16 squares
+            # Crop the image and divise it into 16 squares
+            center = (img.shape[1]//2, img.shape[0]//2)
             size = (1080-300, 1080-300)
             img = cv2.getRectSubPix(img, size, center)
             cv2.imshow("Webcam", img)                   # Show the frame
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):       # Exit the loop if the 'q' key is pressed
+            # Exit the loop if the 'q' key is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
             height, width, _ = img.shape
             square_size = (height//4, width//4)
 
-            for row in range(4):                        # Iterate through the rows and columns of the image
+            # Iterate through the rows and columns of the image
+            for row in range(4):
                 for col in range(4):
-                    square = img[row*square_size[0]:(row+1)*square_size[0], col*square_size[1]:(col+1)*square_size[1]]  # Extract each square of the image
+                    square = img[row*square_size[0]:(row+1)*square_size[0], col*square_size[1]:(
+                        col+1)*square_size[1]]  # Extract each square of the image
                     gray_img = cv2.cvtColor(square, cv2.COLOR_BGR2GRAY)
-                    
+
                     qr_codes = pyzbar.decode(gray_img)  # Detect QR codes
                     for qr_code in qr_codes:            # Add QR code to the list
                         data = qr_code.data.decode()    # Get QR code data
-                        list[i]=(int(data))                
-                    i+=1
-            
+                        list[i] = (int(data))
+                    i += 1
+
             time.sleep(0.2)                             # Wait 0.2 seconds
-        
+
         for i, (a, b) in enumerate(zip(list, self.LastList)):
             if a != b:
-                x = i%4+1
+                x = i % 4+1
                 y = i//4+1
                 if (a < 47):
                     Player = 2
@@ -293,9 +335,9 @@ class gameboard(QtWidgets.QMainWindow):
         cv2.destroyAllWindows()
 
         return Player, x, y
-    
+
     def StatsAddWin(self, Player):
-        
+
         # Open the text file in read mode
         with open('Stats.txt', 'r') as f:
             # Read the values of the variables and convert them to integers
@@ -313,4 +355,3 @@ class gameboard(QtWidgets.QMainWindow):
 
         # Close the file
         f.close()
-    

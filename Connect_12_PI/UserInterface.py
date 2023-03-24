@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt5.QtCore import Qt
+
+
 def userInterface(self):
     # Generate the user interface
     self.setWindowTitle("User Interface")
@@ -70,6 +72,17 @@ def userInterface(self):
     """
     self.submit_button4.setStyleSheet(style_sheet3)
 
+    # Move the buttons down when pressed
+    self.submit_button1.pressed.connect(self.move_button1_down)
+    self.submit_button2.pressed.connect(self.move_button2_down)
+    self.submit_button3.pressed.connect(self.move_button3_down)
+    self.submit_button4.pressed.connect(self.move_button4_down)
+
+    self.submit_button1.released.connect(self.move_button1_up)
+    self.submit_button2.released.connect(self.move_button2_up)
+    self.submit_button3.released.connect(self.move_button3_up)
+    self.submit_button4.released.connect(self.move_button4_up)
+
     # Display layouts ----------------------------------------------------
     self.left_layout = QVBoxLayout()
     self.left_layout.addWidget(self.submit_button4)
@@ -79,7 +92,6 @@ def userInterface(self):
     self.right_layout.addWidget(self.submit_button2)
     self.right_layout.addWidget(self.submit_button3)
     self.right_layout.addWidget(self.label2)
-
 
     self.main_layout = QHBoxLayout()
     self.main_layout.addLayout(self.left_layout)
