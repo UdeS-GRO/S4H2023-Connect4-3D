@@ -27,7 +27,7 @@ class MotorMove:
     mssg2:str = "0000"
     mssg3:str = "0000"
     mssg4:str = "0"             #default is go to 45deg
-    mssg5:str = "3"             #default is no reset of magazines
+    mssg5:str = "3"             #default is reset of all magazines
     mssg6:str = "0"             #default is not reset
     mssg7:str = "0"             #default is no victory
     mssg:str = "0000000000000000"
@@ -51,6 +51,7 @@ class MotorMove:
                                 ]
         ex: 01230123012300
         '''
+        print("Sending message")
         
         ### First Joint Position
         Shoulderlength = len(str(Shouldermessage))
@@ -172,14 +173,15 @@ class MotorMove:
         self.sendMsg(self, J1, J2)
 
     def sendVictory(self, winner):
-        # 0 = player, 1 = robot
-        if winner == 0:
-            self.mssg5 = "3"
-            self.mssg7 = "1"
+        # 3 = New Game, 1 = player, 2 = robot
+        print("Winner is: ")
+        if winner == 3:
+            self.mssg7 = "3"
             self.sendMsg(self, 0, 0)
         elif winner == 1:
-            self.mssg5 = "3"
-            self.mssg7 = "2"
+            self.mssg7 = "1"
             self.sendMsg(self, 0, 0)
+        elif winner == 2:
+            self.mssg7 = "2"
 
 

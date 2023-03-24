@@ -52,6 +52,15 @@ class gameboard(QtWidgets.QMainWindow):
             usermatrix = usermatrix + stringmatrix
             i += 1
         return usermatrix
+    
+    def print_stats(self):
+         # Open the text file in read mode
+        with open('Stats.txt', 'r') as f:
+            # Read the values of the variables and convert them to integers
+            VictoryHuman, VictoryRobot = map(int, f.readlines())
+        return "Human Victory: " + str(VictoryHuman) + "\n" + "Robot Victory: " + str(VictoryRobot)
+
+
 
     def add_piece(self, position_list):
         # Display the piece played on the UI to refresh the gameboard.
@@ -89,10 +98,16 @@ class gameboard(QtWidgets.QMainWindow):
             if streak == 4:
                 return True
         return False
-
+ 
     def start_new_game(self):
         # This function starts a completely new game
+        print("New game started")
+        self.init_board()
+        self.LastList = [0 for _ in range(16)]
         MotorMove.mssg5 = "3"
+        MotorMove.sendVictory(MotorMove, 3)
+        self.label.setText(self.print_board())
+        self.label2.setText(self.print_stats())
         return
 
     def resetPick45deg(self):
@@ -146,27 +161,27 @@ class gameboard(QtWidgets.QMainWindow):
             J2 = 3810 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 3):
-            J1 = 3025 + offsetJ1
-            J2 = 1140 + offestJ2
+            J1 = 3045 + offsetJ1
+            J2 = 1190 + offestJ2
             PickPlace = 90
         elif (row == 2 and column == 4):
             J1 = 2505 + offsetJ1
             J2 = 1320 + offestJ2
             PickPlace = 45
         elif (row == 3 and column == 1):
-            J1 = 3300 + offsetJ1
-            J2 = 1640 + offestJ2
+            J1 = 3360 + offsetJ1
+            J2 = 1630 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 2):
-            J1 = 3090 + offsetJ1
+            J1 = 3130 + offsetJ1
             J2 = 1545 + offestJ2
-            PickPlace = 90
+            PickPlace = 45
         elif (row == 3 and column == 3):
-            J1 = 2740 + offsetJ1
+            J1 = 2780 + offsetJ1
             J2 = 1545 + offestJ2
             PickPlace = 90
         elif (row == 3 and column == 4):
-            J1 = 2320 + offsetJ1
+            J1 = 2300 + offsetJ1
             J2 = 1650 + offestJ2
             PickPlace = 90
         elif (row == 4 and column == 1):
@@ -183,7 +198,7 @@ class gameboard(QtWidgets.QMainWindow):
             PickPlace = 45
         elif (row == 4 and column == 4):
             J1 = 1350 + offsetJ1
-            J2 = 2735 + offestJ2
+            J2 = 2747 + offestJ2
             PickPlace = 45
         else:
             J1 = 0
@@ -192,7 +207,7 @@ class gameboard(QtWidgets.QMainWindow):
             print("Error: Invalid position")
         
         height_constant = -300
-        height_init = 2100
+        height_init = 2350
         '''
         xA1Position = 0.111
         yA1Position = 0.110
@@ -231,11 +246,12 @@ class gameboard(QtWidgets.QMainWindow):
 
     def take_picture(self):
         # Take picture of the gameboard when the played button is press. Actualize the UI by comparing the actual status gameboard
-        # and the previous status gameboard. 
+        # and the previous status gameboard.
 
         start_time = time.time()
         list = self.LastList[:]
-     
+        ret, img = self.cap.read()                       # Capture a frame from the webcam
+
         while list == self.LastList:
             i=0
             ret, img = self.cap.read()                       # Capture a frame from the webcam
@@ -277,4 +293,24 @@ class gameboard(QtWidgets.QMainWindow):
         cv2.destroyAllWindows()
 
         return Player, x, y
+    
+    def StatsAddWin(self, Player):
+        
+        # Open the text file in read mode
+        with open('Stats.txt', 'r') as f:
+            # Read the values of the variables and convert them to integers
+            VictoryHuman, VictoryRobot = map(int, f.readlines())
+
+        if (Player == 1):
+            VictoryHuman += 1
+        elif (Player == 2):
+            VictoryRobot += 1
+
+        # Open the same text file in write mode
+        with open('Stats.txt', 'w') as f:
+            # Write the updated values of the variables to the file
+            f.write(f"{VictoryHuman}\n{VictoryRobot}")
+
+        # Close the file
+        f.close()
     
