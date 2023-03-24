@@ -31,17 +31,6 @@
 #define PIN_LIMITSWITCH 6   //Digital I/O
 #define RED_LED_PIN 12         //LED USER 1
 #define GREEN_LED_PIN 13         //LED USER 2
-#define RESET_45 1
-#define RESET_90 2
-#define RESET_ALL 3
-#define PICKPLACE_45 0
-#define PICKPLACE_90 1
-#define NO_VICTORY 0
-#define HUMAN_VICTORY 1
-#define ROBOT_VICTORY 2
-#define START_NEW_GAME 3
-
-
 
 
 //Delays
@@ -50,20 +39,19 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 250
-#define OFFSET_J2 0
-#define PIECE_OFFSET 300
-#define HOME_POS_J1 4095 //+ OFFSET_J1 // TODO: hardcoder la valeur
-#define HOME_POS_J2 3500 + OFFSET_J2 // TODO: hardcoder la valeur
+#define OFFSET_J1 40
+#define OFFSET_J2 450
+#define HOME_POS_J1 4050  // TODO: hardcoder la valeur
+#define HOME_POS_J2 3500  // TODO: hardcoder la valeur
 #define HOME_POS_Z 0      // TODO: hardcoder la valeur
-#define PICK_90_POS_J1 2318 + OFFSET_J1
-#define PICK_90_POS_J2 3378 + OFFSET_J2
-#define PICK_POS_Z 910
-#define PICK_45_POS_J1 2600 + OFFSET_J1
-#define PICK_45_POS_J2 2780 + OFFSET_J2
+#define PICK_90_POS_J1 2575 + OFFSET_J1
+#define PICK_90_POS_J2 2968 + OFFSET_J2
+#define PICK_90_POS_Z 675
+#define PICK_45_POS_J1 2850 + OFFSET_J1
+#define PICK_45_POS_J2 2350 + OFFSET_J2
+#define PICK_45_POS_Z 675
 #define PICK_45_ID 0
 #define PICK_90_ID 1
-
 
 /*---------------------------- ENUM AND STRUCT --------------------------------*/
 
@@ -104,6 +92,7 @@ bool IsLimitSwitchActivated();
 void ActivateMagnet();
 void DeactivateMagnet();
 void readSerialPort();
+void sendData(int msg2send);
 void PosPick();
 void RobotTurnLED();
 void HumanTurnLED();
@@ -140,6 +129,7 @@ unsigned long timerBetweenStates;
 int ledState = LOW;  // ledState used to set the LED in Victory
 unsigned long previousMillis = 0;  // will store last time LED was updated
 const long interval = 200;  // interval at which to blink (milliseconds)
+unsigned long VictoryTimer = 0;
 
 //States
 int fromPi_posJ1 = 0;
@@ -151,8 +141,7 @@ bool StartSequence = 0;
 int pickPlace = 0;  //Choose wich position to pick (0 for 45 degree and 1 for 90 degree)
 int pickReset = 0;  //Reset to 8 the number of pieces (0 = nothing, 1 = reset 45, 2 = reset 90)
 bool SequenceReset = 0;
-int VictoryMsg = 0; //0 -> No victory, 1 -> Human Victory, 2 -> Robot Victory
-
+int VictoryMsg = 0;
 
 void setup() {
   Serial.begin(BAUDRATE);
@@ -199,138 +188,144 @@ void setup() {
 
   pr_pick_90.j1 = PICK_90_POS_J1;
   pr_pick_90.j2 = PICK_90_POS_J2;
-  pr_pick_90.z = PICK_POS_Z;
+  pr_pick_90.z = PICK_90_POS_Z;
   pr_pick_90.PieceLeft = 8;
 
   // pr_pick.j1 = PICK_45_POS_J1;
   // pr_pick.j2 = PICK_45_POS_J2;
-  // pr_pick.z = PICK_POS_Z;
+  // pr_pick.z = PICK_45_POS_Z;
   // pr_pick.PieceLeft = 8;
 
   pr_pick_45.j1 = PICK_45_POS_J1;
   pr_pick_45.j2 = PICK_45_POS_J2;
-  pr_pick_45.z = PICK_POS_Z;
+  pr_pick_45.z = PICK_45_POS_Z;
   pr_pick_45.PieceLeft = 8;
 
-
+  pr_place.j1 = 3000;
+  pr_place.j2 = 1000;
+  pr_place.z = 1000;
 
   STATE_AUTO = SA_GO_TO_HOME;
+
+  GotoPosition(pr_home);
 }
 
 /*---------------------------- LOOP FUNCTION ----------------------------------*/
 
 void loop() {
   readSerialPort();
-  if(SequenceReset)
-  {
-    STATE_AUTO = SA_GO_TO_HOME;
-    SequenceReset = false;
-  }
+  GoToPosition(pr_place);
 
-  switch (STATE_AUTO) {
+  // if(SequenceReset)
+  // {
+  //   STATE_AUTO = SA_GO_TO_HOME;
+  //   SequenceReset = false;
+  // }
 
-    case SA_GO_TO_HOME:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        Count_pulses = 0;
-        RestingEOAT();
+  // switch (STATE_AUTO) {
 
-        GoToPosition(pr_home);
+  //   case SA_GO_TO_HOME:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       Count_pulses = 0;
+  //       RestingEOAT();
 
-        if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
-          STATE_AUTO = SA_IDLE;
-        }
-      }
-      break;
+  //       GoToPosition(pr_home);
 
-    case SA_IDLE:
-      RestingEOAT();
-      DeactivateMagnet();
-      HumanTurnLED();
-      VictoryLED();
+  //       if (IsAtPosition(motorShoulder_ID, pr_home.j1, 6) && IsAtPosition(motorElbow_ID, pr_home.j2, 6)) {
+  //         STATE_AUTO = SA_IDLE;
+  //       }
+  //     }
+  //     break;
 
-      if (StartSequence) {
-        StartSequence = 0;
-        STATE_AUTO = SA_GO_TO_PICK1;
-        RobotTurnLED();
-      }
-      break;
+  //   case SA_IDLE:
+  //     RestingEOAT();
+  //     DeactivateMagnet();
+  //     HumanTurnLED();
+  //     VictoryLED();
 
-    case SA_GO_TO_PICK1:
-      GoToPosition(pr_pick);
-      if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
-        STATE_AUTO = SA_GO_TO_PIECE;
-        delay(500);
-      }
-      break;
+  //     if (StartSequence) {
+  //       StartSequence = 0;
+  //       STATE_AUTO = SA_GO_TO_PICK1;
+  //       RobotTurnLED();
+  //     }
+  //     break;
 
-    case SA_GO_TO_PIECE:
-      LowerEOAT(pr_pick);
+  //   case SA_GO_TO_PICK1:
+  //     GoToPosition(pr_pick);
+  //     if (IsAtPosition(motorShoulder_ID, pr_pick.j1, 10) && IsAtPosition(motorElbow_ID, pr_pick.j2, 10)) {
+  //       STATE_AUTO = SA_GO_TO_PIECE;
+  //       delay(500);
+  //     }
+  //     break;
 
-      if (Count_pulses >= pr_pick.z) {
-        RestingEOAT();
-        PosPick();
-        timerPickPieceStart = millis();
-        STATE_AUTO = SA_PICK_PIECE;
-      }
-      break;
+  //   case SA_GO_TO_PIECE:
+  //     LowerEOAT(pr_pick);
 
-    case SA_PICK_PIECE:
-      ActivateMagnet();
+  //     if (Count_pulses >= pr_pick.z) {
+  //       RestingEOAT();
+  //       PosPick();
+  //       timerPickPieceStart = millis();
+  //       STATE_AUTO = SA_PICK_PIECE;
+  //     }
+  //     break;
 
-      if ((millis() - timerPickPieceStart) >= delayPick) {
-        STATE_AUTO = SA_GO_TO_LS1;
-      }
-      break;
+  //   case SA_PICK_PIECE:
+  //     ActivateMagnet();
 
-    case SA_GO_TO_LS1:
-      RaiseEOAT();
+  //     if ((millis() - timerPickPieceStart) >= delayPick) {
+  //       STATE_AUTO = SA_GO_TO_LS1;
+  //     }
+  //     break;
 
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_POS;
-      }
-      break;
+  //   case SA_GO_TO_LS1:
+  //     RaiseEOAT();
 
-    case SA_GO_TO_POS:
-      GoToPosition(pr_place);
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_POS;
+  //     }
+  //     break;
 
-      if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
-        STATE_AUTO = SA_GO_TO_FLOOR;
-        delay(500);
-      }
-      break;
+  //   case SA_GO_TO_POS:
+  //     GoToPosition(pr_place);
 
-    case SA_GO_TO_FLOOR:
-      LowerEOAT(pr_place);
-      if (Count_pulses >= pr_place.z) {
-        RestingEOAT();
-        timerPlacePieceStart = millis();
-        STATE_AUTO = SA_DROP_PIECE;
-      }
-      break;
+  //     if (IsAtPosition(motorShoulder_ID, pr_place.j1, 6) && IsAtPosition(motorElbow_ID, pr_place.j2, 6)) {
+  //       STATE_AUTO = SA_GO_TO_FLOOR;
+  //       delay(500);
+  //     }
+  //     break;
 
-    case SA_DROP_PIECE:
-      DeactivateMagnet();
-      if (millis() - timerPlacePieceStart >= delayPlace) {
-        STATE_AUTO = SA_GO_TO_LS2;
-      }
-      break;
+  //   case SA_GO_TO_FLOOR:
+  //     LowerEOAT(pr_place);
+  //     if (Count_pulses >= pr_place.z) {
+  //       RestingEOAT();
+  //       timerPlacePieceStart = millis();
+  //       STATE_AUTO = SA_DROP_PIECE;
+  //     }
+  //     break;
 
-    case SA_GO_TO_LS2:
-      RaiseEOAT();
-      if (IsLimitSwitchActivated()) {
-        RestingEOAT();
-        Count_pulses = 0;
-        STATE_AUTO = SA_GO_TO_HOME;
-      }
-      break;
+  //   case SA_DROP_PIECE:
+  //     DeactivateMagnet();
+  //     if (millis() - timerPlacePieceStart >= delayPlace) {
+  //       STATE_AUTO = SA_GO_TO_LS2;
+  //     }
+  //     break;
 
-    default:
-      STATE_AUTO = SA_GO_TO_HOME;
-      break;
-  }
+  //   case SA_GO_TO_LS2:
+  //     RaiseEOAT();
+  //     if (IsLimitSwitchActivated()) {
+  //       RestingEOAT();
+  //       Count_pulses = 0;
+  //       STATE_AUTO = SA_GO_TO_HOME;
+  //     }
+  //     break;
+
+  //   default:
+  //     STATE_AUTO = SA_GO_TO_HOME;
+  //     break;
+  // }
 }
 
 /*---------------------------- FUNCTIONS --------------------------------------*/
@@ -375,18 +370,74 @@ void DeactivateMagnet() {
   digitalWrite(PIN_EMAGNET, LOW);
 }
 
+void sendData() {
+
+  while (Serial.available() < 1) {
+    float SendShoulderPosFloat = ServoMotor.getPresentPosition(motorShoulder_ID);
+    int SendShoulderPos = round(SendShoulderPosFloat);
+    String SendShoulderPosStr = String(SendShoulderPos);
+
+    float SendElbowPosFloat = ServoMotor.getPresentPosition(motorElbow_ID);
+    int SendElbowPos = round(SendElbowPosFloat);
+    String SendElbowPosStr = String(SendElbowPos);
+
+    if (SendShoulderPosStr.length() == 0) {
+      msg1 = "0000";
+    } else if (SendShoulderPosStr.length() == 1) {
+      msg1 = "000" + SendShoulderPosStr;
+    } else if (SendShoulderPosStr.length() == 2) {
+      msg1 = "00" + SendShoulderPosStr;
+    } else if (SendShoulderPosStr.length() == 3) {
+      msg1 = "0" + SendShoulderPosStr;
+    } else {
+      msg1 = SendShoulderPosStr;
+    }
+
+    if (SendElbowPosStr.length() == 0) {
+      msg2 = "0000";
+    } else if (SendElbowPosStr.length() == 1) {
+      msg2 = "000" + SendElbowPosStr;
+    } else if (SendElbowPosStr.length() == 2) {
+      msg2 = "00" + SendElbowPosStr;
+    } else if (SendElbowPosStr.length() == 3) {
+      msg2 = "0" + SendElbowPosStr;
+    } else {
+      msg2 = SendElbowPosStr;
+    }
+
+    if (String(Count_pulses).length() == 0) {
+      msg3 = "0000";
+    } else if (String(Count_pulses).length() == 1) {
+      msg3 = "000" + SendElbowPosStr;
+    } else if (String(Count_pulses).length() == 2) {
+      msg3 = "00" + SendElbowPosStr;
+    } else if (String(Count_pulses).length() == 3) {
+      msg3 = "0" + SendElbowPosStr;
+    } else {
+      msg3 = String(Count_pulses);
+    }
+
+    msg3 = "1234";
+
+    //msg4 = String(fromPi_Mode);
+
+    //msg5 = String(fromPi_State);
+
+    msg = msg1 + msg2 + msg3 + msg4 + msg5;
+  }
+}
+
 void readSerialPort() {
 
   /*communication order:  [j1 j1 j1 j1  --> int 0-9 times 4
                           j2 j2 j2 j2   --> int 0-9 times 4
                           z z z z       --> int 0-9 times 4
-                          msg4          --> PickPlace       0 for 45 degree or 1 for 90 degree
-                          msg5          --> PickReset       1 to reset 45, 2 to reset 90 and 3 to reset all
-                          msg6          --> SequenceReset   Not implemented in python
-                          msg7          --> VictoryMessage  1 for human and 2 for robot
+                          mode          --> int 0 = manual, 1 = automatic
+                          etat          --> int 0-9: 0 = state no1, 1 = state no2, [...], 9 = state no10
                           ]*/
 
-    if (Serial.available() > 0) {
+  if (Serial.available() == 0) {
+  } else if (Serial.available() > 0) {
 
     StringFromPi = Serial.readString();
 
@@ -417,22 +468,21 @@ void readSerialPort() {
 
 
     // Reset PieceLeft
-    if (pickReset == RESET_45 || pickReset == RESET_ALL) //First move of the match is 3, so reset all
+    if (pickReset == 1 || pickReset == 3) //First move of the match is 3, so reset all
     {
       pr_pick_45.PieceLeft = 8;
-      pr_pick_45.z = PICK_POS_Z;
+      pr_pick_45.z = PICK_45_POS_Z;
     }
-    if (pickReset == RESET_90 || pickReset == RESET_ALL)
+    if (pickReset == 2 || pickReset == 3)
     {
       pr_pick_90.PieceLeft = 8;
-      pr_pick_90.z = PICK_POS_Z;
+      pr_pick_90.z = PICK_90_POS_Z;
     }
-    
     
 
 
     // Detect if Pickplace is 45 or 90
-    if (pickPlace == PICKPLACE_45) 
+    if (pickPlace == 0) 
     {
     pr_pick.j1 = pr_pick_45.j1;
     pr_pick.j2 = pr_pick_45.j2;
@@ -446,16 +496,10 @@ void readSerialPort() {
       pr_pick.z = pr_pick_90.z;
       pr_pick.PieceLeft = pr_pick_90.PieceLeft;
     }
-    if(VictoryMsg != HUMAN_VICTORY && VictoryMsg != START_NEW_GAME) // Do not make a play if the human already won
-      StartSequence = 1;
-
-    if (VictoryMsg = START_NEW_GAME) //If a new game is started, disable the blinking LED
-      {
-        VictoryMsg = 0;
-      }
-
+    StartSequence = 1;
     Serial.flush();
   }
+
   return;
 }
 
@@ -466,17 +510,17 @@ bool IsAtPosition(int MotorID, int EndPos, int Treshold) {
 
 void PosPick() {
   if (pickPlace == PICK_45_ID && pr_pick_45.PieceLeft > 0) {
-    pr_pick_45.z += PIECE_OFFSET;
+    pr_pick_45.z += 300;
     pr_pick_45.PieceLeft -= 1;
   } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 0) {
-    pr_pick_90.z += PIECE_OFFSET;
+    pr_pick_90.z += 300;
     pr_pick_90.PieceLeft -= 1;
   }
 }
 
 void RobotTurnLED() {
 
-  if(VictoryMsg == NO_VICTORY)
+  if(VictoryMsg == 0 || millis()-VictoryTimer > 10000)
   {
     digitalWrite(RED_LED_PIN, true);
     digitalWrite(GREEN_LED_PIN, false);
@@ -484,7 +528,7 @@ void RobotTurnLED() {
 
 }
 void HumanTurnLED() {
-  if(VictoryMsg == NO_VICTORY)
+  if(VictoryMsg == 0 || millis()-VictoryTimer > 10000)
   {
     digitalWrite(RED_LED_PIN, false);
     digitalWrite(GREEN_LED_PIN, true);
@@ -493,22 +537,23 @@ void HumanTurnLED() {
 }
 void VictoryLED() {
   int LED_PIN;
-  int Loser_LED_PIN;
+
+  // Stop after 10 sec
+  bool VictoryTimerStarted = 0;
+  if(VictoryMsg == 1 && !VictoryTimerStarted)
+  {
+    VictoryTimer = millis();
+  }
+
   
   // Select LED to open
-  if(VictoryMsg == HUMAN_VICTORY)
-  {
+  if(VictoryMsg == 1)
     LED_PIN = GREEN_LED_PIN;
-    Loser_LED_PIN = RED_LED_PIN; 
-  }
-  else if(VictoryMsg == ROBOT_VICTORY)
-  {
+  else if(VictoryMsg == 2)
     LED_PIN = RED_LED_PIN;
-    Loser_LED_PIN = GREEN_LED_PIN;
-  }
   
   // Flash the LED
-  if(VictoryMsg != NO_VICTORY)
+  if(VictoryMsg != 0 && millis()-VictoryTimer < 10000)
     {
     if (millis() - previousMillis >= interval) {
     // save the last time you blinked the LED
@@ -523,7 +568,6 @@ void VictoryLED() {
 
     // set the LED with the ledState of the variable:
     digitalWrite(LED_PIN, ledState);
-    digitalWrite(Loser_LED_PIN, false);
     }
   }
 }

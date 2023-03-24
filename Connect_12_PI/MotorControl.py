@@ -1,5 +1,5 @@
-#Alexandre Baril: Created: january 16 2023, Sherbrooke
-#Alexandre Baril: Modified: february 8 2023, Sherbrooke
+# Alexandre Baril: Created: january 16 2023, Sherbrooke
+# Alexandre Baril: Modified: february 8 2023, Sherbrooke
 
 import struct
 import numpy as np
@@ -9,39 +9,40 @@ import sys
 import serial.tools.list_ports
 from PyQt5 import QtWidgets
 app = QtWidgets.QApplication(sys.argv)
-#from GameBoardRepresentation import gameboard
-#game = gameboard()
+# from GameBoardRepresentation import gameboard
+# game = gameboard()
 
 theta = 0.001
 phi = 0.001
 
+
 class MotorMove:
-    ### Math variable
-    BicepLen:float = 0.1425
-    ForearmLen:float = 0.1425
-    J1Offset:int = 0
-    J2Offset:int = 0
+    # Math variable
+    BicepLen: float = 0.1425
+    ForearmLen: float = 0.1425
+    J1Offset: int = 0
+    J2Offset: int = 0
 
-    ## Communication variables
-    mssg1:str = "0000"
-    mssg2:str = "0000"
-    mssg3:str = "0000"
-    mssg4:str = "0"             #default is go to 45deg
-    mssg5:str = "0"             #default is no reset of magazines
-    mssg6:str = "0"             #default is not reset
-    mssg7:str = "0"             #default is no victory
-    mssg:str = "0000000000000000"
+    # Communication variables
+    mssg1: str = "0000"
+    mssg2: str = "0000"
+    mssg3: str = "0000"
+    mssg4: str = "0"  # default is go to 45deg
+    mssg5: str = "3"  # default is reset of all magazines
+    mssg6: str = "0"  # default is not resetSequence
+    mssg7: str = "0"  # default is no victory
+    mssg: str = "0000000000000000"
 
-    Zpos:int = 0 #zposition
+    Zpos: int = 0  # zposition
 
-    #serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)        #Linux or Pi
-    serOpenCR = serial.Serial('COM3', baudrate= 9600, timeout=2.0)  #Windows
+    # serOpenCR = serial.Serial('/dev/ttyUSB0', 9600)        #Linux or Pi
+    serOpenCR = serial.Serial('COM3', baudrate=9600, timeout=2.0)  # Windows
 
-    ## Methods
+    # Methods
     def __init__(self):
         self.init_motor(self)
 
-    def sendMsg(self, Shouldermessage:int, Elbowmessage:int):
+    def sendMsg(self, Shouldermessage: int, Elbowmessage: int):
         '''
         communication order:    [j1 j1 j1 j1  --> int 0-9 times 4
                                 j2 j2 j2 j2   --> int 0-9 times 4
@@ -51,34 +52,35 @@ class MotorMove:
                                 ]
         ex: 01230123012300
         '''
-        
-        ### First Joint Position
+        print("Sending message")
+
+        # First Joint Position
         Shoulderlength = len(str(Shouldermessage))
         if Shoulderlength == 1:
-            mssg1 =  "000" + str(Shouldermessage)
+            mssg1 = "000" + str(Shouldermessage)
         elif Shoulderlength == 2:
-            mssg1 =  "00" + str(Shouldermessage)
+            mssg1 = "00" + str(Shouldermessage)
         elif Shoulderlength == 3:
-            mssg1 =  '0' + str(Shouldermessage)
+            mssg1 = '0' + str(Shouldermessage)
         elif Shoulderlength == 4:
             mssg1 = str(Shouldermessage)
         if mssg1 == "":
             mssg1 = "0000"
 
-        ### Second Joint Position
+        # Second Joint Position
         Elbowlength = len(str(Elbowmessage))
         if Elbowlength == 1:
-            mssg2 =  "000" + str(Elbowmessage)# + '|'
+            mssg2 = "000" + str(Elbowmessage)  # + '|'
         elif Elbowlength == 2:
-            mssg2 =  "00" + str(Elbowmessage)# + '|'
+            mssg2 = "00" + str(Elbowmessage)  # + '|'
         elif Elbowlength == 3:
-            mssg2 =  '0' + str(Elbowmessage)# + '|'
+            mssg2 = '0' + str(Elbowmessage)  # + '|'
         elif Elbowlength == 4:
-            mssg2 = str(Elbowmessage)# + '|'
+            mssg2 = str(Elbowmessage)  # + '|'
         if mssg2 == "":
             mssg2 = "0000"
-        
-        ### Z Position
+
+        # Z Position
         '''
         floor0 = 2750
         floor1 = 2450
@@ -89,45 +91,45 @@ class MotorMove:
         '''
         Zlength = len(str(self.Zpos))
         if Zlength == 1:
-            mssg3 =  "000" + str(self.Zpos)# + '|'
+            mssg3 = "000" + str(self.Zpos)  # + '|'
         elif Zlength == 2:
-            mssg3 =  "00" + str(self.Zpos)# + '|'
+            mssg3 = "00" + str(self.Zpos)  # + '|'
         elif Zlength == 3:
-            mssg3 =  '0' + str(self.Zpos)# + '|'
+            mssg3 = '0' + str(self.Zpos)  # + '|'
         elif Zlength == 4:
-            mssg3 = str(self.Zpos)# + '|'
+            mssg3 = str(self.Zpos)  # + '|'
         if mssg3 == "":
             mssg3 = "0000"
 
-        ### Pick to go to, 0 = 45deg, 1 = 90deg
-        #self.mssg4 = "1"
+        # Pick to go to, 0 = 45deg, 1 = 90deg
+        # self.mssg4 = "1"
 
-        ### Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
-        #self.mssg5 = "1"
+        # Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
+        # self.mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5 + self.mssg6 + self.mssg7
         print(mssg)
         if self.serOpenCR.isOpen():
             self.serOpenCR.write(mssg.encode().rstrip())
-            print("msg Sent: " + mssg)
-        
+            print("msg Sent: " + mssg+"\n")
+
         self.mssg5 = "0"
         self.mssg7 = "0"
         return
 
     def readMsg(self):
-        answer:str = ""
+        answer: str = ""
         if self.serOpenCR.isOpen():
             StartTime = time.time()
-            while self.serOpenCR.inWaiting()==0:
+            while self.serOpenCR.inWaiting() == 0:
                 pass
-            while  self.serOpenCR.inWaiting() > 0:
+            while self.serOpenCR.inWaiting() > 0:
                 answer = self.serOpenCR.readline().decode()
                 print("Answer is : " + answer)
                 self.serOpenCR.flushInput()
         return int(answer)
 
-    def rad2Servo(self, angleRad:float):
+    def rad2Servo(self, angleRad: float):
         angleServo = angleRad * 4095 / (2*np.pi)
         return angleServo
 
@@ -135,10 +137,12 @@ class MotorMove:
         modulus = np.power(a, 2) + np.power(b, 2) - np.power(c, 2)
         return np.arccos(modulus / (2*a*b))
 
-    def cart2cyl(self, cartX:float, cartY:float):
+    def cart2cyl(self, cartX: float, cartY: float):
 
-        phi = np.arccos((np.power(cartX,2) + np.power(cartY,2) - np.power(self.BicepLen,2) - np.power(self.ForearmLen,2) )/(2 * self.BicepLen * self.ForearmLen))
-        theta = np.pi/2 - (np.arctan2(cartY,cartX) - np.arctan2(self.ForearmLen * np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(phi))))
+        phi = np.arccos((np.power(cartX, 2) + np.power(cartY, 2) - np.power(self.BicepLen,
+                        2) - np.power(self.ForearmLen, 2))/(2 * self.BicepLen * self.ForearmLen))
+        theta = np.pi/2 - (np.arctan2(cartY, cartX) - np.arctan2(self.ForearmLen *
+                           np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(phi))))
 
         '''t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
         theta2:float = np.arccos(t2)
@@ -148,16 +152,15 @@ class MotorMove:
         print("phi1: " + str(phi))
         print("theta1: " + str(theta))
 
-
-        J1:int = round(self.rad2Servo(self, theta*2 + 4*np.pi/4) ) + self.J1Offset
-        J2:int = round(self.rad2Servo(self, phi+5*np.pi/4)) + self.J2Offset
+        J1: int = round(self.rad2Servo(
+            self, theta*2 + 4*np.pi/4)) + self.J1Offset
+        J2: int = round(self.rad2Servo(self, phi+5*np.pi/4)) + self.J2Offset
 
         print("phi2: " + str(J1))
         print("theta2: " + str(J2))
 
         J1 = J1 % 4096
         J2 = J2 % 4096
-        
 
         print("phi3: " + str(J1))
         print("theta3: " + str(J2))
@@ -165,21 +168,21 @@ class MotorMove:
         return J1, J2
 
     def moveCart(self, gameXpos, gameYpos, gameZpos):
-        servoShoulderAngle, servoElbowAngle = self.cart2cyl(self, gameXpos, gameYpos)
+        servoShoulderAngle, servoElbowAngle = self.cart2cyl(
+            self, gameXpos, gameYpos)
         self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
-    
+
     def moveJoint(self, J1, J2):
         self.sendMsg(self, J1, J2)
 
     def sendVictory(self, winner):
-        # 0 = player, 1 = robot
-        if winner == 0:
-            self.mssg5 = "3"
-            self.mssg7 = "1"
+        # 3 = New Game, 1 = player, 2 = robot
+        print("Winner is: ")
+        if winner == 3:
+            self.mssg7 = "3"
             self.sendMsg(self, 0, 0)
         elif winner == 1:
-            self.mssg5 = "3"
-            self.mssg7 = "2"
+            self.mssg7 = "1"
             self.sendMsg(self, 0, 0)
-
-
+        elif winner == 2:
+            self.mssg7 = "2"
