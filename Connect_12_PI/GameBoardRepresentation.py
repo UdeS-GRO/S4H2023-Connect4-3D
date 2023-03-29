@@ -199,7 +199,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 2 and column == 3):
             J1 = 3045 + offsetJ1
             J2 = 1190 + offestJ2
-            PickPlace = 90
+            PickPlace = 465
         elif (row == 2 and column == 4):
             J1 = 2505 + offsetJ1
             J2 = 1320 + offestJ2
@@ -215,7 +215,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 3 and column == 3):
             J1 = 2780 + offsetJ1
             J2 = 1545 + offestJ2
-            PickPlace = 90
+            PickPlace = 45
         elif (row == 3 and column == 4):
             J1 = 2300 + offsetJ1
             J2 = 1650 + offestJ2
@@ -223,7 +223,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 4 and column == 1):
             J1 = 2655 + offsetJ1
             J2 = 2240 + offestJ2
-            PickPlace = 90
+            PickPlace = 45
         elif (row == 4 and column == 2):
             J1 = 2585 + offsetJ1
             J2 = 2030 + offestJ2

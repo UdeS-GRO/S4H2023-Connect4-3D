@@ -248,6 +248,8 @@ void loop() {
       DeactivateMagnet();
       HumanTurnLED();
       VictoryLED();
+      // Serial.print("VictoryMsg");
+      // Serial.println(VictoryMsg);
 
       if (StartSequence) {
         StartSequence = 0;
@@ -449,7 +451,7 @@ void readSerialPort() {
     if(VictoryMsg != HUMAN_VICTORY && VictoryMsg != START_NEW_GAME) // Do not make a play if the human already won
       StartSequence = 1;
 
-    if (VictoryMsg = START_NEW_GAME) //If a new game is started, disable the blinking LED
+    if (VictoryMsg == START_NEW_GAME) //If a new game is started, disable the blinking LED
       {
         VictoryMsg = 0;
       }
