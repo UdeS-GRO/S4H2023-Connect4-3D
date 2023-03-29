@@ -50,7 +50,7 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 250
+#define OFFSET_J1 190
 #define OFFSET_J2 0
 #define PIECE_OFFSET 300
 #define HOME_POS_J1 4095 //+ OFFSET_J1 // TODO: hardcoder la valeur

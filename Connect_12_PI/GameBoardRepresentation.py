@@ -31,9 +31,7 @@ class gameboard(QtWidgets.QMainWindow):
         # start camera
         # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
         self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
-        # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        # Set the focus distance
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         return
 
@@ -116,16 +114,22 @@ class gameboard(QtWidgets.QMainWindow):
 
     def resetPick45deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 45 deg
-        MotorMove.mssg5 = "1"
-
-        print("MotorMove.mssg5 = 1")
+        if( MotorMove.mssg5 == "2"):
+            MotorMove.mssg5 = "3"
+            print("MotorMove.mssg5 = 3")
+        else:
+            MotorMove.mssg5 = "1"
+            print("MotorMove.mssg5 = 1")
         return
 
     def resetPick90deg(self):
         # Move the robot to his pick position registered, where the pieces dispenser is placed at 0 deg
-        MotorMove.mssg5 = "2"
-
-        print("MotorMove.mssg5 = 2")
+        if(MotorMove.mssg5 == "1"):
+            MotorMove.mssg5 = "3"
+            print("MotorMove.mssg5 = 3")
+        else:
+            MotorMove.mssg5 = "2"
+            print("MotorMove.mssg5 = 2")
         return
 
     def move_button1_down(self):
@@ -173,8 +177,8 @@ class gameboard(QtWidgets.QMainWindow):
         # row = 123    column = abc
 
         if (row == 1 and column == 1):
-            J1 = 1560 + offsetJ1
-            J2 = 3920 + offestJ2
+            J1 = 1580 + offsetJ1
+            J2 = 3900 + offestJ2
             PickPlace = 45
         elif (row == 1 and column == 2):
             J1 = 770 + offsetJ1
@@ -189,8 +193,8 @@ class gameboard(QtWidgets.QMainWindow):
             J2 = 1060 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 1):
-            J1 = 1490 + offsetJ1
-            J2 = 3750 + offestJ2
+            J1 = 1460 + offsetJ1
+            J2 = 3720 + offestJ2
             PickPlace = 45
         elif (row == 2 and column == 2):
             J1 = 960 + offsetJ1
@@ -199,7 +203,7 @@ class gameboard(QtWidgets.QMainWindow):
         elif (row == 2 and column == 3):
             J1 = 3045 + offsetJ1
             J2 = 1190 + offestJ2
-            PickPlace = 465
+            PickPlace = 45
         elif (row == 2 and column == 4):
             J1 = 2505 + offsetJ1
             J2 = 1320 + offestJ2
@@ -233,8 +237,8 @@ class gameboard(QtWidgets.QMainWindow):
             J2 = 2045 + offestJ2
             PickPlace = 45
         elif (row == 4 and column == 4):
-            J1 = 1350 + offsetJ1
-            J2 = 2747 + offestJ2
+            J1 = 1290 + offsetJ1
+            J2 = 2787 + offestJ2
             PickPlace = 45
         else:
             J1 = 0
@@ -287,16 +291,22 @@ class gameboard(QtWidgets.QMainWindow):
         start_time = time.time()
         list = self.LastList[:]
         # Capture a frame from the webcam
-        ret, img = self.cap.read()
+        while(True):
+            ret, img = self.cap.read()
+            if ret == True:
+                break
 
         while list == self.LastList:
             i = 0
             # Capture a frame from the webcam
-            ret, img = self.cap.read()
+            while(True):
+                ret, img = self.cap.read()
+                if ret == True:
+                    break
 
             # Crop the image and divise it into 16 squares
             center = (img.shape[1]//2, img.shape[0]//2)
-            size = (1080-300, 1080-300)
+            size = (1080-270, 1080-270)
             img = cv2.getRectSubPix(img, size, center)
             cv2.imshow("Webcam", img)                   # Show the frame
 
