@@ -284,7 +284,7 @@ class gameboard(QtWidgets.QMainWindow):
 
         return J1, J2, zPosition
 
-    def take_picture(self):
+    def take_picture(self, player):
         # Take picture of the gameboard when the played button is press. Actualize the UI by comparing the actual status gameboard
         # and the previous status gameboard.
 
@@ -327,7 +327,8 @@ class gameboard(QtWidgets.QMainWindow):
                     qr_codes = pyzbar.decode(gray_img)  # Detect QR codes
                     for qr_code in qr_codes:            # Add QR code to the list
                         data = qr_code.data.decode()    # Get QR code data
-                        list[i] = (int(data))
+                        if (player == 2 and int(data) < 47 or player == 4 and int(data) > 46):
+                            list[i] = (int(data))
                     i += 1
 
             time.sleep(0.2)                             # Wait 0.2 seconds

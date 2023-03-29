@@ -17,12 +17,12 @@ def AI_played(self):
     gb.add_piece(entries)
     gb.submit_robot_pos(int(play[0]), int(play[1]), int(play[2]))
     gb.label.setText(gb.print_board())
-    gb.take_picture()
+    gb.take_picture(2)
 
 
 def player_played(self):
     # Actualize the gameboard status with the new inputs
-    player, column, row = gb.take_picture()
+    player, column, row = gb.take_picture(4)
     entries = [str(row), str(column), str(player)]
     if (gb.detect_win(entries)):
         MotorMove.sendVictory(MotorMove, 1)
