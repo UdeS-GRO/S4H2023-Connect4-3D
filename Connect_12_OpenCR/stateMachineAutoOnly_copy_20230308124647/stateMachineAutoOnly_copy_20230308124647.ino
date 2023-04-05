@@ -50,7 +50,7 @@
 #define delayPlace 1000
 
 //Positions
-#define OFFSET_J1 250
+#define OFFSET_J1 190
 #define OFFSET_J2 0
 #define PIECE_OFFSET 300
 #define HOME_POS_J1 4095 //+ OFFSET_J1 // TODO: hardcoder la valeur
@@ -248,6 +248,8 @@ void loop() {
       DeactivateMagnet();
       HumanTurnLED();
       VictoryLED();
+      // Serial.print("VictoryMsg");
+      // Serial.println(VictoryMsg);
 
       if (StartSequence) {
         StartSequence = 0;
@@ -449,7 +451,7 @@ void readSerialPort() {
     if(VictoryMsg != HUMAN_VICTORY && VictoryMsg != START_NEW_GAME) // Do not make a play if the human already won
       StartSequence = 1;
 
-    if (VictoryMsg = START_NEW_GAME) //If a new game is started, disable the blinking LED
+    if (VictoryMsg == START_NEW_GAME) //If a new game is started, disable the blinking LED
       {
         VictoryMsg = 0;
       }

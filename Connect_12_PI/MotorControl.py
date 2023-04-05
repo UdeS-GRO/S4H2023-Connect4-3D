@@ -107,6 +107,8 @@ class MotorMove:
         # Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
         # self.mssg5 = "1"
 
+        
+
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5 + self.mssg6 + self.mssg7
         print(mssg)
         if self.serOpenCR.isOpen():

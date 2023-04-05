@@ -34,7 +34,7 @@ def userInterface(self):
     self.label2.setStyleSheet(style_sheet)
 
     # Define elements of the UI ------------------------------------------
-    self.submit_button1 = QPushButton("Start new game")
+    self.submit_button1 = QPushButton("Nouvelle partie\n\nStart new game")
     style_sheet2 = """
     QPushButton {
         background-color: #555956;
@@ -50,14 +50,14 @@ def userInterface(self):
     self.submit_button1.setStyleSheet(style_sheet2)
     self.submit_button1.clicked.connect(self.start_new_game)
 
-    self.submit_button2 = QPushButton("Pick 45 deg just fulled")
+    self.submit_button2 = QPushButton("Réservoir 45 remplis\n\nPick 45 deg just fulled")
     self.submit_button2.setStyleSheet(style_sheet2)
     self.submit_button2.clicked.connect(self.resetPick45deg)
-    self.submit_button3 = QPushButton("Pick 90 deg just fulled")
+    self.submit_button3 = QPushButton("Réservoir 90 remplis\n\nPick 90 deg just fulled")
     self.submit_button3.setStyleSheet(style_sheet2)
     self.submit_button3.clicked.connect(self.resetPick90deg)
 
-    self.submit_button4 = QPushButton("I've played")
+    self.submit_button4 = QPushButton("J'ai joué\n\nI've played")
     style_sheet3 = """
     QPushButton {
         background-color: #4caf50;
