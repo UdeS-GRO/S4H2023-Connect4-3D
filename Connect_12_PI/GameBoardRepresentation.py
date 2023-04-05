@@ -30,7 +30,7 @@ class gameboard(QtWidgets.QMainWindow):
 
         # start camera
         # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
-        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         return
@@ -97,7 +97,7 @@ class gameboard(QtWidgets.QMainWindow):
             play, self.board, self.row_total, self.column_total, self.floor_total)
         print("streak", streaks)
         for streak in streaks:
-            if streak == 4:
+            if int(streak) == 4:
                 return True
         return False
 
