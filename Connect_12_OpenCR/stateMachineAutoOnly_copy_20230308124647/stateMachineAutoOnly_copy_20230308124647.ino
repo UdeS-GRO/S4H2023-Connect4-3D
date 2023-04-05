@@ -467,12 +467,18 @@ bool IsAtPosition(int MotorID, int EndPos, int Treshold) {
 }
 
 void PosPick() {
-  if (pickPlace == PICK_45_ID && pr_pick_45.PieceLeft > 0) {
+  if (pickPlace == PICK_45_ID && pr_pick_45.PieceLeft > 1) {
     pr_pick_45.z += PIECE_OFFSET;
     pr_pick_45.PieceLeft -= 1;
-  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 0) {
+  } else if (pickPlace == PICK_45_ID && pr_pick_45.PieceLeft <= 1) {
+    pr_pick_45.PieceLeft = 8;
+    pr_pick_45.z = PICK_POS_Z;
+  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 1) {
     pr_pick_90.z += PIECE_OFFSET;
     pr_pick_90.PieceLeft -= 1;
+  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft <= 1) {
+    pr_pick_90.PieceLeft = 8;
+    pr_pick_90.z = PICK_POS_Z;
   }
 }
 

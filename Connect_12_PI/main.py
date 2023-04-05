@@ -24,13 +24,14 @@ def player_played(self):
     # Actualize the gameboard status with the new inputs
     player, column, row = gb.take_picture(4)
     entries = [str(row), str(column), str(player)]
-    if (gb.detect_win(entries)):
+    win = gb.detect_win(entries)
+    if (win):
         MotorMove.sendVictory(MotorMove, 1)
         print("VICTORY! Human")
         gb.StatsAddWin(1)
     
     gb.add_piece(entries)
-    if(not gb.detect_win(entries)):
+    if(not win):
         AI_played(self)
     gb.label.setText(gb.print_board())
 
