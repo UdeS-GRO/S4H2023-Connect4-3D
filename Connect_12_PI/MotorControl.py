@@ -102,7 +102,7 @@ class MotorMove:
         ### Pick to go to, 0 = 45deg, 1 = 90deg
         #self.mssg4 = "1"
 
-        ### Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
+        ### Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg, 3 = both
         #self.mssg5 = "1"
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5 + self.mssg6 + self.mssg7
@@ -172,12 +172,12 @@ class MotorMove:
         self.sendMsg(self, J1, J2)
 
     def sendVictory(self, winner):
-        # 0 = player, 1 = robot
-        if winner == 0:
+        # 1 = player, 2 = robot
+        if winner == 1:
             self.mssg5 = "3"
             self.mssg7 = "1"
             self.sendMsg(self, 0, 0)
-        elif winner == 1:
+        elif winner == 2:
             self.mssg5 = "3"
             self.mssg7 = "2"
             self.sendMsg(self, 0, 0)
