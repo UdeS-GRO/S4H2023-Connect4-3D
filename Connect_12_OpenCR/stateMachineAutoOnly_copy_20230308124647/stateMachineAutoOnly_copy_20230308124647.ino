@@ -475,15 +475,13 @@ void readSerialPort() {
       pr_pick_90.z = PICK_90_POS_Z;
     }
     
-
-
     // Detect if Pickplace is 45 or 90
     if (pickPlace == 0) 
     {
-    pr_pick.j1 = pr_pick_45.j1;
-    pr_pick.j2 = pr_pick_45.j2;
-    pr_pick.z = pr_pick_45.z;
-    pr_pick.PieceLeft = pr_pick_45.PieceLeft;
+      pr_pick.j1 = pr_pick_45.j1;
+      pr_pick.j2 = pr_pick_45.j2;
+      pr_pick.z = pr_pick_45.z;
+      pr_pick.PieceLeft = pr_pick_45.PieceLeft;
     }
     else 
     {
@@ -550,20 +548,21 @@ void VictoryLED() {
   
   // Flash the LED
   if(VictoryMsg != 0 && millis()-VictoryTimer < 10000)
-    {
+  {
     if (millis() - previousMillis >= interval) {
-    // save the last time you blinked the LED
-    previousMillis = millis();
+      // save the last time you blinked the LED
+      previousMillis = millis();
 
-    // if the LED is off turn it on and vice-versa:
-    if (ledState == LOW) {
-      ledState = HIGH;
-    } else {
-      ledState = LOW;
-    }
+      // if the LED is off turn it on and vice-versa:
+      if (ledState == LOW) {
+        ledState = HIGH;
+      }
+      else {
+        ledState = LOW;
+      }
 
-    // set the LED with the ledState of the variable:
-    digitalWrite(LED_PIN, ledState);
+      // set the LED with the ledState of the variable:
+      digitalWrite(LED_PIN, ledState);
     }
   }
 }
