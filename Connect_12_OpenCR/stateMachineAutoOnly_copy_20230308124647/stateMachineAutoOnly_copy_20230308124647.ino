@@ -476,7 +476,7 @@ void PosPick() {
   } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 1) {
     pr_pick_90.z += PIECE_OFFSET;
     pr_pick_90.PieceLeft -= 1;
-  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft > 1) {
+  } else if (pickPlace == PICK_90_ID && pr_pick_90.PieceLeft <= 1) {
     pr_pick_90.PieceLeft = 8;
     pr_pick_90.z = PICK_POS_Z;
   }
