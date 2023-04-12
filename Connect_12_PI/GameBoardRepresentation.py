@@ -15,7 +15,7 @@ from UserInterface import userInterface
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
-    floor_total = 8
+    floor_total = 10
     board = []
     LastList = [0 for _ in range(16)]
     var = 0
@@ -30,7 +30,7 @@ class gameboard(QtWidgets.QMainWindow):
 
         # start camera
         # Create a VideoCapture object, validate if your PC's cam is 1 or 0 for index
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
         return
