@@ -4,6 +4,9 @@ Connect 4 3D is a project that was created by students of Sherbrooke University 
 The project is open source according to the _______ standard. The location of everything you need to replicate this project is shown below.
 
 1. All the code of the OpenCR card is in the directory: Connect_12_OpenCR
+  1.1 The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name
+  1.2 The file PingMotorsID is pingning all the motors ID connected to the OpenCR board
+  1.3 The file named ServoReadLive is monitoring the live position of the first and second joint
 
 2. All the code of the computer/Raspberry PI is in the directory: Connect_12_PI
 
