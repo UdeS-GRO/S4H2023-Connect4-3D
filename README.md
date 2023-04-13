@@ -1,7 +1,7 @@
 # Connect4-3D
 Connect 4 3D is a project that was created by students of Sherbrooke University in Quebec, Canada. The project's goal is to create a robotic arm that can play Connect 4 in 3D against a human.
 
-The project is open source according to the _______ standard. The location of everything you need to replicate this project is shown below.
+The project is open source according to the GNU General Public License v3.0 (GPLv3) standard. The location of everything you need to replicate this project is shown below.
 
 1. All the code of the OpenCR card is in the directory: Connect_12_OpenCR
 
