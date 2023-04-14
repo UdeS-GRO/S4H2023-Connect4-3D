@@ -1,5 +1,6 @@
-# Alexandre Baril: Created: january 16 2023, Sherbrooke
-# Alexandre Baril: Modified: february 8 2023, Sherbrooke
+## Class: MotorMove
+## Summary: This class is used to send messages to the OpenCR board. When other classes call
+##          the sendMsg method, the joint positions are updated and are sent to the OpenCR board.
 
 import struct
 import numpy as np
@@ -43,6 +44,10 @@ class MotorMove:
         self.init_motor(self)
 
     def sendMsg(self, Shouldermessage: int, Elbowmessage: int):
+        #Shouldermessage = joint 1 (angle from 0 to 4095)
+        #Elbowmessage = joint 2 (angle from 0 to 4095)
+        #all the other messages are updated externaly with MotorMove.mssg4 = "1" or MotorMove.zpos = 1000 for exemple.
+
         '''
         communication order:    [j1 j1 j1 j1  --> int 0-9 times 4
                                 j2 j2 j2 j2   --> int 0-9 times 4
@@ -53,6 +58,8 @@ class MotorMove:
         ex: 01230123012300
         '''
         print("Sending message")
+
+        #The next block of code is used to make sure that the three joint positions are always 4 digits long.
 
         # First Joint Position
         Shoulderlength = len(str(Shouldermessage))
@@ -81,14 +88,6 @@ class MotorMove:
             mssg2 = "0000"
 
         # Z Position
-        '''
-        floor0 = 2750
-        floor1 = 2450
-        floor2 = 2150
-        floor3 = 1850
-        floor4 = 1550
-        floor5 = 1250
-        '''
         Zlength = len(str(self.Zpos))
         if Zlength == 1:
             mssg3 = "000" + str(self.Zpos)  # + '|'
@@ -99,15 +98,7 @@ class MotorMove:
         elif Zlength == 4:
             mssg3 = str(self.Zpos)  # + '|'
         if mssg3 == "":
-            mssg3 = "0000"
-
-        # Pick to go to, 0 = 45deg, 1 = 90deg
-        # self.mssg4 = "1"
-
-        # Reset of magazines, 0 = nothing, 1 = 45deg, 2 = 90deg
-        # self.mssg5 = "1"
-
-        
+            mssg3 = "0000"        
 
         mssg = mssg1 + mssg2 + mssg3 + self.mssg4 + self.mssg5 + self.mssg6 + self.mssg7
         print(mssg)
@@ -119,65 +110,11 @@ class MotorMove:
         self.mssg7 = "0"
         return
 
-    def readMsg(self):
-        answer: str = ""
-        if self.serOpenCR.isOpen():
-            StartTime = time.time()
-            while self.serOpenCR.inWaiting() == 0:
-                pass
-            while self.serOpenCR.inWaiting() > 0:
-                answer = self.serOpenCR.readline().decode()
-                print("Answer is : " + answer)
-                self.serOpenCR.flushInput()
-        return int(answer)
-
-    def rad2Servo(self, angleRad: float):
-        angleServo = angleRad * 4095 / (2*np.pi)
-        return angleServo
-
-    def lawOfCos(self, a, b, c):
-        modulus = np.power(a, 2) + np.power(b, 2) - np.power(c, 2)
-        return np.arccos(modulus / (2*a*b))
-
-    def cart2cyl(self, cartX: float, cartY: float):
-
-        phi = np.arccos((np.power(cartX, 2) + np.power(cartY, 2) - np.power(self.BicepLen,
-                        2) - np.power(self.ForearmLen, 2))/(2 * self.BicepLen * self.ForearmLen))
-        theta = np.pi/2 - (np.arctan2(cartY, cartX) - np.arctan2(self.ForearmLen *
-                           np.sin(phi), self.BicepLen + (self.ForearmLen * np.cos(phi))))
-
-        '''t2:float = (cartX**2 + cartY**2 - self.BicepLen**2 - self.ForearmLen**2) / (2 * self.BicepLen * self.ForearmLen)
-        theta2:float = np.arccos(t2)
-        t1 = (self.ForearmLen*np.sin(theta2)) / (self.BicepLen*np.cos(theta2))
-        theta1:float = np.arctan(cartX/cartY) + np.arctan(t1)'''
-
-        print("phi1: " + str(phi))
-        print("theta1: " + str(theta))
-
-        J1: int = round(self.rad2Servo(
-            self, theta*2 + 4*np.pi/4)) + self.J1Offset
-        J2: int = round(self.rad2Servo(self, phi+5*np.pi/4)) + self.J2Offset
-
-        print("phi2: " + str(J1))
-        print("theta2: " + str(J2))
-
-        J1 = J1 % 4096
-        J2 = J2 % 4096
-
-        print("phi3: " + str(J1))
-        print("theta3: " + str(J2))
-
-        return J1, J2
-
-    def moveCart(self, gameXpos, gameYpos, gameZpos):
-        servoShoulderAngle, servoElbowAngle = self.cart2cyl(
-            self, gameXpos, gameYpos)
-        self.sendMsg(self, servoShoulderAngle, servoElbowAngle)
-
     def moveJoint(self, J1, J2):
         self.sendMsg(self, J1, J2)
 
     def sendVictory(self, winner):
+        # this method is used to send the winner of the game to the OpenCR board
         # 3 = New Game, 1 = player, 2 = robot
         print("Winner is: ")
         if winner == 3:
