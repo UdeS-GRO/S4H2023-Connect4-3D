@@ -7,17 +7,17 @@ Connect4-3D is an exciting project created by students at Sherbrooke University 
 alt="Robot Demonstration" width="240" height="180" border="10" /></a>
 
 # Project Overview
-The project is open source and is licensed under the GNU General Public License v3.0 (GPLv3). The main components of the project are:<br>
+The project is open source and is licensed under the GNU General Public License v3.0 (GPLv3). The main components of the project are:
 
-The OpenCR card code for controlling the robotic arm<br>
-The computer code for processing the game board and communicating with the OpenCR board<br>
-The CAD files for 3D printing the parts<br>
-A Bill of Materials (BOM) listing all the non-printed materials used<br>
+The OpenCR card code for controlling the robotic arm
+The computer code for processing the game board and communicating with the OpenCR board
+The CAD files for 3D printing the parts
+A Bill of Materials (BOM) listing all the non-printed materials used
 
 1. All the code of the OpenCR card is in the directory: Connect_12_OpenCR
-  1.1 The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name<br>
-  1.2 The file PingMotorsID is pingning all the motors ID connected to the OpenCR board<br>
-  1.3 The file named ServoReadLive is monitoring the live position of the first and second joint<br>
+  1.1 The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name
+  1.2 The file PingMotorsID is pingning all the motors ID connected to the OpenCR board
+  1.3 The file named ServoReadLive is monitoring the live position of the first and second joint
 
 2. All the code of the computer is in the directory: Connect_12_PI
 
@@ -26,31 +26,37 @@ A Bill of Materials (BOM) listing all the non-printed materials used<br>
 
 4. The list of all material used that is not 3D printed can be found in the file BOM.xlsx
 
-5. Installation procedure for the OpenCR board<br>
-  5.1 Install the Arduino IDE<br>
-  5.2 Download the Dynaxixel2Arduino library<br>
-  5.3 Download the OpenCR board manager<br>
-  5.4 Connect the OpenCR board to the computer with a USB cable<br>
-  5.5 Upload the executable code to the OpenCR board<br>
+5. Installation procedure for the OpenCR board
+  5.1 Install the Arduino IDE
+  5.2 Download the Dynaxixel2Arduino library
+  5.3 Download the OpenCR board manager
+  5.4 Connect the OpenCR board to the computer with a USB cable
+  5.5 Upload the executable code to the OpenCR board
 
 
 6. Installation procedure for the computer
-  1.1 Install VS Code IDE<br>
-  1.2 Download following libraries: <br>
-    1.2.1 OpenCV<br>
-    1.2.2 Numpy<br>
-    1.2.3 pyzbar<br>
-    1.2.4 random<br>
-    1.2.5 time<br>
-    1.2.6 os<br>
-    1.2.7 sys<br>
-    1.2.8 PyQt5<br>
-    1.2.9 cv2<br>
-    1.2.10 struct<br>
-    1.2.11 serial<br>
-  1.3 Connect the computer to the camera with a USB cable<br>
-  1.4 Run the file named main.py<br>
-  1.5 Enjoy!<br>
+    <ol>
+      <li>Install VS Code IDE</li>
+      <li>Download following libraries: </li>
+        <ol>
+          <li>OpenCV</li>
+          <li>Numpy</li>
+          <li>pyzbar</li>
+          <li>random</li>
+          <li>time</li>
+          <li>os</li>
+          <li>sys</li>
+          <li>PyQt5</li>
+          <li>cv2</li>
+          <li>struct</li>
+          <li>serial</li>
+        </ol>
+      </li>
+      <li>Connect the computer to the camera with a USB cable</li>
+      <li>Run the file named main.py</li>
+      <li>Enjoy!</li>
+    </ol>
+
 
 
 # Conclusion
