@@ -2,9 +2,9 @@
 Connect4-3D is an exciting project created by students at Sherbrooke University in Quebec, Canada. The goal of the project is to build a robotic arm that can play Connect 4 in 3D against a human. This README file contains information on how to replicate the project and includes links to all the necessary code, CAD files, and installation procedures.
 
 
-<a href="https://youtu.be/UQO0S-S_vtE
-" target="_blank"><img src="http://img.youtube.com/vi/UQO0S-S_vtE/0.jpg" 
-alt="Robot Demonstration" width="720" height="540" border="10" /></a>
+<div style="text-align:center;">
+  <a href="https://youtu.be/UQO0S-S_vtE" target="_blank"><img src="http://img.youtube.com/vi/UQO0S-S_vtE/0.jpg" alt="Robot Demonstration" width="720" height="540" border="10" /></a>
+</div> 
 
 # Project Overview
 The project is open source and is licensed under the GNU General Public License v3.0 (GPLv3). The main components of the project are:
