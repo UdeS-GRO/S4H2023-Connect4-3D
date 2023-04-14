@@ -16,21 +16,21 @@ The project is open source and is licensed under the GNU General Public License 
 </ol>
 
 
-## All the code of the OpenCR card is in the directory: Connect_12_OpenCR
+#### All the code of the OpenCR card is in the directory: Connect_12_OpenCR
 <ol>
   <li>The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name</li>
   <li>The file PingMotorsID is pingning all the motors ID connected to the OpenCR board</li>
   <li>The file named ServoReadLive is monitoring the live position of the first and second joint</li>
 </ol>
 
-## All the code of the computer is in the directory: Connect_12_PI
+#### All the code of the computer is in the directory: Connect_12_PI
 
-## All the CADS of the 3D printed parts are available directly on OnShape with this link: 
+#### All the CADS of the 3D printed parts are available directly on OnShape with this link: 
 https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
 
-## The list of all material used that is not 3D printed can be found in the file BOM.xlsx
+#### The list of all material used that is not 3D printed can be found in the file BOM.xlsx
 
-## Installation procedure for the OpenCR board
+#### Installation procedure for the OpenCR board
 
 <ol>
   <li>Install the Arduino IDE</li>
@@ -42,7 +42,7 @@ https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875
 
 
 
-## Installation procedure for the computer
+#### Installation procedure for the computer
 <ol>
   <li>Install VS Code IDE</li>
   <li>Download following libraries: </li>
