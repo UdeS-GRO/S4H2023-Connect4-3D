@@ -25,15 +25,13 @@ The project is open source and is licensed under the GNU General Public License 
 
 ### Location of computer Code:
   <li>Connect_12_PI </li>
-</ol>
+
 
 ### OnShape Link for 3D Printed CADs:
 https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
 
 ### List of Non-3D Printed Materials:
-<ol>
   <li>BOM.xlsx</li>
-</ol>
 
 ### Installation procedure for the OpenCR board
 
