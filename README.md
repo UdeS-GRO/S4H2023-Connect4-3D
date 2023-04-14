@@ -4,15 +4,17 @@ Connect4-3D is an exciting project created by students at Sherbrooke University 
 
 <a href="https://youtu.be/UQO0S-S_vtE
 " target="_blank"><img src="http://img.youtube.com/vi/UQO0S-S_vtE/0.jpg" 
-alt="Robot Demonstration" width="240" height="180" border="10" /></a>
+alt="Robot Demonstration" width="720" height="540" border="10" /></a>
 
 # Project Overview
 The project is open source and is licensed under the GNU General Public License v3.0 (GPLv3). The main components of the project are:
+<ol>
+  <li>The OpenCR card code for controlling the robotic arm </li>
+  <li>The computer code for processing the game board and communicating with the OpenCR board </li>
+  <li>The CAD files for 3D printing the parts </li>
+  <li>A Bill of Materials (BOM) listing all the non-printed materials used </li>
+</ol>
 
-The OpenCR card code for controlling the robotic arm
-The computer code for processing the game board and communicating with the OpenCR board
-The CAD files for 3D printing the parts
-A Bill of Materials (BOM) listing all the non-printed materials used
 
 ## All the code of the OpenCR card is in the directory: Connect_12_OpenCR
 <ol>
@@ -40,7 +42,7 @@ A Bill of Materials (BOM) listing all the non-printed materials used
 
 
 
-6. Installation procedure for the computer
+## Installation procedure for the computer
     <ol>
       <li>Install VS Code IDE</li>
       <li>Download following libraries: </li>
