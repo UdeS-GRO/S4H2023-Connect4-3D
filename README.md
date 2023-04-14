@@ -9,29 +9,28 @@ Connect4-3D is an exciting project created by students at Sherbrooke University 
 # Project Overview
 The project is open source and is licensed under the GNU General Public License v3.0 (GPLv3). The main components of the project are:
 <ol>
-  <li>The OpenCR card code for controlling the robotic arm </li>
+  <li>The OpenCR board code for controlling the robotic arm </li>
   <li>The computer code for processing the game board and communicating with the OpenCR board </li>
   <li>The CAD files for 3D printing the parts </li>
   <li>A Bill of Materials (BOM) listing all the non-printed materials used </li>
 </ol>
 
 
-### All the code of the OpenCR card is in the directory: Connect_12_OpenCR
+### Location of OpenCR Code:
 <ol>
   <li>The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name</li>
   <li>The file PingMotorsID is pingning all the motors ID connected to the OpenCR board</li>
   <li>The file named ServoReadLive is monitoring the live position of the first and second joint</li>
 </ol>
 
-### All the code of the computer is in the directory: 
-<ol>
+### Location of computer Code:
   <li>Connect_12_PI </li>
 </ol>
 
-### All the CADS of the 3D printed parts are available directly on OnShape with this link: 
+### OnShape Link for 3D Printed CADs:
 https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
 
-### The list of all material used that is not 3D printed can be found in the file 
+### List of Non-3D Printed Materials:
 <ol>
   <li>BOM.xlsx</li>
 </ol>
