@@ -14,24 +14,30 @@ The computer code for processing the game board and communicating with the OpenC
 The CAD files for 3D printing the parts
 A Bill of Materials (BOM) listing all the non-printed materials used
 
-1. All the code of the OpenCR card is in the directory: Connect_12_OpenCR
-  1.1 The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name
-  1.2 The file PingMotorsID is pingning all the motors ID connected to the OpenCR board
-  1.3 The file named ServoReadLive is monitoring the live position of the first and second joint
+## All the code of the OpenCR card is in the directory: Connect_12_OpenCR
+<ol>
+  <li>The executable code is named stateMachineAutoOnly_copy_20230308124647 in the folder with the same name</li>
+  <li>The file PingMotorsID is pingning all the motors ID connected to the OpenCR board</li>
+  <li>The file named ServoReadLive is monitoring the live position of the first and second joint</li>
+</ol>
 
-2. All the code of the computer is in the directory: Connect_12_PI
+## All the code of the computer is in the directory: Connect_12_PI
 
-3. All the CADS of the 3D printed parts are available directly on OnShape with this link: 
+## All the CADS of the 3D printed parts are available directly on OnShape with this link: 
                 https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
 
-4. The list of all material used that is not 3D printed can be found in the file BOM.xlsx
+## The list of all material used that is not 3D printed can be found in the file BOM.xlsx
 
-5. Installation procedure for the OpenCR board
-  5.1 Install the Arduino IDE
-  5.2 Download the Dynaxixel2Arduino library
-  5.3 Download the OpenCR board manager
-  5.4 Connect the OpenCR board to the computer with a USB cable
-  5.5 Upload the executable code to the OpenCR board
+## Installation procedure for the OpenCR board
+
+<ol>
+  <li>Install the Arduino IDE</li>
+  <li>Download the Dynaxixel2Arduino library</li>
+  <li>Download the OpenCR board manager</li>
+  <li>Connect the OpenCR board to the computer with a USB cable</li>
+  <li>Upload the executable code to the OpenCR board</li>
+</ol>
+
 
 
 6. Installation procedure for the computer
