@@ -26,7 +26,7 @@ The project is open source and is licensed under the GNU General Public License 
 ## All the code of the computer is in the directory: Connect_12_PI
 
 ## All the CADS of the 3D printed parts are available directly on OnShape with this link: 
-                https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
+https://cad.onshape.com/documents/92b82e0c23a4517eca2f38d9/w/46a67cc575363ff8875ca5a8/e/41a671f2d443bbba929bd6fb
 
 ## The list of all material used that is not 3D printed can be found in the file BOM.xlsx
 
@@ -43,27 +43,27 @@ The project is open source and is licensed under the GNU General Public License 
 
 
 ## Installation procedure for the computer
+<ol>
+  <li>Install VS Code IDE</li>
+  <li>Download following libraries: </li>
     <ol>
-      <li>Install VS Code IDE</li>
-      <li>Download following libraries: </li>
-        <ol>
-          <li>OpenCV</li>
-          <li>Numpy</li>
-          <li>pyzbar</li>
-          <li>random</li>
-          <li>time</li>
-          <li>os</li>
-          <li>sys</li>
-          <li>PyQt5</li>
-          <li>cv2</li>
-          <li>struct</li>
-          <li>serial</li>
-        </ol>
-      </li>
-      <li>Connect the computer to the camera with a USB cable</li>
-      <li>Run the file named main.py</li>
-      <li>Enjoy!</li>
+      <li>OpenCV</li>
+      <li>Numpy</li>
+      <li>pyzbar</li>
+      <li>random</li>
+      <li>time</li>
+      <li>os</li>
+      <li>sys</li>
+      <li>PyQt5</li>
+      <li>cv2</li>
+      <li>struct</li>
+      <li>serial</li>
     </ol>
+  </li>
+  <li>Connect the computer to the camera with a USB cable</li>
+  <li>Run the file named main.py</li>
+  <li>Enjoy!</li>
+</ol>
 
 
 
