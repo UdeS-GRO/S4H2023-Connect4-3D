@@ -15,7 +15,7 @@ from UserInterface import userInterface
 class gameboard(QtWidgets.QMainWindow):
     row_total = 4
     column_total = 4
-    floor_total = 8
+    floor_total = 10
     board = []
     LastList = [0 for _ in range(16)]
     var = 0
@@ -97,7 +97,7 @@ class gameboard(QtWidgets.QMainWindow):
             play, self.board, self.row_total, self.column_total, self.floor_total)
         print("streak", streaks)
         for streak in streaks:
-            if streak == 4:
+            if int(streak) == 4:
                 return True
         return False
 
